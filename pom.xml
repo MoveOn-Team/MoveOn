@@ -9,11 +9,11 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>kopo</groupId>
-    <artifactId>TeamProject</artifactId>
+    <artifactId>MoveOn</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>TeamProject</name>
-    <description>TeamProject</description>
+    <name>MoveOn</name>
+    <description>MoveOn</description>
     <url/>
     <licenses>
         <license/>
