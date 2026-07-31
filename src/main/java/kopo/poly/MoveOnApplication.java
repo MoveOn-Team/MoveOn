@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TeamProjectApplication {
+public class MoveOnApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(TeamProjectApplication.class, args);
+        SpringApplication.run(MoveOnApplication.class, args);
     }
 
 }
