@@ -9,11 +9,11 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>kopo</groupId>
-    <artifactId>TeamProject</artifactId>
+    <artifactId>MoveOn</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>TeamProject</name>
-    <description>TeamProject</description>
+    <name>MoveOn</name>
+    <description>MoveOn</description>
     <url/>
     <licenses>
         <license/>
@@ -72,6 +72,16 @@
             <artifactId>mybatis-spring-boot-starter-test</artifactId>
             <version>4.0.1</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-jasper</artifactId>
+        </dependency>
+        <!-- JSTL for JSP support -->
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+            <version>3.0.0</version>
         </dependency>
     </dependencies>
 
