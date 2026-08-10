@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### sensitive info ###
+credentials/*
+!credentials/*.example
