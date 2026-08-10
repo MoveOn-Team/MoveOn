@@ -26,7 +26,7 @@
         <appender-ref ref="CONSOLE"/>
     </root>
 
-    <Logger name="kopo.poly" level="INFO" additivity="false">
+    <Logger name="com.moveon" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="File"/>
     </Logger>

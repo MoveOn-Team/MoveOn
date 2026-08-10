@@ -1,4 +1,4 @@
-package kopo.poly;
+package com.moveon;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
