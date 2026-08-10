@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- JAVA와 연결할 Mapper 파일 설정 -->
+<mapper namespace="com.moveon.mapper.IUserMapper">
+
+    <!-- 회원 가입 전 아이디 중복체크하기 -->
+    <select id="getUserIdExists" parameterType="UserDTO" resultType="UserDTO">
+        SELECT
+            IF(COUNT(user_id) > 0, 'Y', 'N') AS exists_yn
+        FROM users
+        WHERE login_id = #{loginId}
+    </select>
+
+</mapper>
