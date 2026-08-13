@@ -1,0 +1,148 @@
+/* =====================================================================
+   MOVE:ON 회원가입 전용 스타일
+   ===================================================================== */
+
+.required {
+    color: var(--error);
+}
+
+/* 밑줄형 입력창 스타일 (피그마 디자인) */
+.underline-input {
+    border: none !important;
+    border-bottom: 1px solid var(--line) !important;
+    border-radius: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    background: transparent !important;
+}
+
+.underline-input:focus {
+    border-bottom-color: var(--accent) !important;
+}
+
+.underline-input.is-error {
+    border-bottom-color: var(--error) !important;
+}
+
+.underline-input.is-ok {
+    border-bottom-color: var(--ok) !important;
+}
+
+/* 우측 소형 버튼 (인증요청, 확인) */
+.btn-sm {
+    padding: 10px 16px;
+    font-size: 14px;
+    border-radius: var(--radius);
+    white-space: nowrap;
+}
+
+/* 약관 동의 체크박스 */
+.terms-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    display: none;
+}
+
+/* 모두 동의 사각형 커스텀 체크박스 */
+.check-all .checkbox-custom {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid var(--text-dim);
+    border-radius: 6px;
+    margin-right: 10px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.check-all input[type="checkbox"]:checked + .checkbox-custom {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.check-all input[type="checkbox"]:checked + .checkbox-custom::after {
+    content: "✓";
+    color: white;
+    font-size: 13px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* 하위 약관 체크 아이콘 스타일 */
+.terms-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-left: 2px;
+}
+
+.terms-list .item {
+    font-size: 13px;
+    color: var(--text-dim);
+}
+
+.terms-list .check-icon {
+    margin-right: 8px;
+    font-size: 14px;
+    color: var(--text-dim);
+    transition: color 0.2s ease;
+}
+
+.terms-list input[type="checkbox"]:checked ~ .check-icon {
+    color: var(--accent);
+}
+
+.terms-list input[type="checkbox"]:checked ~ .checkbox-text {
+    color: var(--text);
+}
+
+.btn-submit {
+    padding: 16px;
+    font-size: 16px;
+    border-radius: var(--radius);
+}
+
+/* 모달 얼럿 팝업 */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.modal-card {
+    background: var(--bg);
+    width: 80%;
+    max-width: 320px;
+    padding: 24px 20px 20px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.modal-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 12px 0 24px;
+}
+
+.hidden {
+    display: none !important;
+}

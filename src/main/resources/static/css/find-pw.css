@@ -1,0 +1,98 @@
+/* =====================================================================
+   MOVE:ON 비밀번호 찾기 전용 스타일
+   ===================================================================== */
+
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.step-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.required {
+    color: var(--error);
+}
+
+.page-subtext {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    margin-bottom: 24px;
+}
+
+/* 밑줄형 입력창 */
+.underline-input {
+    border: none !important;
+    border-bottom: 1px solid var(--line) !important;
+    border-radius: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 30px !important;
+    background: transparent !important;
+}
+
+.underline-input:focus {
+    border-bottom-color: var(--accent) !important;
+}
+
+.underline-input.is-error {
+    border-bottom-color: var(--error) !important;
+}
+
+.underline-input.is-ok {
+    border-bottom-color: var(--ok) !important;
+}
+
+.btn-sm {
+    padding: 10px 16px;
+    font-size: 14px;
+    border-radius: var(--radius);
+    white-space: nowrap;
+}
+
+/* 비밀번호 가리기/보이기 토글 아이콘 영역 */
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-icon .underline-input {
+    width: 100%;
+}
+
+.toggle-pw-btn {
+    position: absolute;
+    right: 0;
+    bottom: 10px;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 0 4px;
+    font-size: 16px;
+}
+
+.toggle-pw-btn:hover {
+    color: var(--text);
+}
+
+/* 하단 고정 버튼 영역 */
+.bottom-action {
+    margin-top: auto;
+    padding-bottom: 24px;
+}
+
+.btn-submit {
+    padding: 16px;
+    font-size: 16px;
+    border-radius: var(--radius);
+}
+
+.hidden {
+    display: none !important;
+}

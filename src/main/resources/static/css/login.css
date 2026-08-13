@@ -1,0 +1,178 @@
+/* ==========================================
+   MOVEON 로그인 페이지 스타일 (Mobile First)
+   ========================================== */
+
+/* 전체 화면 중앙 정렬 및 배경 */
+body {
+    background-color: var(--bg, #f8f9fa);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* 모바일 프레임 레이아웃 */
+.mobile-wrapper {
+    width: 100%;
+    max-width: 393px; /* 아이폰 16 너비 기준 */
+    min-height: 100vh;
+    background-color: #ffffff;
+    padding: 40px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.login-card {
+    width: 100%;
+}
+
+/* 헤더 & 로고 영역 */
+.login-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.logo-text {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+}
+
+.logo-point {
+    color: #2563eb; /* 브랜드 포인트 컬러 (파란색) */
+}
+
+.slogan-text {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* 입력 폼 영역 */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.input-underline-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #e2e8f0;
+    transition: border-color 0.2s ease;
+}
+
+.input-underline-group:focus-within {
+    border-bottom-color: var(--accent);
+}
+
+.input-underline-group input {
+    width: 100%;
+    padding: 12px 0;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: #1e293b;
+    background: transparent;
+}
+
+.input-underline-group input::placeholder {
+    color: #cbd5e1;
+}
+
+/* 비밀번호 눈 아이콘 버튼 */
+.toggle-password-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 8px;
+    font-size: 16px;
+}
+
+.toggle-password-btn:hover {
+    color: #475569;
+}
+
+/* 버튼 영역 */
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.btn {
+    flex: 1;
+    padding: 14px 0;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: #1e40af;
+}
+
+.btn-secondary {
+    background-color: #f1f5f9;
+    color: #334155;
+}
+
+.btn-secondary:hover {
+    background-color: #e2e8f0;
+}
+
+/* 하단 링크 영역 */
+.login-footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.login-footer-links a {
+    font-size: 13px;
+    color: #64748b;
+    text-decoration: none;
+}
+
+.login-footer-links a:hover {
+    color: #1e293b;
+    text-decoration: underline;
+}
+
+.login-footer-links .divider {
+    font-size: 12px;
+    color: #cbd5e1;
+}

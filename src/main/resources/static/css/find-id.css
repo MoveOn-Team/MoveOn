@@ -1,0 +1,117 @@
+/* =====================================================================
+   MOVE:ON 아이디 찾기 전용 스타일
+   ===================================================================== */
+
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.step-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.required {
+    color: var(--error);
+}
+
+.page-subtext {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    margin-bottom: 24px;
+}
+
+/* 밑줄형 입력창 */
+.underline-input {
+    border: none !important;
+    border-bottom: 1px solid var(--line) !important;
+    border-radius: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    background: transparent !important;
+}
+
+.underline-input:focus {
+    border-bottom-color: var(--accent) !important;
+}
+
+.underline-input.is-error {
+    border-bottom-color: var(--error) !important;
+}
+
+.underline-input.is-ok {
+    border-bottom-color: var(--ok) !important;
+}
+
+.btn-sm {
+    padding: 10px 16px;
+    font-size: 14px;
+    border-radius: var(--radius);
+    white-space: nowrap;
+}
+
+/* 하단 고정형 영역 */
+.bottom-action {
+    margin-top: auto;
+    padding-bottom: 24px;
+}
+
+.btn-submit {
+    padding: 16px;
+    font-size: 16px;
+    border-radius: var(--radius);
+}
+
+/* 결과 화면 전용 스타일 */
+.result-content {
+    margin-top: 60px;
+}
+
+.result-message {
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.result-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    padding: 16px 0;
+}
+
+.result-id {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.result-date {
+    font-size: 13px;
+    color: var(--text-dim);
+}
+
+.find-pw-prompt {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+}
+
+.link-find-pw {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+.hidden {
+    display: none !important;
+}

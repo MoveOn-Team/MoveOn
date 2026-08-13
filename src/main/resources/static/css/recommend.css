@@ -1,0 +1,216 @@
+/* recommend.css */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; }
+body { background-color: #f8fafc; color: #1e293b; display: flex; justify-content: center; }
+
+.mobile-container {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding-bottom: 70px; /* 하단 탭바 공간 */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.content-body { padding: 20px 20px 30px 20px; flex: 1; }
+
+/* Header */
+.top-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.page-title { font-size: 24px; font-weight: 800; color: #000; }
+.btn-re-diagnose {
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* User Type Summary Card */
+.type-card {
+    background: #2b529a;
+    border-radius: 18px;
+    padding: 22px 20px;
+    color: #fff;
+    margin-bottom: 28px;
+}
+.type-card .type-title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 14px;
+}
+.type-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.type-tag {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+.type-divider { height: 1px; background: rgba(255,255,255,0.2); margin-bottom: 12px; }
+.type-subinfo { font-size: 12px; color: rgba(255, 255, 255, 0.85); font-weight: 400; }
+
+/* Section Title */
+.section-title { font-size: 18px; font-weight: 700; color: #000; margin-bottom: 14px; }
+
+/* Top 3 List Cards */
+.top-list { display: flex; flex-direction: column; gap: 12px; }
+.top-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.top-item:hover { border-color: #2b529a; }
+.top-item.rank-1 { border: 2px solid #2b529a; }
+
+.item-left { display: flex; align-items: center; gap: 14px; }
+.rank-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+}
+.rank-1 .rank-badge { background: #2b529a; color: #fff; }
+.rank-2 .rank-badge, .rank-3 .rank-badge { background: #f1f5f9; color: #94a3b8; }
+
+.item-name { font-size: 18px; font-weight: 700; color: #000; }
+.item-right { text-align: right; }
+.match-rate { font-size: 20px; font-weight: 800; color: #2b529a; }
+.match-label { font-size: 11px; color: #94a3b8; display: block; }
+
+/* Bottom Nav */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 430px;
+    height: 65px;
+    background: #fff;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+}
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+}
+.nav-item.active { color: #2b529a; }
+.nav-item i { font-size: 20px; }
+
+/* --- Detail View Styles --- */
+.detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.btn-back { font-size: 20px; color: #000; cursor: pointer; border: none; background: none; }
+.detail-rank-title { font-size: 15px; font-weight: 600; color: #94a3b8; }
+
+.detail-main-title { font-size: 28px; font-weight: 800; color: #000; margin-bottom: 6px; }
+.detail-sub-title { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+
+/* Metric Cards */
+.metric-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 28px; }
+.metric-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 8px;
+    text-align: center;
+    background: #fff;
+}
+.metric-label { font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
+.metric-value { font-size: 15px; font-weight: 800; color: #0f172a; }
+
+/* Center Facility List Cards */
+.facility-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+}
+.facility-card.active { border: 2px solid #2b529a; }
+.facility-name { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+.facility-addr { font-size: 12px; color: #94a3b8; }
+.distance-badge {
+    background: #e0f2fe;
+    color: #0284c7;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+/* Course Cards */
+.course-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+}
+.course-name { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+.course-info { font-size: 12px; color: #94a3b8; }
+.course-price { font-size: 15px; font-weight: 800; color: #2b529a; }
+
+/* Bottom Action Buttons */
+.action-btn-group { display: flex; gap: 10px; margin-top: 24px; }
+.btn-outline {
+    flex: 1;
+    border: 1px solid #2b529a;
+    color: #2b529a;
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.btn-solid {
+    flex: 1.2;
+    background: #2b529a;
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}

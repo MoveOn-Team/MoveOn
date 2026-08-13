@@ -1,0 +1,318 @@
+/* =====================================================================
+   MOVE:ON 온보딩 & 성향조사 스타일
+   ===================================================================== */
+
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding-bottom: 24px;
+}
+
+/* 상단 5단계 프로그래스 바 */
+.progress-bar-container {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0 24px 0;
+}
+
+.progress-step {
+    flex: 1;
+    height: 4px;
+    background-color: #e5e9f0;
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.progress-step.active {
+    background-color: var(--accent);
+}
+
+/* 스텝 타이틀 */
+.step-badge {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+
+.page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.35;
+}
+
+.page-subtext {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    margin-bottom: 24px;
+}
+
+/* 카드형 입력 필드 */
+.card-input-box {
+    background: #ffffff;
+    border: 1px solid #e1e7f0;
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.card-input-box.flex-between {
+    justify-content: space-between;
+}
+
+.card-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.birth-inputs, .input-with-unit {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.inline-input {
+    border: none;
+    border-bottom: 1px solid #c5d1e0;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 2px 4px;
+    outline: none;
+    background: transparent;
+}
+
+.inline-input:focus {
+    border-bottom-color: var(--accent);
+}
+
+.inline-input.year { width: 55px; }
+.inline-input.month, .inline-input.day { width: 35px; }
+.inline-input.number-input { width: 60px; text-align: right; }
+
+.unit {
+    font-size: 14px;
+    color: var(--text-dim);
+}
+
+/* 성별 선택 버튼 */
+.gender-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.gender-btn {
+    flex: 1;
+    padding: 16px;
+    border: 1px solid #e1e7f0;
+    border-radius: 14px;
+    background: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.gender-btn.active {
+    border-color: var(--accent);
+    background-color: #f0f5ff;
+    color: var(--accent);
+}
+
+/* BMI 카드 */
+.bmi-card {
+    background: #f4f7fb;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-top: 16px;
+    margin-bottom: 12px;
+}
+
+.bmi-empty {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bmi-label {
+    font-weight: 700;
+    color: #8b9bb4;
+}
+
+.bmi-placeholder {
+    font-size: 13px;
+    color: #a0aec0;
+}
+
+.bmi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.bmi-subtext {
+    font-size: 11px;
+    color: #8b9bb4;
+}
+
+.bmi-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+}
+
+.bmi-status-badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+/* BMI 슬라이더 / 그래프 바 */
+.bmi-bar-wrapper {
+    position: relative;
+    height: 8px;
+    margin: 14px 0 6px 0;
+}
+
+.bmi-bar-bg {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(to right, #6bb8ff 0%, #70c786 33%, #f8b153 66%, #e75c5c 100%);
+}
+
+.bmi-pointer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px;
+    height: 14px;
+    background-color: #ffffff;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: left 0.3s ease;
+}
+
+.bmi-scale-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #a0aec0;
+}
+
+.notice-text {
+    font-size: 12px;
+    color: #94a3b8;
+    text-align: center;
+    margin-top: 12px;
+}
+
+/* 객관식 선택지 카드 */
+.option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.option-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 20px;
+    border: 1px solid #e1e7f0;
+    border-radius: 14px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.radio-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    font-size: 11px;
+}
+
+.option-card.selected {
+    border-color: var(--accent);
+    background-color: #f0f5ff;
+    font-weight: 600;
+}
+
+.option-card.selected .radio-icon {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+}
+
+/* 결과 요약 카드 */
+.summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.summary-card {
+    background: #f0f5ff;
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.summary-title {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.summary-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+/* 버튼 구조 */
+.bottom-action {
+    margin-top: auto;
+    padding-top: 24px;
+}
+
+.flex-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.flex-buttons .btn-outline {
+    flex: 1;
+}
+
+.flex-buttons .btn-primary {
+    flex: 2;
+}
+
+.hidden {
+    display: none !important;
+}
