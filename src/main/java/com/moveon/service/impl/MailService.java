@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -20,6 +21,7 @@ public class MailService implements IMailService {
     @Value("${spring.mail.username:}")
     private String fromMail;
 
+    @Async
     @Override
     public void doSendMail(MailDTO pDTO) {
 
@@ -36,11 +38,10 @@ public class MailService implements IMailService {
             helper.setText(pDTO.getContents(), true);
 
             mailSender.send(message);
-            log.info("메일 발송 완료");
+            log.info("메일 발송 완료 : {}", pDTO.getToMail());
 
         } catch (Exception e) {
-            log.error("메일 발송 실패", e);
-            throw new IllegalStateException("메일 발송에 실패했습니다.", e);
+            log.error("메일 발송 실패 : {}", pDTO.getToMail(), e);
         }
     }
 }

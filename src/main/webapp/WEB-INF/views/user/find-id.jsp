@@ -9,15 +9,14 @@
 </head>
 <body class="auth-page" data-context-path="${pageContext.request.contextPath}">
 <main class="auth-shell">
-    <!-- 아이디 찾기 화면 제목 영역 -->
-    <header class="auth-header">
-        <a class="back-button" href="${pageContext.request.contextPath}/user/login" aria-label="로그인으로 돌아가기">‹</a>
-        <h1>아이디 찾기</h1>
-        <p>가입할 때 사용한 이름과 이메일을 입력해 주세요.</p>
-    </header>
+    <a class="back-button" href="${pageContext.request.contextPath}/user/login" aria-label="로그인으로 돌아가기">‹</a>
 
     <!-- 이름과 이메일 인증 입력 영역 -->
     <form id="findIdForm" class="auth-form find-form" novalidate>
+        <header class="auth-header">
+            <h1>아이디 찾기</h1>
+            <p>가입할 때 사용한 이름과 이메일을 입력해 주세요.</p>
+        </header>
         <div class="line-field">
             <label for="name">이름 <em>*</em></label>
             <input id="name" name="name" type="text" autocomplete="name" placeholder="이름을 입력해 주세요.">
@@ -47,11 +46,11 @@
             <h1>아이디를 찾았어요.</h1>
             <p>회원님의 MOVE:ON 아이디입니다.</p>
         </header>
-        <div class="line-field has-ok">
+        <div class="line-field">
             <label>아이디</label>
             <input id="foundLoginId" type="text" readonly>
         </div>
-        <a class="primary-button" href="${pageContext.request.contextPath}/user/login">로그인하러 가기</a>
+        <a class="primary-button" href="${pageContext.request.contextPath}/user/login">로그인 하기</a>
         <a class="outline-button" href="${pageContext.request.contextPath}/user/find-password">비밀번호 찾기</a>
     </section>
 </main>
