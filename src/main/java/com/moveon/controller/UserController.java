@@ -1,6 +1,7 @@
 package com.moveon.controller;
 
 import com.moveon.dto.MsgDTO;
+import com.moveon.dto.OnboardingDTO;
 import com.moveon.dto.UserDTO;
 import com.moveon.service.IUserService;
 import jakarta.servlet.http.HttpSession;
@@ -10,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.regex.Pattern;
@@ -32,7 +34,7 @@ public class UserController {
 
     // 비밀번호는 8~16자리이며 영문, 숫자, 특수문자를 각각 하나 이상 포함한다.
     private static final Pattern PASSWORD_PATTERN = Pattern.compile(
-        "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s]).{8,16}$"
+            "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s]).{8,16}$"
     );
 
     private final IUserService userService; // 회원 관련 비즈니스 로직 호출
@@ -102,14 +104,12 @@ public class UserController {
             UserDTO rDTO = new UserDTO();
             rDTO.setExists(1);
             log.info("{}.getEmailExists End!", this.getClass().getName());
-
             return rDTO;
         }
 
         UserDTO rDTO = userService.getEmailExists(pDTO);
         log.info("exists : {}", rDTO.getExists());
         log.info("{}.getEmailExists End!", this.getClass().getName());
-
         return rDTO;
     }
 
@@ -120,20 +120,18 @@ public class UserController {
 
         log.info("{}.sendEmailCode Start!", this.getClass().getName());
         log.info("purpose : {} / loginId : {} / name : {} / email : {}",
-            pDTO.getPurpose(), pDTO.getLoginId(), pDTO.getName(), pDTO.getEmail());
+                pDTO.getPurpose(), pDTO.getLoginId(), pDTO.getName(), pDTO.getEmail());
 
         String purpose = normalizePurpose(pDTO.getPurpose());
 
         if (purpose == null || isBlank(pDTO.getEmail())) {
             log.info("{}.sendEmailCode End!", this.getClass().getName());
-
             return message("이메일과 인증 목적을 확인해 주세요.");
         }
 
         MsgDTO validationResult = validateEmailRequest(pDTO, purpose);
         if (validationResult != null) {
             log.info("{}.sendEmailCode End!", this.getClass().getName());
-
             return validationResult;
         }
 
@@ -143,19 +141,17 @@ public class UserController {
             session.setAttribute(EMAIL_CODE + purpose, emailCode);
             session.setAttribute(EMAIL_ADDRESS + purpose, pDTO.getEmail());
             session.setAttribute(
-                EMAIL_EXPIRES_AT + purpose,
-                System.currentTimeMillis() + EMAIL_CODE_VALID_MILLIS
+                    EMAIL_EXPIRES_AT + purpose,
+                    System.currentTimeMillis() + EMAIL_CODE_VALID_MILLIS
             );
             session.removeAttribute(EMAIL_VERIFIED + purpose);
 
             log.info("{}.sendEmailCode End!", this.getClass().getName());
-
             return message("인증번호를 발송했습니다.");
 
         } catch (Exception e) {
             log.error("인증번호 메일 발송 실패", e);
             log.info("{}.sendEmailCode End!", this.getClass().getName());
-
             return message("인증번호 발송에 실패했습니다.");
         }
     }
@@ -181,14 +177,12 @@ public class UserController {
 
         if (savedCode == null || savedEmail == null || expiresAt == null) {
             log.info("{}.verifyEmailCode End!", this.getClass().getName());
-
             return message("인증번호를 먼저 요청해 주세요.");
         }
 
         if (System.currentTimeMillis() > expiresAt) {
             clearEmailSession(session, purpose);
             log.info("{}.verifyEmailCode End!", this.getClass().getName());
-
             return message("인증번호가 만료되었습니다.");
         }
 
@@ -212,11 +206,11 @@ public class UserController {
 
         log.info("{}.insertUserInfo Start!", this.getClass().getName());
         log.info("loginId : {} / name : {} / email : {} / ageConfirmed : {} / termsAgreed : {}",
-            pDTO.getLoginId(), pDTO.getName(), pDTO.getEmail(),
-            pDTO.isAgeConfirmed(), pDTO.isTermsAgreed());
+                pDTO.getLoginId(), pDTO.getName(), pDTO.getEmail(),
+                pDTO.isAgeConfirmed(), pDTO.isTermsAgreed());
 
         if (isBlank(pDTO.getName()) || isBlank(pDTO.getLoginId()) ||
-            isBlank(pDTO.getEmail()) || isBlank(pDTO.getPassword())) {
+                isBlank(pDTO.getEmail()) || isBlank(pDTO.getPassword())) {
             log.info("{}.insertUserInfo End!", this.getClass().getName());
             return message("필수 입력값을 확인해 주세요.");
         }
@@ -382,7 +376,7 @@ public class UserController {
         String resetEmail = (String) session.getAttribute("RESET_EMAIL");
 
         if (resetLoginId == null || resetEmail == null ||
-            !resetLoginId.equals(pDTO.getLoginId()) || !resetEmail.equals(pDTO.getEmail())) {
+                !resetLoginId.equals(pDTO.getLoginId()) || !resetEmail.equals(pDTO.getEmail())) {
             log.info("{}.newPassword End!", this.getClass().getName());
             return message("비밀번호 찾기와 이메일 인증을 먼저 완료해 주세요.");
         }
@@ -413,6 +407,62 @@ public class UserController {
         return message("비밀번호 변경에 실패했습니다.");
     }
 
+    /** 로그인한 회원의 온보딩 정보 저장 */
+    @ResponseBody
+    @PostMapping(value = "/user/onboarding")
+    public MsgDTO saveOnboarding(
+            @RequestBody OnboardingDTO pDTO,
+            HttpSession session
+    ) throws Exception {
+
+        log.info("{}.saveOnboarding Start!", this.getClass().getName());
+
+        Integer userId = getSessionUserId(session);
+        if (userId == null) {
+            log.info("{}.saveOnboarding End!", this.getClass().getName());
+            return message("로그인이 필요합니다.");
+        }
+
+        pDTO.setUserId(userId);
+
+        try {
+            int result = userService.saveOnboarding(pDTO);
+
+            log.info("온보딩 저장 결과 : {} / userId : {}", result > 0 ? "성공" : "실패", userId);
+            log.info("{}.saveOnboarding End!", this.getClass().getName());
+            return result > 0
+                    ? message("온보딩 정보가 저장되었습니다.")
+                    : message("온보딩 정보 저장에 실패했습니다.");
+
+        } catch (IllegalArgumentException e) {
+            log.info("온보딩 입력값 확인 실패 : {}", e.getMessage());
+            log.info("{}.saveOnboarding End!", this.getClass().getName());
+            return message(e.getMessage());
+        }
+    }
+
+    /** 로그인한 회원의 온보딩 정보 조회 */
+    @ResponseBody
+    @GetMapping(value = "/user/onboarding")
+    public OnboardingDTO getOnboarding(HttpSession session) throws Exception {
+
+        log.info("{}.getOnboarding Start!", this.getClass().getName());
+
+        Integer userId = getSessionUserId(session);
+        if (userId == null) {
+            log.info("{}.getOnboarding End!", this.getClass().getName());
+            return new OnboardingDTO();
+        }
+
+        OnboardingDTO pDTO = new OnboardingDTO();
+        pDTO.setUserId(userId);
+
+        OnboardingDTO rDTO = userService.getOnboarding(pDTO);
+        log.info("온보딩 완료 여부 : {} / userId : {}", rDTO.isOnboardingCompleted(), userId);
+        log.info("{}.getOnboarding End!", this.getClass().getName());
+        return rDTO;
+    }
+
     /** 인증 목적에 맞는 회원 정보인지 확인한다. */
     private MsgDTO validateEmailRequest(UserDTO pDTO, String purpose) throws Exception {
 
@@ -423,13 +473,13 @@ public class UserController {
 
         } else if (FIND_ID.equals(purpose)) {
             if (isBlank(pDTO.getName()) ||
-                userService.searchUserId(pDTO).getExists() != 1) {
+                    userService.searchUserId(pDTO).getExists() != 1) {
                 return message("일치하는 회원 정보가 없습니다.");
             }
 
         } else if (FIND_PW.equals(purpose)) {
             if (isBlank(pDTO.getLoginId()) ||
-                userService.searchPassword(pDTO).getExists() != 1) {
+                    userService.searchPassword(pDTO).getExists() != 1) {
                 return message("일치하는 회원 정보가 없습니다.");
             }
         }
@@ -475,6 +525,12 @@ public class UserController {
     /** 문자열이 비어 있거나 공백만 있는지 확인한다. */
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    /** 세션에서 로그인한 회원 번호를 가져온다. */
+    private Integer getSessionUserId(HttpSession session) {
+        Object userId = session.getAttribute("SS_USER_NO");
+        return userId instanceof Number ? ((Number) userId).intValue() : null;
     }
 
     /** 화면에 전달할 실행 결과 메시지를 만든다. */
