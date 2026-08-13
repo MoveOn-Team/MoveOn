@@ -81,7 +81,7 @@
             gender = #{gender},
             height_cm = #{height},
             weight_kg = #{weight},
-            bmi = #{bmi},
+            <!-- bmi 는 키·몸무게로 자동 계산되는 가상 컬럼이라 직접 넣으면 UPDATE 가 실패한다 -->
             trait_companion = #{companion},
             trait_competition = #{competition},
             trait_place = #{place},
@@ -101,7 +101,9 @@
                trait_companion AS companion,
                trait_competition AS competition,
                trait_place AS place,
-               trait_intensity AS intensity
+               trait_intensity AS intensity,
+               <!-- 성향 4축은 한 번에 저장되므로 하나만 확인하면 완료 여부를 알 수 있다 -->
+               IF(trait_companion IS NULL, 0, 1) AS onboarding_completed
         FROM users
         WHERE user_id = #{userId}
         LIMIT 1
