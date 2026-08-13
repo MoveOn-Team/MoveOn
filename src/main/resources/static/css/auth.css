@@ -1,459 +1,481 @@
 @charset "UTF-8";
 
+/* ==========================================
+   1. 기본 변수 및 리셋 (Variables & Reset)
+   ========================================== */
 :root {
-    --auth-primary: #345f9f;
-    --auth-error: #e2464f;
-    --auth-ok: #438f62;
+    --primary-color: #3b66ac;
+    --primary-hover: #2d5088;
+    --primary-light: #eef4fc;
+    --disabled-color: #9cb0d3;
+    --bg-color: #f8fafc;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --border-color: #e2e8f0;
+    --error-color: #ef4444;
+    --success-color: #10b981;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
 }
 
 * {
     box-sizing: border-box;
-}
-
-html,
-body {
     margin: 0;
     padding: 0;
-}
-
-body,
-button,
-input {
-    font-family: "Pretendard", "Malgun Gothic", "맑은 고딕", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 body {
-    color: #17191c;
-    font-size: 15px;
-    line-height: 1.5;
-    -webkit-text-size-adjust: 100%;
-}
-
-a {
-    color: inherit;
-    text-decoration: none;
-}
-
-button {
-    cursor: pointer;
-}
-
-/* ---------------------------------------------------------------------
-   15. 회원 인증 화면
-   Figma 도안을 Android 412 x 915 화면 비율에 맞춰 옮긴 로그인·회원가입 화면이다.
-   --------------------------------------------------------------------- */
-.auth-page {
+    background-color: #f1f5f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     min-height: 100vh;
-    min-height: 100dvh;
-    background: #f2f3f5;
+    color: var(--text-primary);
 }
 
-.auth-shell {
+/* ==========================================
+   2. 레이아웃 컨테이너 (Layout Container)
+   ========================================== */
+.onboarding-container {
+    width: 100%;
+    max-width: 420px;
+    min-height: 720px;
+    background: #ffffff;
+    border-radius: 32px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    padding: 24px 20px 32px;
     display: flex;
     flex-direction: column;
-    width: min(calc(100% - 32px), 393px);
-    min-height: 852px;
-    margin: 24px auto;
-    padding: 42px 30px 34px;
-    overflow: hidden;
-    background: #ffffff;
-    border-radius: 42px;
-    box-shadow: 0 18px 48px rgba(30, 44, 68, .14);
-}
-
-.auth-header {
     position: relative;
-    margin-bottom: 26px;
+    overflow: hidden;
 }
 
-.auth-header h1 {
-    margin: 12px 0 5px;
-    font-size: 26px;
-    line-height: 1.15;
-    font-weight: 900;
-    letter-spacing: -.04em;
-}
-
-.auth-header p {
-    margin: 0;
-    color: #a3a7ad;
-    font-size: 11px;
-    line-height: 1.5;
+/* ==========================================
+   3. 상단 헤더 & 프로그래스바 (Header & Progress)
+   ========================================== */
+.onboarding-header {
+    margin-bottom: 24px;
 }
 
 .back-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 28px;
-    margin-left: -7px;
-    color: #111111;
-    font-size: 35px;
-    font-weight: 300;
-    line-height: 1;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+    margin-bottom: 12px;
+    color: var(--text-primary);
 }
 
-.login-shell {
-    padding-top: 58px;
-}
-
-.login-intro {
-    margin-bottom: 46px;
-}
-
-.brand {
-    display: inline-block;
-    color: #345f9f;
-    font-size: 28px;
-    line-height: 1;
-    font-weight: 900;
-    letter-spacing: -.06em;
-}
-
-.brand span {
-    color: #65a2c2;
-}
-
-.login-intro p {
-    margin: 7px 0 0;
-    color: #959ba3;
-    font-size: 12px;
-    line-height: 1.35;
-}
-
-.auth-form {
+.progress-bar-group {
     display: flex;
-    flex: 1;
-    flex-direction: column;
-    min-height: 0;
+    gap: 6px;
+    margin-bottom: 24px;
 }
 
+.progress-step {
+    flex: 1;
+    height: 6px;
+    background-color: #e2e8f0;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.progress-step.active {
+    background-color: var(--primary-color);
+}
+
+.step-indicator {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 6px;
+}
+
+.step-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin-bottom: 6px;
+}
+
+.step-description {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* ==========================================
+   4. 폼 및 입력 필드 (Form & Input Styles)
+   ========================================== */
+.onboarding-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+/* 라인 형태 입력 필드 */
 .line-field {
-    margin-bottom: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .line-field label {
-    display: block;
-    margin-bottom: 3px;
-    color: #17191c;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.line-field label em {
-    color: #dd5156;
-    font-style: normal;
-}
-
-.line-field input {
-    width: 100%;
-    min-width: 0;
-    padding: 7px 0 10px;
-    color: #17191c;
-    font-family: inherit;
     font-size: 14px;
     font-weight: 600;
-    background: transparent;
-    border: 0;
-    border-bottom: 1px solid #dfe1e5;
-    border-radius: 0;
-    outline: 0;
-    transition: border-color .18s ease;
+    color: var(--text-primary);
 }
 
-.line-field input::placeholder {
-    color: #d5d7db;
-    font-weight: 400;
+.line-field .input-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.line-field input[type="number"],
+.line-field input[type="text"] {
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    outline: none;
+    padding: 2px 4px;
+    width: 50px;
+    color: var(--text-primary);
 }
 
 .line-field input:focus {
-    border-bottom-color: #345f9f;
+    border-bottom-color: var(--primary-color);
 }
 
-.line-field.has-error input {
-    border-bottom-color: #e2464f;
+.line-field .unit {
+    font-size: 14px;
+    color: var(--text-muted);
 }
 
-.line-field.has-ok input {
-    border-bottom-color: #4d9d6d;
-}
-
-.action-line,
-.password-line {
+/* 성별 선택 버튼 (M / F) */
+.gender-select-group {
     display: flex;
-    align-items: flex-end;
-    gap: 8px;
+    gap: 10px;
+    margin-bottom: 4px;
 }
 
-.action-line input,
-.password-line input {
+.gender-btn {
     flex: 1;
+    padding: 14px 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.line-button {
-    flex: 0 0 auto;
-    min-width: 70px;
-    height: 33px;
-    margin-bottom: 2px;
-    padding: 0 12px;
-    color: #345f9f;
-    font-size: 12px;
-    font-weight: 700;
-    background: #ffffff;
-    border: 1px solid #345f9f;
-    border-radius: 9px;
+.gender-btn.active {
+    border-color: var(--primary-color);
+    background-color: var(--primary-light);
+    color: var(--primary-color);
 }
 
-.line-button.filled {
-    color: #ffffff;
-    background: #345f9f;
+/* 에러 & 성공 상태 */
+.line-field.has-error {
+    border-color: var(--error-color);
+}
+
+.line-field.has-ok {
+    border-color: var(--success-color);
 }
 
 .field-message {
-    min-height: 15px;
-    margin: 2px 0 0;
-    font-size: 10px;
-    line-height: 1.35;
+    font-size: 12px;
+    margin-top: 4px;
+    padding-left: 4px;
 }
 
-.field-message.error {
-    color: #e2464f;
+.field-message.error { color: var(--error-color); }
+.field-message.ok { color: var(--success-color); }
+
+/* ==========================================
+   5. BMI 계산 시각화 카드 (BMI Card)
+   ========================================== */
+.bmi-card {
+    background-color: #f0f5fa;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-top: 8px;
 }
 
-.field-message.ok {
-    color: #438f62;
-}
-
-.password-eye {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 28px;
-    width: 28px;
-    height: 32px;
-    margin: 0 0 2px -36px;
-    padding: 4px;
-    color: #c8cbd0;
-    background: transparent;
-    border: 0;
-    z-index: 1;
-}
-
-.password-eye svg {
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: currentColor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 1.7;
-}
-
-.password-eye.is-visible {
-    color: #8e949b;
-}
-
-.primary-button,
-.outline-button {
+.bmi-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: 48px;
-    padding: 0 18px;
-    font-size: 16px;
-    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.bmi-title {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.bmi-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.bmi-status-badge {
+    background-color: var(--primary-color);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
     border-radius: 12px;
 }
 
-.primary-button {
-    color: #ffffff;
-    background: #345f9f;
-    border: 1px solid #345f9f;
-    box-shadow: 0 4px 8px rgba(52, 95, 159, .2);
+.bmi-bar-wrapper {
+    position: relative;
+    margin: 12px 0 6px;
 }
 
-.primary-button:disabled {
-    color: #ffffff;
-    background: #a8b8d4;
-    border-color: #a8b8d4;
-    box-shadow: none;
-    cursor: default;
+.bmi-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #60a5fa 0%, #34d399 35%, #fbbf24 70%, #f87171 100%);
 }
 
-.outline-button {
-    margin-top: 9px;
-    color: #345f9f;
-    background: #ffffff;
-    border: 1px solid #345f9f;
+.bmi-pointer {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px;
+    height: 14px;
+    background-color: #fff;
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
 }
 
-.login-button {
-    margin-top: 48px;
-}
-
-.find-links {
+.bmi-labels {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 14px;
-    color: #a1a5ab;
-    font-size: 12px;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-muted);
 }
 
-.find-links span {
-    color: #d3d5d8;
-}
-
-.agreement-box {
-    margin: 2px 0 12px;
-}
-
-.check-row {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin-top: 7px;
-    color: #acb0b6;
+.bmi-notice {
+    text-align: center;
     font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 10px;
 }
 
-.check-row input {
-    width: 17px;
-    height: 17px;
-    margin: 0;
-    accent-color: #345f9f;
+/* ==========================================
+   6. 라디오 옵션 카드 (Option Cards)
+   ========================================== */
+.option-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.check-row.all-check {
-    color: #25282c;
-    font-size: 12px;
-    font-weight: 700;
+.option-card {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.join-shell {
-    padding-top: 36px;
-}
-
-.join-shell .auth-header {
-    margin-bottom: 19px;
-}
-
-.join-shell .line-field {
-    margin-bottom: 9px;
-}
-
-.join-shell .field-message {
-    min-height: 13px;
-}
-
-.join-shell .primary-button {
-    margin-top: auto;
-}
-
-.find-form .bottom-button,
-.reset-form .bottom-button {
-    margin-top: auto;
-}
-
-.hidden-area,
-.is-hidden {
+.option-card input[type="radio"] {
     display: none;
 }
 
-.hidden-area.is-visible,
-.reset-form.is-visible {
+.radio-circle {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    margin-right: 12px;
     display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
 }
 
-.line-field.hidden-area.is-visible {
-    display: block;
+.option-card.active {
+    border-color: var(--primary-color);
+    background-color: var(--primary-light);
 }
 
-.reset-form h2 {
-    margin: 0 0 9px;
-    font-size: 26px;
-    font-weight: 900;
-    letter-spacing: -.04em;
+.option-card.active .radio-circle {
+    border-color: var(--primary-color);
+    background-color: var(--primary-color);
 }
 
-.reset-form > p {
-    margin: 0 0 28px;
-    color: #a3a7ad;
-    font-size: 11px;
+.option-card.active .radio-circle::after {
+    content: "✓";
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: bold;
 }
 
+.option-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.option-card.active .option-text {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* ==========================================
+   7. 요약(Step 6) 카드 스타일 (Summary List)
+   ========================================== */
+.summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background-color: var(--primary-light);
+    border-radius: var(--radius-md);
+}
+
+.summary-label {
+    font-size: 13px;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.summary-value {
+    font-size: 13px;
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+/* ==========================================
+   8. 하단 버튼 영역 (Bottom Actions)
+   ========================================== */
+.onboarding-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-primary, .btn-secondary {
+    flex: 1;
+    padding: 14px 0;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--disabled-color);
+    color: #ffffff;
+}
+
+.btn-primary.enabled,
+.btn-primary:not(:disabled) {
+    background-color: var(--primary-color);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+    background-color: #ffffff;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* ==========================================
+   9. 자바스크립트 연동 공통 (Modal & Password)
+   ========================================== */
+
+/* 비밀번호 토글 버튼 */
+[data-password-toggle] {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+[data-password-toggle] svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-muted);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* 피그마 형태 알림 모달 (Dialog Element) */
 .message-modal {
-    width: min(286px, calc(100% - 48px));
+    border: none;
+    border-radius: var(--radius-lg);
     padding: 0;
-    overflow: hidden;
-    color: #15171a;
-    background: rgba(255, 255, 255, .96);
-    border: 0;
-    border-radius: 24px;
-    box-shadow: 0 16px 40px rgba(16, 26, 42, .2);
+    max-width: 300px;
+    width: 90%;
+    margin: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .message-modal::backdrop {
-    background: rgba(255, 255, 255, .28);
-    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .message-modal-body {
-    padding: 27px 14px 12px;
+    padding: 24px 20px;
+    text-align: center;
 }
 
 .message-modal-body p {
-    margin: 0 15px 23px;
-    text-align: center;
     font-size: 15px;
-    font-weight: 800;
-    line-height: 1.35;
-    white-space: pre-line;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    word-break: keep-all;
 }
 
 .message-modal-body button {
     width: 100%;
-    height: 42px;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-    background: #078bf0;
-    border: 0;
-    border-radius: 22px;
-}
-
-@media (max-width: 425px) {
-    .auth-page {
-        background: #ffffff;
-    }
-
-    .auth-shell {
-        min-height: 100vh;
-        min-height: 100dvh;
-        width: 100%;
-        margin: 0 auto;
-        border-radius: 0;
-        box-shadow: none;
-    }
-}
-
-@media (max-height: 760px) {
-    .auth-shell {
-        min-height: 100dvh;
-    }
-
-    .login-shell {
-        padding-top: 38px;
-    }
-
-    .login-intro {
-        margin-bottom: 28px;
-    }
-
-    .login-button {
-        margin-top: 28px;
-    }
+    padding: 10px 0;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    cursor: pointer;
 }
