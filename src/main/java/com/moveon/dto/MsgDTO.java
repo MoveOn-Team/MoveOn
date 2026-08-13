@@ -5,14 +5,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 비동기(Ajax) 요청의 결과를 화면에 돌려줄 때 쓰는 공통 DTO
+ * 실행 결과를 화면에 안내하는 메시지 DTO.
  */
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class MsgDTO {
 
-    private int result; // 성공 : 1 / 실패 : 그 외
-
-    private String msg; // 메시지
+    private String msg; // 실행 성공 또는 실패 안내 메시지
 }
