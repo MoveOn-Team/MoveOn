@@ -95,6 +95,9 @@ button {
     line-height: 1;
     background: transparent;
     border: 0;
+    padding: 0;
+    /* <a> 와 <button> 을 같이 쓰므로 커서 모양을 맞춘다 */
+    cursor: pointer;
 }
 
 .login-shell {
@@ -530,9 +533,21 @@ button {
     outline: none;
 }
 
-.input-group input#birthYear { width: 52px; }
+/* 숫자 입력칸의 위아래 화살표(스피너)를 숨긴다.
+   생년월일·키·몸무게는 직접 타이핑하는 값이라 화살표가 오히려 방해된다. */
+.input-group input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+.input-group input[type="number"]::-webkit-outer-spin-button,
+.input-group input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-group input#birthYear { width: 68px; }
 .input-group input#birthMonth,
-.input-group input#birthDay { width: 34px; }
+.input-group input#birthDay { width: 44px; }
 .input-group input#height,
 .input-group input#weight { width: 60px; }
 
@@ -634,7 +649,7 @@ button {
 }
 
 .bmi-notice {
-    text-align: center;
+    text-align: right;
     font-size: 11px;
     color: #a3a7ad;
     margin-top: 4px;

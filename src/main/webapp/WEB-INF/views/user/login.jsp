@@ -68,7 +68,16 @@
             const result = await moveOnAuth.post(contextPath + "/user/loginProc", {loginId, password});
             const success = (result.msg || "").includes("로그인되었습니다");
             moveOnAuth.setFieldMessage(message, result.msg, success ? "ok" : "error");
-            moveOnAuth.showMessage(result.msg);
+
+            if (success) {
+                // 성향조사를 안 했으면 온보딩부터, 마쳤으면 맞춤 추천으로 보낸다.
+                const next = result.onboardingCompleted
+                    ? contextPath + "/recommend"
+                    : contextPath + "/user/onboarding-page";
+                moveOnAuth.showMessage(result.msg, function () { location.href = next; });
+            } else {
+                moveOnAuth.showMessage(result.msg);
+            }
         } catch (error) {
             moveOnAuth.setFieldMessage(message, error.message, "error");
             moveOnAuth.showMessage(error.message);

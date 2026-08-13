@@ -13,4 +13,7 @@ import lombok.Setter;
 public class MsgDTO {
 
     private String msg; // 실행 성공 또는 실패 안내 메시지
+
+    @JsonInclude(JsonInclude.Include.ALWAYS)
+    private boolean onboardingCompleted;
 }
