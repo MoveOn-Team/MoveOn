@@ -11,7 +11,7 @@
 <main class="auth-shell">
     <!-- 아이디 찾기 화면 제목 영역 -->
     <header class="auth-header">
-        <a class="back-button" href="${pageContext.request.contextPath}/login" aria-label="로그인으로 돌아가기">‹</a>
+        <a class="back-button" href="${pageContext.request.contextPath}/user/login" aria-label="로그인으로 돌아가기">‹</a>
         <h1>아이디 찾기</h1>
         <p>가입할 때 사용한 이름과 이메일을 입력해 주세요.</p>
     </header>
@@ -51,8 +51,8 @@
             <label>아이디</label>
             <input id="foundLoginId" type="text" readonly>
         </div>
-        <a class="primary-button" href="${pageContext.request.contextPath}/login">로그인하러 가기</a>
-        <a class="outline-button" href="${pageContext.request.contextPath}/find-password">비밀번호 찾기</a>
+        <a class="primary-button" href="${pageContext.request.contextPath}/user/login">로그인하러 가기</a>
+        <a class="outline-button" href="${pageContext.request.contextPath}/user/find-password">비밀번호 찾기</a>
     </section>
 </main>
 

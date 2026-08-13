@@ -94,9 +94,9 @@
         }
     }
 
-    // 5. 비밀번호 유효성 검사 (영문, 숫자, 특수문자 포함 8~16자)
+    // 5. 비밀번호 유효성 검사 (영문, 숫자, 특수문자 포함 8자리 이상)
     function isValidPassword(password) {
-        return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d\s]).{8,16}$/.test(password);
+        return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d\s]).{8,}$/.test(password);
     }
 
     // 6. 비밀번호 눈 아이콘 및 토글 이벤트 처리

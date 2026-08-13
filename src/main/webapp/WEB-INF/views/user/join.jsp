@@ -11,7 +11,7 @@
 <main class="auth-shell join-shell">
     <!-- 회원가입 화면 제목 영역 -->
     <header class="auth-header">
-        <a class="back-button" href="${pageContext.request.contextPath}/login" aria-label="로그인으로 돌아가기">‹</a>
+        <a class="back-button" href="${pageContext.request.contextPath}/user/login" aria-label="로그인으로 돌아가기">‹</a>
         <h1>회원가입</h1>
         <p>회원 정보를 입력하고 이메일 인증을 완료해 주세요.</p>
     </header>
@@ -53,7 +53,7 @@
         <div class="line-field">
             <label for="password">비밀번호 <em>*</em></label>
             <div class="password-line">
-                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="영문, 숫자, 특수문자 포함 8~16자">
+                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="영문, 숫자, 특수문자 포함 8자 이상">
                 <button class="password-eye" type="button" data-password-toggle="#password" aria-label="비밀번호 보기"></button>
             </div>
             <p id="passwordMessage" class="field-message"></p>
@@ -164,12 +164,14 @@
         function validatePassword() {
             const passwordOk = moveOnAuth.isValidPassword(password.value);
             const confirmOk = password.value === passwordConfirm.value && passwordConfirm.value !== "";
-            moveOnAuth.setFieldMessage(document.getElementById("passwordMessage"), password.value ? (passwordOk ? "사용할 수 있는 비밀번호입니다." : "영문, 숫자, 특수문자를 포함한 8~16자로 입력해 주세요.") : "", password.value ? (passwordOk ? "ok" : "error") : "");
+            moveOnAuth.setFieldMessage(document.getElementById("passwordMessage"), password.value ? (passwordOk ? "사용할 수 있는 비밀번호입니다." : "영문, 숫자, 특수문자를 포함한 8자 이상으로 입력해 주세요.") : "", password.value ? (passwordOk ? "ok" : "error") : "");
             moveOnAuth.setFieldMessage(document.getElementById("passwordConfirmMessage"), passwordConfirm.value ? (confirmOk ? "비밀번호가 일치합니다." : "비밀번호가 일치하지 않습니다.") : "", passwordConfirm.value ? (confirmOk ? "ok" : "error") : "");
             return passwordOk && confirmOk;
         }
         password.addEventListener("input", validatePassword);
         passwordConfirm.addEventListener("input", validatePassword);
+
+
 
         // 전체 동의 체크 상태를 세 약관에 함께 적용한다.
         const agreements = [document.getElementById("ageConfirmed"), document.getElementById("termsAgreed"), document.getElementById("privacyAgreed")];
@@ -201,7 +203,7 @@
                     privacyAgreed: agreements[2].checked ? "1" : "0"
                 });
                 const success = (result.msg || "").includes("회원가입") && (result.msg || "").includes("완료");
-                moveOnAuth.showMessage(result.msg, success ? function () { location.href = contextPath + "/login"; } : null);
+                moveOnAuth.showMessage(result.msg, success ? function () { location.href = contextPath + "/user/login"; } : null);
             } catch (error) {
                 moveOnAuth.showMessage(error.message);
             } finally {

@@ -35,13 +35,13 @@
         </div>
 
         <button id="loginButton" class="primary-button login-button" type="submit">로그인</button>
-        <a class="outline-button" href="${pageContext.request.contextPath}/join">회원가입</a>
+        <a class="outline-button" href="${pageContext.request.contextPath}/user/join">회원가입</a>
 
         <!-- 계정 찾기 화면 이동 링크 -->
         <nav class="find-links" aria-label="계정 찾기">
-            <a href="${pageContext.request.contextPath}/find-id">아이디 찾기</a>
+            <a href="${pageContext.request.contextPath}/user/find-id">아이디 찾기</a>
             <span>|</span>
-            <a href="${pageContext.request.contextPath}/find-password">비밀번호 찾기</a>
+            <a href="${pageContext.request.contextPath}/user/find-password">비밀번호 찾기</a>
         </nav>
     </form>
 </main>

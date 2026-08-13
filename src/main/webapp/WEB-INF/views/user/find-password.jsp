@@ -11,7 +11,7 @@
 <main class="auth-shell">
     <!-- 비밀번호 찾기 화면 제목 영역 -->
     <header id="findHeader" class="auth-header">
-        <a class="back-button" href="${pageContext.request.contextPath}/login" aria-label="로그인으로 돌아가기">‹</a>
+        <a class="back-button" href="${pageContext.request.contextPath}/user/login" aria-label="로그인으로 돌아가기">‹</a>
         <h1>비밀번호 찾기</h1>
         <p>아이디와 가입한 이메일을 입력해 주세요.</p>
     </header>
@@ -44,13 +44,13 @@
     <!-- 새 비밀번호 입력 영역 -->
     <form id="resetPasswordForm" class="auth-form reset-form is-hidden" novalidate>
         <h2>새 비밀번호</h2>
-        <p>영문, 숫자, 특수문자를 포함한 8~16자로 설정해 주세요.</p>
+        <p>영문, 숫자, 특수문자를 포함한 8자 이상으로 설정해 주세요.</p>
         <input id="resetLoginId" type="hidden">
         <input id="resetEmail" type="hidden">
         <div class="line-field">
             <label for="password">새 비밀번호 <em>*</em></label>
             <div class="password-line">
-                <input id="password" type="password" autocomplete="new-password" placeholder="영문, 숫자, 특수문자 포함 8~16자">
+                <input id="password" type="password" autocomplete="new-password" placeholder="영문, 숫자, 특수문자 포함 8자 이상">
                 <button class="password-eye" type="button" data-password-toggle="#password" aria-label="새 비밀번호 보기"></button>
             </div>
             <p id="passwordMessage" class="field-message"></p>
@@ -141,7 +141,7 @@
         function validatePassword() {
             const passwordOk = moveOnAuth.isValidPassword(password.value);
             const confirmOk = password.value === passwordConfirm.value && passwordConfirm.value !== "";
-            moveOnAuth.setFieldMessage(document.getElementById("passwordMessage"), password.value ? (passwordOk ? "사용할 수 있는 비밀번호입니다." : "영문, 숫자, 특수문자를 포함한 8~16자로 입력해 주세요.") : "", password.value ? (passwordOk ? "ok" : "error") : "");
+            moveOnAuth.setFieldMessage(document.getElementById("passwordMessage"), password.value ? (passwordOk ? "사용할 수 있는 비밀번호입니다." : "영문, 숫자, 특수문자를 포함한 8자 이상으로 입력해 주세요.") : "", password.value ? (passwordOk ? "ok" : "error") : "");
             moveOnAuth.setFieldMessage(document.getElementById("passwordConfirmMessage"), passwordConfirm.value ? (confirmOk ? "비밀번호가 일치합니다." : "비밀번호가 일치하지 않습니다.") : "", passwordConfirm.value ? (confirmOk ? "ok" : "error") : "");
             return passwordOk && confirmOk;
         }
@@ -162,7 +162,7 @@
                     passwordConfirm: passwordConfirm.value
                 });
                 const success = (result.msg || "").includes("변경되었습니다");
-                moveOnAuth.showMessage(result.msg, success ? function () { location.href = contextPath + "/login"; } : null);
+                moveOnAuth.showMessage(result.msg, success ? function () { location.href = contextPath + "/user/login"; } : null);
             } catch (error) {
                 moveOnAuth.showMessage(error.message);
             } finally {
