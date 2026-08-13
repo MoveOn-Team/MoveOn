@@ -1,6 +1,7 @@
 package com.moveon.service.impl;
 
 import com.moveon.dto.MailDTO;
+import com.moveon.dto.OnboardingDTO;
 import com.moveon.dto.UserDTO;
 import com.moveon.mapper.IUserMapper;
 import com.moveon.service.IMailService;
@@ -10,6 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.Set;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -18,6 +23,12 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 @Service
 public class UserService implements IUserService {
+
+    private static final Set<String> GENDERS = Set.of("M", "F");
+    private static final Set<String> COMPANIONS = Set.of("ALONE", "PAIR", "GROUP");
+    private static final Set<String> COMPETITIONS = Set.of("OWN_PACE", "ANY", "WIN");
+    private static final Set<String> PLACES = Set.of("INDOOR", "ANY", "OUTDOOR");
+    private static final Set<String> INTENSITIES = Set.of("LIGHT", "MODERATE", "HARD");
 
     private final IUserMapper userMapper;
     private final IMailService mailService;
@@ -120,6 +131,97 @@ public class UserService implements IUserService {
         pDTO.setPassword(hashPassword(pDTO.getPassword(), salt));
 
         return userMapper.updatePassword(pDTO);
+    }
+
+    @Override
+    public int saveOnboarding(OnboardingDTO pDTO) throws Exception {
+
+        validateOnboarding(pDTO);
+
+        pDTO.setGender(normalizeCode(pDTO.getGender()));
+        pDTO.setCompanion(normalizeCode(pDTO.getCompanion()));
+        pDTO.setCompetition(normalizeCode(pDTO.getCompetition()));
+        pDTO.setPlace(normalizeCode(pDTO.getPlace()));
+        pDTO.setIntensity(normalizeCode(pDTO.getIntensity()));
+        pDTO.setBmi(calculateBmi(pDTO.getHeight(), pDTO.getWeight()));
+
+        return userMapper.updateOnboarding(pDTO);
+    }
+
+    @Override
+    public OnboardingDTO getOnboarding(OnboardingDTO pDTO) throws Exception {
+
+        OnboardingDTO rDTO = Optional.ofNullable(userMapper.getOnboarding(pDTO))
+            .orElseGet(OnboardingDTO::new);
+
+        rDTO.setLoggedIn(true);
+        rDTO.setOnboardingCompleted(isOnboardingCompleted(rDTO));
+
+        if (rDTO.getBmi() != null) {
+            rDTO.setBmiStatus(getBmiStatus(rDTO.getBmi()));
+        }
+
+        return rDTO;
+    }
+
+    /** 입력된 키와 몸무게로 BMI를 소수점 첫째 자리까지 계산한다. */
+    private BigDecimal calculateBmi(BigDecimal height, BigDecimal weight) {
+        BigDecimal heightMeter = height.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
+        return weight.divide(heightMeter.multiply(heightMeter), 1, RoundingMode.HALF_UP);
+    }
+
+    /** BMI 수치에 맞는 화면 표시 문구를 반환한다. */
+    private String getBmiStatus(BigDecimal bmi) {
+        if (bmi.compareTo(BigDecimal.valueOf(18.5)) < 0) {
+            return "저체중";
+        }
+        if (bmi.compareTo(BigDecimal.valueOf(23)) < 0) {
+            return "정상 체중";
+        }
+        if (bmi.compareTo(BigDecimal.valueOf(25)) < 0) {
+            return "과체중";
+        }
+        return "비만";
+    }
+
+    /** 온보딩 필수 입력값과 정해진 코드값을 확인한다. */
+    private void validateOnboarding(OnboardingDTO pDTO) {
+        if (pDTO.getBirthDate() == null || pDTO.getGender() == null ||
+            pDTO.getHeight() == null || pDTO.getWeight() == null ||
+            pDTO.getCompanion() == null || pDTO.getCompetition() == null ||
+            pDTO.getPlace() == null || pDTO.getIntensity() == null) {
+            throw new IllegalArgumentException("모든 온보딩 정보를 입력해 주세요.");
+        }
+
+        if (pDTO.getBirthDate().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("생년월일을 확인해 주세요.");
+        }
+
+        if (pDTO.getHeight().compareTo(BigDecimal.ZERO) <= 0 ||
+            pDTO.getWeight().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("키와 몸무게를 확인해 주세요.");
+        }
+
+        if (!GENDERS.contains(normalizeCode(pDTO.getGender())) ||
+            !COMPANIONS.contains(normalizeCode(pDTO.getCompanion())) ||
+            !COMPETITIONS.contains(normalizeCode(pDTO.getCompetition())) ||
+            !PLACES.contains(normalizeCode(pDTO.getPlace())) ||
+            !INTENSITIES.contains(normalizeCode(pDTO.getIntensity()))) {
+            throw new IllegalArgumentException("선택한 온보딩 항목을 확인해 주세요.");
+        }
+    }
+
+    /** 온보딩 필수 정보가 모두 저장되었는지 확인한다. */
+    private boolean isOnboardingCompleted(OnboardingDTO pDTO) {
+        return pDTO.getBirthDate() != null && pDTO.getGender() != null &&
+            pDTO.getHeight() != null && pDTO.getWeight() != null && pDTO.getBmi() != null &&
+            pDTO.getCompanion() != null && pDTO.getCompetition() != null &&
+            pDTO.getPlace() != null && pDTO.getIntensity() != null;
+    }
+
+    /** 화면에서 받은 선택 코드를 대문자로 통일한다. */
+    private String normalizeCode(String value) {
+        return value == null ? null : value.trim().toUpperCase();
     }
 
     private String createSalt() {
