@@ -106,5 +106,13 @@
         WHERE user_id = #{userId}
         LIMIT 1
     </select>
+  
+    <!-- 맞춤 추천의 신체 점수 계산용 -->
+    <select id="getUserBody" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id, name, gender, bmi,
+               TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) AS age
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
 
 </mapper>

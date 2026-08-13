@@ -34,4 +34,9 @@ public class UserDTO {
     private int exists; // 회원 정보 존재 여부(1 또는 0)
     private String emailCode; // 사용자가 입력한 이메일 인증번호
     private String purpose; // 이메일 인증 목적(JOIN, FIND_ID, FIND_PW)
+
+    // 맞춤 추천의 신체 점수 계산에 쓰는 값 (getUserBody 로 조회)
+    private String gender; // 성별 M / F
+    private double bmi; // 키·몸무게로 자동 계산되는 가상컬럼. INSERT/UPDATE 대상이 아니다
+    private int age; // 만 나이. birth_date 로 계산해서 받는다
 }
