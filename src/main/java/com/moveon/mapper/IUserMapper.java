@@ -23,4 +23,6 @@ public interface IUserMapper {
     UserDTO searchPassword(UserDTO pDTO) throws Exception; // 비밀번호를 변경할 회원을 조회
 
     int updatePassword(UserDTO pDTO) throws Exception; // 새 비밀번호와 salt를 저장
+
+    UserDTO getUserBody(UserDTO pDTO) throws Exception; // 맞춤 추천용 신체정보(만나이·성별·BMI) 조회
 }
