@@ -30,8 +30,4 @@ public interface IUserMapper {
     OnboardingDTO getOnboarding(OnboardingDTO pDTO) throws Exception; // 저장된 온보딩 정보를 조회
   
     UserDTO getUserBody(UserDTO pDTO) throws Exception; // 맞춤 추천용 신체정보(만나이·성별·BMI) 조회
-
-    int updateOnboarding(OnboardingDTO pDTO) throws Exception; // 신체 정보와 운동 성향을 저장
-
-    OnboardingDTO getOnboarding(OnboardingDTO pDTO) throws Exception; // 저장된 온보딩 정보를 조회
 }
