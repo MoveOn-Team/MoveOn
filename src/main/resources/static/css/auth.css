@@ -1,0 +1,459 @@
+@charset "UTF-8";
+
+:root {
+    --auth-primary: #345f9f;
+    --auth-error: #e2464f;
+    --auth-ok: #438f62;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body,
+button,
+input {
+    font-family: "Pretendard", "Malgun Gothic", "맑은 고딕", sans-serif;
+}
+
+body {
+    color: #17191c;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* ---------------------------------------------------------------------
+   15. 회원 인증 화면
+   Figma 도안을 Android 412 x 915 화면 비율에 맞춰 옮긴 로그인·회원가입 화면이다.
+   --------------------------------------------------------------------- */
+.auth-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: #f2f3f5;
+}
+
+.auth-shell {
+    display: flex;
+    flex-direction: column;
+    width: min(calc(100% - 32px), 393px);
+    min-height: 852px;
+    margin: 24px auto;
+    padding: 42px 30px 34px;
+    overflow: hidden;
+    background: #ffffff;
+    border-radius: 42px;
+    box-shadow: 0 18px 48px rgba(30, 44, 68, .14);
+}
+
+.auth-header {
+    position: relative;
+    margin-bottom: 26px;
+}
+
+.auth-header h1 {
+    margin: 12px 0 5px;
+    font-size: 26px;
+    line-height: 1.15;
+    font-weight: 900;
+    letter-spacing: -.04em;
+}
+
+.auth-header p {
+    margin: 0;
+    color: #a3a7ad;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 28px;
+    margin-left: -7px;
+    color: #111111;
+    font-size: 35px;
+    font-weight: 300;
+    line-height: 1;
+}
+
+.login-shell {
+    padding-top: 58px;
+}
+
+.login-intro {
+    margin-bottom: 46px;
+}
+
+.brand {
+    display: inline-block;
+    color: #345f9f;
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -.06em;
+}
+
+.brand span {
+    color: #65a2c2;
+}
+
+.login-intro p {
+    margin: 7px 0 0;
+    color: #959ba3;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.auth-form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.line-field {
+    margin-bottom: 17px;
+}
+
+.line-field label {
+    display: block;
+    margin-bottom: 3px;
+    color: #17191c;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.line-field label em {
+    color: #dd5156;
+    font-style: normal;
+}
+
+.line-field input {
+    width: 100%;
+    min-width: 0;
+    padding: 7px 0 10px;
+    color: #17191c;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid #dfe1e5;
+    border-radius: 0;
+    outline: 0;
+    transition: border-color .18s ease;
+}
+
+.line-field input::placeholder {
+    color: #d5d7db;
+    font-weight: 400;
+}
+
+.line-field input:focus {
+    border-bottom-color: #345f9f;
+}
+
+.line-field.has-error input {
+    border-bottom-color: #e2464f;
+}
+
+.line-field.has-ok input {
+    border-bottom-color: #4d9d6d;
+}
+
+.action-line,
+.password-line {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.action-line input,
+.password-line input {
+    flex: 1;
+}
+
+.line-button {
+    flex: 0 0 auto;
+    min-width: 70px;
+    height: 33px;
+    margin-bottom: 2px;
+    padding: 0 12px;
+    color: #345f9f;
+    font-size: 12px;
+    font-weight: 700;
+    background: #ffffff;
+    border: 1px solid #345f9f;
+    border-radius: 9px;
+}
+
+.line-button.filled {
+    color: #ffffff;
+    background: #345f9f;
+}
+
+.field-message {
+    min-height: 15px;
+    margin: 2px 0 0;
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+.field-message.error {
+    color: #e2464f;
+}
+
+.field-message.ok {
+    color: #438f62;
+}
+
+.password-eye {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 32px;
+    margin: 0 0 2px -36px;
+    padding: 4px;
+    color: #c8cbd0;
+    background: transparent;
+    border: 0;
+    z-index: 1;
+}
+
+.password-eye svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+}
+
+.password-eye.is-visible {
+    color: #8e949b;
+}
+
+.primary-button,
+.outline-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    padding: 0 18px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 12px;
+}
+
+.primary-button {
+    color: #ffffff;
+    background: #345f9f;
+    border: 1px solid #345f9f;
+    box-shadow: 0 4px 8px rgba(52, 95, 159, .2);
+}
+
+.primary-button:disabled {
+    color: #ffffff;
+    background: #a8b8d4;
+    border-color: #a8b8d4;
+    box-shadow: none;
+    cursor: default;
+}
+
+.outline-button {
+    margin-top: 9px;
+    color: #345f9f;
+    background: #ffffff;
+    border: 1px solid #345f9f;
+}
+
+.login-button {
+    margin-top: 48px;
+}
+
+.find-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    color: #a1a5ab;
+    font-size: 12px;
+}
+
+.find-links span {
+    color: #d3d5d8;
+}
+
+.agreement-box {
+    margin: 2px 0 12px;
+}
+
+.check-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 7px;
+    color: #acb0b6;
+    font-size: 11px;
+}
+
+.check-row input {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: #345f9f;
+}
+
+.check-row.all-check {
+    color: #25282c;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.join-shell {
+    padding-top: 36px;
+}
+
+.join-shell .auth-header {
+    margin-bottom: 19px;
+}
+
+.join-shell .line-field {
+    margin-bottom: 9px;
+}
+
+.join-shell .field-message {
+    min-height: 13px;
+}
+
+.join-shell .primary-button {
+    margin-top: auto;
+}
+
+.find-form .bottom-button,
+.reset-form .bottom-button {
+    margin-top: auto;
+}
+
+.hidden-area,
+.is-hidden {
+    display: none;
+}
+
+.hidden-area.is-visible,
+.reset-form.is-visible {
+    display: flex;
+}
+
+.line-field.hidden-area.is-visible {
+    display: block;
+}
+
+.reset-form h2 {
+    margin: 0 0 9px;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -.04em;
+}
+
+.reset-form > p {
+    margin: 0 0 28px;
+    color: #a3a7ad;
+    font-size: 11px;
+}
+
+.message-modal {
+    width: min(286px, calc(100% - 48px));
+    padding: 0;
+    overflow: hidden;
+    color: #15171a;
+    background: rgba(255, 255, 255, .96);
+    border: 0;
+    border-radius: 24px;
+    box-shadow: 0 16px 40px rgba(16, 26, 42, .2);
+}
+
+.message-modal::backdrop {
+    background: rgba(255, 255, 255, .28);
+    backdrop-filter: blur(5px);
+}
+
+.message-modal-body {
+    padding: 27px 14px 12px;
+}
+
+.message-modal-body p {
+    margin: 0 15px 23px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.35;
+    white-space: pre-line;
+}
+
+.message-modal-body button {
+    width: 100%;
+    height: 42px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    background: #078bf0;
+    border: 0;
+    border-radius: 22px;
+}
+
+@media (max-width: 425px) {
+    .auth-page {
+        background: #ffffff;
+    }
+
+    .auth-shell {
+        min-height: 100vh;
+        min-height: 100dvh;
+        width: 100%;
+        margin: 0 auto;
+        border-radius: 0;
+        box-shadow: none;
+    }
+}
+
+@media (max-height: 760px) {
+    .auth-shell {
+        min-height: 100dvh;
+    }
+
+    .login-shell {
+        padding-top: 38px;
+    }
+
+    .login-intro {
+        margin-bottom: 28px;
+    }
+
+    .login-button {
+        margin-top: 28px;
+    }
+}

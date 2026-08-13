@@ -1,5 +1,6 @@
 package com.moveon.service;
 
+import com.moveon.dto.OnboardingDTO;
 import com.moveon.dto.UserDTO;
 
 public interface IUserService {
@@ -19,4 +20,8 @@ public interface IUserService {
     UserDTO searchPassword(UserDTO pDTO) throws Exception; // 비밀번호 찾기 대상 확인
 
     int updatePassword(UserDTO pDTO) throws Exception; // 비밀번호 재설정
+
+    int saveOnboarding(OnboardingDTO pDTO) throws Exception; // 온보딩 정보 저장과 BMI 계산
+
+    OnboardingDTO getOnboarding(OnboardingDTO pDTO) throws Exception; // 온보딩 정보 조회
 }
