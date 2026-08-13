@@ -215,7 +215,7 @@ public class UserController {
 
         if (!isValidPassword(pDTO.getPassword())) {
             log.info("{}.insertUserInfo End!", this.getClass().getName());
-            return message("비밀번호는 8자리 이상 영문, 숫자, 특수문자를 포함해야 합니다.");
+            return message("비밀번호는 8~16자리 영문, 숫자, 특수문자를 포함해야 합니다.");
         }
 
         if (!pDTO.getPassword().equals(pDTO.getPasswordConfirm())) {
@@ -381,7 +381,7 @@ public class UserController {
 
         if (!isValidPassword(pDTO.getPassword())) {
             log.info("{}.newPassword End!", this.getClass().getName());
-            return message("비밀번호는 8자리 이상 영문, 숫자, 특수문자를 포함해야 합니다.");
+            return message("비밀번호는 8~16자리 영문, 숫자, 특수문자를 포함해야 합니다.");
         }
 
         if (!pDTO.getPassword().equals(pDTO.getPasswordConfirm())) {
