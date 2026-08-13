@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.regex.Pattern;
@@ -69,6 +71,23 @@ public class UserController {
         log.info("{}.findPassword Start!", this.getClass().getName());
         log.info("{}.findPassword End!", this.getClass().getName());
         return "user/find-password";
+    }
+
+    /** 로그인한 회원을 온보딩 JSP 화면으로 이동시킨다. */
+    @RequestMapping(value = "/onboarding", method = RequestMethod.GET)
+    public String onboarding(HttpSession session) {
+
+        log.info("{}.onboarding Start!", this.getClass().getName());
+
+        if (getSessionUserId(session) == null) {
+            log.info("온보딩 화면 접근 결과 : 로그인 필요");
+            log.info("{}.onboarding End!", this.getClass().getName());
+            return "redirect:/login";
+        }
+
+        log.info("온보딩 화면 접근 결과 : 성공");
+        log.info("{}.onboarding End!", this.getClass().getName());
+        return "user/onboarding";
     }
 
     /** 회원가입 아이디 중복 체크 */

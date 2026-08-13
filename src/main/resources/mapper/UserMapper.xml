@@ -115,4 +115,37 @@
         WHERE user_id = #{userId}
     </select>
 
+    <!-- 로그인한 회원의 신체 정보와 운동 성향 저장 -->
+    <update id="updateOnboarding" parameterType="OnboardingDTO">
+        UPDATE users
+        SET birth_date = #{birthDate},
+            gender = #{gender},
+            height_cm = #{height},
+            weight_kg = #{weight},
+            bmi = #{bmi},
+            trait_companion = #{companion},
+            trait_competition = #{competition},
+            trait_place = #{place},
+            trait_intensity = #{intensity},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 내 정보 화면에서 사용할 신체 정보와 운동 성향 조회 -->
+    <select id="getOnboarding" parameterType="OnboardingDTO" resultType="OnboardingDTO">
+        SELECT user_id,
+               birth_date,
+               gender,
+               height_cm AS height,
+               weight_kg AS weight,
+               bmi,
+               trait_companion AS companion,
+               trait_competition AS competition,
+               trait_place AS place,
+               trait_intensity AS intensity
+        FROM users
+        WHERE user_id = #{userId}
+        LIMIT 1
+    </select>
+
 </mapper>
