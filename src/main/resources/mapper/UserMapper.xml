@@ -1,15 +1,77 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<!-- JAVA와 연결할 Mapper 파일 설정 -->
 <mapper namespace="com.moveon.mapper.IUserMapper">
 
-    <!-- 회원 가입 전 아이디 중복체크하기 -->
+    <!-- 회원가입 아이디 중복 체크 -->
     <select id="getUserIdExists" parameterType="UserDTO" resultType="UserDTO">
-        SELECT
-            IF(COUNT(user_id) > 0, 'Y', 'N') AS exists_yn
+        SELECT IF(COUNT(user_id) > 0, 1, 0) AS `exists`
         FROM users
         WHERE login_id = #{loginId}
     </select>
+
+    <!-- 회원가입 이메일 중복 체크 -->
+    <select id="getEmailExists" parameterType="UserDTO" resultType="UserDTO">
+        SELECT IF(COUNT(user_id) > 0, 1, 0) AS `exists`
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <!-- 회원가입 -->
+    <insert id="insertUserInfo" parameterType="UserDTO">
+        INSERT INTO users (
+            login_id,
+            password,
+            salt,
+            name,
+            email,
+            terms_agreed_at,
+            privacy_agreed
+        ) VALUES (
+            #{loginId},
+            #{password},
+            #{salt},
+            #{name},
+            #{email},
+            CURRENT_TIMESTAMP,
+            #{privacyAgreed}
+        )
+    </insert>
+
+    <!-- 로그인 정보 조회 -->
+    <select id="getLoginUser" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id, login_id, password, salt, name, email
+        FROM users
+        WHERE login_id = #{loginId}
+        LIMIT 1
+    </select>
+
+    <!-- 이름과 이메일로 아이디 찾기 -->
+    <select id="searchUserId" parameterType="UserDTO" resultType="UserDTO">
+        SELECT login_id, 1 AS `exists`
+        FROM users
+        WHERE name = #{name}
+          AND email = #{email}
+        LIMIT 1
+    </select>
+
+    <!-- 비밀번호 찾기 대상 확인 -->
+    <select id="searchPassword" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id, login_id, name, email, 1 AS `exists`
+        FROM users
+        WHERE login_id = #{loginId}
+          AND email = #{email}
+        LIMIT 1
+    </select>
+
+    <!-- 비밀번호 재설정 -->
+    <update id="updatePassword" parameterType="UserDTO">
+        UPDATE users
+        SET password = #{password},
+            salt = #{salt},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE login_id = #{loginId}
+          AND email = #{email}
+    </update>
 
 </mapper>

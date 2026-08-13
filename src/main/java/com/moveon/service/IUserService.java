@@ -4,8 +4,19 @@ import com.moveon.dto.UserDTO;
 
 public interface IUserService {
 
-    // 회원 가입 전 아이디 중복체크하기
+    UserDTO getUserIdExists(UserDTO pDTO) throws Exception; // 아이디 중복 확인
 
-    UserDTO getUserIdExists(UserDTO pDTO) throws Exception;
+    UserDTO getEmailExists(UserDTO pDTO) throws Exception; // 이메일 중복 확인
 
+    String sendEmailCode(String email) throws Exception; // 이메일 인증번호 발송
+
+    int insertUserInfo(UserDTO pDTO) throws Exception; // 회원가입 처리
+
+    UserDTO login(UserDTO pDTO) throws Exception; // 로그인 정보 확인
+
+    UserDTO searchUserId(UserDTO pDTO) throws Exception; // 아이디 찾기
+
+    UserDTO searchPassword(UserDTO pDTO) throws Exception; // 비밀번호 찾기 대상 확인
+
+    int updatePassword(UserDTO pDTO) throws Exception; // 비밀번호 재설정
 }
