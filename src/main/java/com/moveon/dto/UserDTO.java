@@ -5,38 +5,33 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 회원 정보 (users 테이블)
+ * users 테이블과 회원 화면에서 사용하는 DTO.
  *
- * DB 컬럼은 snake_case(login_id), 자바는 camelCase(loginId) 로 쓴다.
- * application.properties 의 map-underscore-to-camel-case 설정이 알아서 이어준다.
- *
- * 신체정보 · 성향 4축 컬럼은 온보딩 담당자가 필요할 때 추가한다.
+ * DB의 snake_case 컬럼은 application.properties의
+ * map-underscore-to-camel-case 설정으로 camelCase 필드에 매핑된다.
  */
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class UserDTO {
 
-    private int userId; // 회원 PK
+    private int userId; // 회원 번호(PK)
+    private String loginId; // 로그인 아이디
+    private String password; // 암호화할 비밀번호
+    private String passwordConfirm; // 비밀번호 확인값
+    private String salt; // 비밀번호 암호화용 사용자별 랜덤값
+    private String name; // 회원 이름
+    private String email; // 인증이 완료된 이메일
 
-    private String loginId; // 아이디
+    private boolean ageConfirmed; // 만 14세 이상 확인 여부
+    private boolean termsAgreed; // 필수 이용약관 동의 여부
+    private String termsAgreedAt; // 필수 이용약관 동의 시각
+    private int privacyAgreed; // 선택 개인정보 동의 여부(1 또는 0)
 
-    private String password; // SHA-256(비밀번호 + salt)
+    private String createdAt; // 회원가입 일시
 
-    private String salt; // 회원마다 다른 랜덤 문자열
-
-    private String name; // 이름
-
-    private String email; // 이메일 (평문 저장)
-
-    private String termsAgreedAt; // 필수약관 동의 시각
-
-    private int privacyAgreed; // 개인정보 수집·이용 동의(선택) 1=동의
-
-    private String createdAt; // 가입일시
-
-    // 아래는 DB 테이블에 없는 조회 전용 컬럼(ALIAS)
-
-    private String existsYn; // 중복 여부. 존재하면 Y
-
+    @JsonInclude(JsonInclude.Include.ALWAYS)
+    private int exists; // 회원 정보 존재 여부(1 또는 0)
+    private String emailCode; // 사용자가 입력한 이메일 인증번호
+    private String purpose; // 이메일 인증 목적(JOIN, FIND_ID, FIND_PW)
 }
