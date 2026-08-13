@@ -279,8 +279,18 @@
 
         // 스텝 6 요약 렌더링
         function renderSummary() {
-            const birthYear = parseInt(formData.birthDate.split("-")[0]);
-            const age = new Date().getFullYear() - birthYear;
+            // 생일이 지났는지까지 따져 서버(TIMESTAMPDIFF)와 같은 만 나이를 구한다.
+            // 연도만 빼면 생일 전인 사람이 한 살 많게 나와 추천 계산과 어긋난다.
+            // birthDate 는 "1993-6-6" 처럼 0 채움이 없을 수 있어 숫자로 직접 만든다.
+            const birthParts = formData.birthDate.split("-");
+            const birth = new Date(Number(birthParts[0]), Number(birthParts[1]) - 1, Number(birthParts[2]));
+            const today = new Date();
+            let age = today.getFullYear() - birth.getFullYear();
+            if (today.getMonth() < birth.getMonth() ||
+                (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())) {
+                age--;
+            }
+
             const genderText = formData.gender === "M" ? "남성" : "여성";
             const bmiValEl = document.getElementById("bmiValueText");
             const bmiStatusEl = document.getElementById("bmiStatusText");
@@ -349,7 +359,8 @@
                         const success = result.msg === "온보딩 정보가 저장되었습니다.";
 
                         showMessage(result.msg, success ? function () {
-                            // 메인 화면 주소가 확정되면 이곳에서 이동한다.
+                            // 성향조사를 마쳤으므로 맞춤 추천 화면으로 보낸다.
+                            location.href = contextPath + "/recommend";
                         } : null);
                     } catch (err) {
                         showMessage(err.message);

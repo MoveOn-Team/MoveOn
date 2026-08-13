@@ -13,7 +13,7 @@
   <div class="onboarding-container">
     <!-- 상단 헤더 & 프로그래스 바 -->
     <div class="onboarding-header">
-      <button type="button" class="back-button" id="btnBack" style="visibility: hidden;">&lt;</button>
+      <button type="button" class="back-button" id="btnBack" style="visibility: hidden;">&lsaquo;</button>
       <div class="progress-bar-group">
         <div class="progress-step active" data-step="1"></div>
         <div class="progress-step" data-step="2"></div>
@@ -50,7 +50,7 @@
         <div class="line-field box-style">
           <label>키</label>
           <div class="input-group">
-            <input type="number" id="height" placeholder="170" min="100" max="250">
+            <input type="number" id="height" min="100" max="250">
             <span class="unit">cm</span>
           </div>
         </div>
@@ -59,7 +59,7 @@
         <div class="line-field box-style">
           <label>몸무게</label>
           <div class="input-group">
-            <input type="number" id="weight" placeholder="65" min="30" max="200">
+            <input type="number" id="weight" min="30" max="200">
             <span class="unit">kg</span>
           </div>
         </div>
@@ -195,11 +195,11 @@
 
       <div class="onboarding-body summary-list">
         <div class="summary-item">
-          <span class="summary-label">신체정보</span>
+          <span class="summary-label">나이 · 성별</span>
           <span class="summary-value" id="summaryBasic">--</span>
         </div>
         <div class="summary-item">
-          <span class="summary-label">신체정보</span>
+          <span class="summary-label">키 · 몸무게</span>
           <span class="summary-value" id="summaryBmi">--</span>
         </div>
         <div class="summary-item">

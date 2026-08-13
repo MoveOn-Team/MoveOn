@@ -4,6 +4,7 @@ import com.moveon.dto.MsgDTO;
 import com.moveon.dto.OnboardingDTO;
 import com.moveon.dto.UserDTO;
 import com.moveon.service.IUserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +69,28 @@ public class UserController {
         log.info("{}.findPassword End!", this.getClass().getName());
         return "user/find-password";
     }
+
+    /**
+     * 온보딩(성향조사) JSP 화면으로 이동한다.
+     *
+     * 주소를 /onboarding 이 아니라 /onboarding-page 로 둔 이유는
+     * /onboarding 이 이미 데이터 조회·저장용(JSON)으로 쓰이고 있어서다.
+     * 같은 주소에 GET 매핑이 두 개면 서버가 뜨지 않는다.
+     */
+    @GetMapping(value = "/onboarding-page")
+    public String onboardingPage(HttpSession session) {
+        log.info("{}.onboardingPage Start!", this.getClass().getName());
+
+        // 로그인하지 않고 주소를 직접 친 경우 로그인 화면으로 돌려보낸다.
+        if (session.getAttribute("SS_USER_NO") == null) {
+            log.info("{}.onboardingPage End! 비로그인 접근", this.getClass().getName());
+            return "redirect:/user/login";
+        }
+
+        log.info("{}.onboardingPage End!", this.getClass().getName());
+        return "user/onboarding";
+    }
+
 
     /** 회원가입 아이디 중복 체크 */
     @ResponseBody
@@ -267,15 +290,10 @@ public class UserController {
     /** 로그인 */
     @ResponseBody
     @PostMapping(value = "/loginProc")
-    public MsgDTO loginProc(UserDTO pDTO, HttpSession session) throws Exception {
+    public MsgDTO loginProc(UserDTO pDTO, HttpSession session, HttpServletRequest request) throws Exception {
 
         log.info("{}.loginProc Start!", this.getClass().getName());
         log.info("loginId : {}", pDTO.getLoginId());
-
-        if (session.getAttribute("SS_USER_ID") != null) {
-            log.info("{}.loginProc End!", this.getClass().getName());
-            return message("이미 로그인되어 있습니다.");
-        }
 
         if (isBlank(pDTO.getLoginId()) || isBlank(pDTO.getPassword())) {
             log.info("{}.loginProc End!", this.getClass().getName());
@@ -290,13 +308,26 @@ public class UserController {
             return message("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
 
+        // 이전에 로그인한 세션이 남아 있으면 버리고 새로 만든다.
+        //   - 로그아웃 없이 다른 계정으로 로그인할 수 있게 한다
+        //   - 로그인 시점에 세션 ID가 바뀌므로 세션 고정 공격도 막힌다
+        session.invalidate();
+        session = request.getSession(true);
+
         session.setAttribute("SS_USER_NO", rDTO.getUserId());
         session.setAttribute("SS_USER_ID", rDTO.getLoginId());
         session.setAttribute("SS_USER_NAME", rDTO.getName());
 
-        log.info("로그인 처리 결과 : 성공 / userId : {}", rDTO.getUserId());
+        // 성향조사를 마쳤는지 확인한다. 화면은 이 값으로 온보딩과 맞춤추천 중 어디로 갈지 정한다.
+        OnboardingDTO oDTO = new OnboardingDTO();
+        oDTO.setUserId(rDTO.getUserId());
+        OnboardingDTO onboarding = userService.getOnboarding(oDTO);
+        boolean onboardingCompleted = onboarding != null && onboarding.isOnboardingCompleted();
+
+        log.info("로그인 처리 결과 : 성공 / userId : {} / 온보딩완료 : {}",
+                rDTO.getUserId(), onboardingCompleted);
         log.info("{}.loginProc End!", this.getClass().getName());
-        return message("로그인되었습니다.");
+        return message("로그인되었습니다.", onboardingCompleted);
     }
 
     /** 로그아웃 */
@@ -535,6 +566,14 @@ public class UserController {
     private MsgDTO message(String msg) {
         MsgDTO rDTO = new MsgDTO();
         rDTO.setMsg(msg);
+        return rDTO;
+    }
+
+    /** 메시지와 함께 온보딩(성향조사) 완료 여부를 담아 돌려준다. */
+    private MsgDTO message(String msg, boolean onboardingCompleted) {
+        MsgDTO rDTO = new MsgDTO();
+        rDTO.setMsg(msg);
+        rDTO.setOnboardingCompleted(onboardingCompleted);
         return rDTO;
     }
 }
