@@ -9,17 +9,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.regex.Pattern;
 
 @Slf4j
 @RequiredArgsConstructor
+@RequestMapping(value = "/user")
 @Controller
 public class UserController {
 
@@ -34,7 +30,7 @@ public class UserController {
 
     private static final long EMAIL_CODE_VALID_MILLIS = 5 * 60 * 1000L; // 인증번호 유효시간 5분
 
-    // 비밀번호는 8~16자리이며 영문, 숫자, 특수문자를 각각 하나 이상 포함한다.
+    // 비밀번호는 8자리 이상이며 영문, 숫자, 특수문자를 각각 하나 이상 포함한다.
     private static final Pattern PASSWORD_PATTERN = Pattern.compile(
             "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s]).{8,16}$"
     );
@@ -73,26 +69,9 @@ public class UserController {
         return "user/find-password";
     }
 
-    /** 로그인한 회원을 온보딩 JSP 화면으로 이동시킨다. */
-    @RequestMapping(value = "/onboarding", method = RequestMethod.GET)
-    public String onboarding(HttpSession session) {
-
-        log.info("{}.onboarding Start!", this.getClass().getName());
-
-        if (getSessionUserId(session) == null) {
-            log.info("온보딩 화면 접근 결과 : 로그인 필요");
-            log.info("{}.onboarding End!", this.getClass().getName());
-            return "redirect:/login";
-        }
-
-        log.info("온보딩 화면 접근 결과 : 성공");
-        log.info("{}.onboarding End!", this.getClass().getName());
-        return "user/onboarding";
-    }
-
     /** 회원가입 아이디 중복 체크 */
     @ResponseBody
-    @PostMapping(value = "/user/getUserIdExists")
+    @PostMapping(value = "/getUserIdExists")
     public UserDTO getUserIdExists(UserDTO pDTO) throws Exception {
 
         log.info("{}.getUserIdExists Start!", this.getClass().getName());
@@ -113,7 +92,7 @@ public class UserController {
 
     /** 회원가입 이메일 중복 체크 */
     @ResponseBody
-    @PostMapping(value = "/user/getEmailExists")
+    @PostMapping(value = "/getEmailExists")
     public UserDTO getEmailExists(UserDTO pDTO) throws Exception {
 
         log.info("{}.getEmailExists Start!", this.getClass().getName());
@@ -134,7 +113,7 @@ public class UserController {
 
     /** 이메일 인증번호 발송 */
     @ResponseBody
-    @PostMapping(value = "/user/sendEmailCode")
+    @PostMapping(value = "/sendEmailCode")
     public MsgDTO sendEmailCode(UserDTO pDTO, HttpSession session) throws Exception {
 
         log.info("{}.sendEmailCode Start!", this.getClass().getName());
@@ -177,7 +156,7 @@ public class UserController {
 
     /** 이메일 인증번호 확인 */
     @ResponseBody
-    @PostMapping(value = "/user/verifyEmailCode")
+    @PostMapping(value = "/verifyEmailCode")
     public MsgDTO verifyEmailCode(UserDTO pDTO, HttpSession session) {
 
         log.info("{}.verifyEmailCode Start!", this.getClass().getName());
@@ -220,7 +199,7 @@ public class UserController {
 
     /** 회원가입 */
     @ResponseBody
-    @PostMapping(value = "/user/insertUserInfo")
+    @PostMapping(value = "/insertUserInfo")
     public MsgDTO insertUserInfo(UserDTO pDTO, HttpSession session) throws Exception {
 
         log.info("{}.insertUserInfo Start!", this.getClass().getName());
@@ -236,7 +215,7 @@ public class UserController {
 
         if (!isValidPassword(pDTO.getPassword())) {
             log.info("{}.insertUserInfo End!", this.getClass().getName());
-            return message("비밀번호는 8~16자리 영문, 숫자, 특수문자를 포함해야 합니다.");
+            return message("비밀번호는 8자리 이상 영문, 숫자, 특수문자를 포함해야 합니다.");
         }
 
         if (!pDTO.getPassword().equals(pDTO.getPasswordConfirm())) {
@@ -287,7 +266,7 @@ public class UserController {
 
     /** 로그인 */
     @ResponseBody
-    @PostMapping(value = "/user/loginProc")
+    @PostMapping(value = "/loginProc")
     public MsgDTO loginProc(UserDTO pDTO, HttpSession session) throws Exception {
 
         log.info("{}.loginProc Start!", this.getClass().getName());
@@ -322,7 +301,7 @@ public class UserController {
 
     /** 로그아웃 */
     @ResponseBody
-    @PostMapping(value = "/user/logout")
+    @PostMapping(value = "/logout")
     public MsgDTO logout(HttpSession session) {
         log.info("{}.logout Start!", this.getClass().getName());
         session.invalidate();
@@ -332,7 +311,7 @@ public class UserController {
 
     /** 아이디 찾기 */
     @ResponseBody
-    @PostMapping(value = "/user/searchUserId")
+    @PostMapping(value = "/searchUserId")
     public UserDTO searchUserId(UserDTO pDTO, HttpSession session) throws Exception {
 
         log.info("{}.searchUserId Start!", this.getClass().getName());
@@ -358,7 +337,7 @@ public class UserController {
 
     /** 비밀번호 찾기 대상 확인 */
     @ResponseBody
-    @PostMapping(value = "/user/searchPassword")
+    @PostMapping(value = "/searchPassword")
     public UserDTO searchPassword(UserDTO pDTO, HttpSession session) throws Exception {
 
         log.info("{}.searchPassword Start!", this.getClass().getName());
@@ -385,7 +364,7 @@ public class UserController {
 
     /** 비밀번호 재설정 */
     @ResponseBody
-    @PostMapping(value = "/user/newPassword")
+    @PostMapping(value = "/newPassword")
     public MsgDTO newPassword(UserDTO pDTO, HttpSession session) throws Exception {
 
         log.info("{}.newPassword Start!", this.getClass().getName());
@@ -402,7 +381,7 @@ public class UserController {
 
         if (!isValidPassword(pDTO.getPassword())) {
             log.info("{}.newPassword End!", this.getClass().getName());
-            return message("비밀번호는 8~16자리 영문, 숫자, 특수문자를 포함해야 합니다.");
+            return message("비밀번호는 8자리 이상 영문, 숫자, 특수문자를 포함해야 합니다.");
         }
 
         if (!pDTO.getPassword().equals(pDTO.getPasswordConfirm())) {
@@ -428,7 +407,7 @@ public class UserController {
 
     /** 로그인한 회원의 온보딩 정보 저장 */
     @ResponseBody
-    @PostMapping(value = "/user/onboarding")
+    @PostMapping(value = "/onboarding")
     public MsgDTO saveOnboarding(
             @RequestBody OnboardingDTO pDTO,
             HttpSession session
@@ -462,7 +441,7 @@ public class UserController {
 
     /** 로그인한 회원의 온보딩 정보 조회 */
     @ResponseBody
-    @GetMapping(value = "/user/onboarding")
+    @GetMapping(value = "/onboarding")
     public OnboardingDTO getOnboarding(HttpSession session) throws Exception {
 
         log.info("{}.getOnboarding Start!", this.getClass().getName());
