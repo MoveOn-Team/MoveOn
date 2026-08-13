@@ -1,249 +1,601 @@
 @charset "UTF-8";
 
-/* ==========================================
-   1. 기본 변수 및 리셋 (Variables & Reset)
-   ========================================== */
 :root {
-    --primary-color: #3b66ac;
-    --primary-hover: #2d5088;
-    --primary-light: #eef4fc;
-    --disabled-color: #9cb0d3;
-    --bg-color: #f8fafc;
-    --text-primary: #1e293b;
-    --text-secondary: #64748b;
-    --text-muted: #94a3b8;
-    --border-color: #e2e8f0;
-    --error-color: #ef4444;
-    --success-color: #10b981;
-    --radius-lg: 16px;
-    --radius-md: 12px;
-    --radius-sm: 8px;
+    --auth-primary: #345f9f;
+    --auth-error: #e2464f;
+    --auth-ok: #438f62;
 }
 
 * {
     box-sizing: border-box;
+}
+
+html,
+body {
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body,
+button,
+input {
+    font-family: "Pretendard", "Malgun Gothic", "맑은 고딕", sans-serif;
 }
 
 body {
-    background-color: #f1f5f9;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    color: var(--text-primary);
+    color: #17191c;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
 }
 
-/* ==========================================
-   2. 레이아웃 컨테이너 (Layout Container)
-   ========================================== */
-.onboarding-container {
-    width: 100%;
-    max-width: 420px;
-    min-height: 720px;
-    background: #ffffff;
-    border-radius: 32px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    padding: 24px 20px 32px;
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* ---------------------------------------------------------------------
+   15. 회원 인증 화면
+   Figma 도안을 Android 412 x 915 화면 비율에 맞춰 옮긴 로그인·회원가입 화면이다.
+   --------------------------------------------------------------------- */
+.auth-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: #f2f3f5;
+}
+
+.auth-shell {
     display: flex;
     flex-direction: column;
-    position: relative;
+    width: min(calc(100% - 32px), 393px);
+    min-height: 852px;
+    margin: 24px auto;
+    padding: 42px 30px 34px;
     overflow: hidden;
+    background: #ffffff;
+    border-radius: 42px;
+    box-shadow: 0 18px 48px rgba(30, 44, 68, .14);
 }
 
-/* ==========================================
-   3. 상단 헤더 & 프로그래스바 (Header & Progress)
-   ========================================== */
-.onboarding-header {
-    margin-bottom: 24px;
+.auth-header {
+    position: relative;
+    margin-bottom: 26px;
+}
+
+.auth-header h1 {
+    margin: 12px 0 5px;
+    font-size: 26px;
+    line-height: 1.15;
+    font-weight: 900;
+    letter-spacing: -.04em;
+}
+
+.auth-header p {
+    margin: 0;
+    color: #a3a7ad;
+    font-size: 11px;
+    line-height: 1.5;
 }
 
 .back-button {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    padding: 4px;
-    margin-bottom: 12px;
-    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 28px;
+    margin-left: -7px;
+    color: #111111;
+    font-size: 35px;
+    font-weight: 300;
+    line-height: 1;
+    background: transparent;
+    border: 0;
 }
 
+.login-shell {
+    padding-top: 58px;
+}
+
+.login-intro {
+    margin-bottom: 46px;
+}
+
+.brand {
+    display: inline-block;
+    color: #345f9f;
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -.06em;
+}
+
+.brand span {
+    color: #65a2c2;
+}
+
+.login-intro p {
+    margin: 7px 0 0;
+    color: #959ba3;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.auth-form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.line-field {
+    margin-bottom: 17px;
+}
+
+.line-field label {
+    display: block;
+    margin-bottom: 3px;
+    color: #17191c;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.line-field label em {
+    color: #dd5156;
+    font-style: normal;
+}
+
+.line-field input {
+    width: 100%;
+    min-width: 0;
+    padding: 7px 0 10px;
+    color: #17191c;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid #dfe1e5;
+    border-radius: 0;
+    outline: 0;
+    transition: border-color .18s ease;
+}
+
+.line-field input::placeholder {
+    color: #d5d7db;
+    font-weight: 400;
+}
+
+.line-field input:focus {
+    border-bottom-color: #345f9f;
+}
+
+.line-field.has-error input {
+    border-bottom-color: #e2464f;
+}
+
+.line-field.has-ok input {
+    border-bottom-color: #4d9d6d;
+}
+
+.action-line,
+.password-line {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.action-line input,
+.password-line input {
+    flex: 1;
+}
+
+.line-button {
+    flex: 0 0 auto;
+    min-width: 70px;
+    height: 33px;
+    margin-bottom: 2px;
+    padding: 0 12px;
+    color: #345f9f;
+    font-size: 12px;
+    font-weight: 700;
+    background: #ffffff;
+    border: 1px solid #345f9f;
+    border-radius: 9px;
+}
+
+.line-button.filled {
+    color: #ffffff;
+    background: #345f9f;
+}
+
+.field-message {
+    min-height: 15px;
+    margin: 2px 0 0;
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+.field-message.error {
+    color: #e2464f;
+}
+
+.field-message.ok {
+    color: #438f62;
+}
+
+.password-eye {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 32px;
+    margin: 0 0 2px -36px;
+    padding: 4px;
+    color: #c8cbd0;
+    background: transparent;
+    border: 0;
+    z-index: 1;
+}
+
+.password-eye svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.7;
+}
+
+.password-eye.is-visible {
+    color: #8e949b;
+}
+
+.primary-button,
+.outline-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    padding: 0 18px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 12px;
+}
+
+.primary-button {
+    color: #ffffff;
+    background: #345f9f;
+    border: 1px solid #345f9f;
+    box-shadow: 0 4px 8px rgba(52, 95, 159, .2);
+}
+
+.primary-button:disabled {
+    color: #ffffff;
+    background: #a8b8d4;
+    border-color: #a8b8d4;
+    box-shadow: none;
+    cursor: default;
+}
+
+.outline-button {
+    margin-top: 9px;
+    color: #345f9f;
+    background: #ffffff;
+    border: 1px solid #345f9f;
+}
+
+.login-button {
+    margin-top: 48px;
+}
+
+.find-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    color: #a1a5ab;
+    font-size: 12px;
+}
+
+.find-links span {
+    color: #d3d5d8;
+}
+
+.agreement-box {
+    margin: 2px 0 12px;
+}
+
+.check-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 7px;
+    color: #acb0b6;
+    font-size: 11px;
+}
+
+.check-row input {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: #345f9f;
+}
+
+.check-row.all-check {
+    color: #25282c;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.join-shell {
+    padding-top: 36px;
+}
+
+.join-shell .auth-header {
+    margin-bottom: 19px;
+}
+
+.join-shell .line-field {
+    margin-bottom: 9px;
+}
+
+.join-shell .field-message {
+    min-height: 13px;
+}
+
+.join-shell .primary-button {
+    margin-top: auto;
+}
+
+.find-form .bottom-button,
+.reset-form .bottom-button {
+    margin-top: auto;
+}
+
+.hidden-area,
+.is-hidden {
+    display: none;
+}
+
+.hidden-area.is-visible,
+.reset-form.is-visible {
+    display: flex;
+}
+
+.line-field.hidden-area.is-visible {
+    display: block;
+}
+
+.reset-form h2 {
+    margin: 0 0 9px;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -.04em;
+}
+
+.reset-form > p {
+    margin: 0 0 28px;
+    color: #a3a7ad;
+    font-size: 11px;
+}
+
+.message-modal {
+    width: min(286px, calc(100% - 48px));
+    padding: 0;
+    overflow: hidden;
+    color: #15171a;
+    background: rgba(255, 255, 255, .96);
+    border: 0;
+    border-radius: 24px;
+    box-shadow: 0 16px 40px rgba(16, 26, 42, .2);
+}
+
+.message-modal::backdrop {
+    background: rgba(255, 255, 255, .28);
+    backdrop-filter: blur(5px);
+}
+
+.message-modal-body {
+    padding: 27px 14px 12px;
+}
+
+.message-modal-body p {
+    margin: 0 15px 23px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.35;
+    white-space: pre-line;
+}
+
+.message-modal-body button {
+    width: 100%;
+    height: 42px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    background: #078bf0;
+    border: 0;
+    border-radius: 22px;
+}
+
+/* ---------------------------------------------------------------------
+   16. 온보딩 (첫 로그인 후 성향조사 & 신체정보)
+   시안(iPhone 16 / 393 x 852 비율) 디자인을 충실히 구현한 추가 CSS
+   --------------------------------------------------------------------- */
+
+.onboarding-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    flex: 1;
+}
+
+/* 상단 게이지 바 (프로그래스 바) */
 .progress-bar-group {
     display: flex;
-    gap: 6px;
-    margin-bottom: 24px;
+    gap: 8px;
+    margin-top: 18px;
+    margin-bottom: 22px;
 }
 
 .progress-step {
     flex: 1;
-    height: 6px;
-    background-color: #e2e8f0;
-    border-radius: 3px;
-    transition: background-color 0.3s ease;
+    height: 7px;
+    background-color: #e5edf5;
+    border-radius: 4px;
+    transition: background-color 0.25s ease;
 }
 
 .progress-step.active {
-    background-color: var(--primary-color);
+    background-color: #345f9f;
 }
 
 .step-indicator {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--primary-color);
+    font-size: 12px;
+    font-weight: 700;
+    color: #345f9f;
     margin-bottom: 6px;
 }
 
 .step-title {
+    margin: 0 0 6px 0;
     font-size: 22px;
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.3;
-    margin-bottom: 6px;
+    font-weight: 900;
+    line-height: 1.25;
+    color: #17191c;
+    letter-spacing: -0.03em;
 }
 
 .step-description {
-    font-size: 13px;
-    color: var(--text-muted);
+    margin: 0 0 20px 0;
+    font-size: 12px;
+    color: #a3a7ad;
 }
 
-/* ==========================================
-   4. 폼 및 입력 필드 (Form & Input Styles)
-   ========================================== */
+/* 1단계 신체정보 입력 박스 스타일 */
 .onboarding-body {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-top: 16px;
+    gap: 10px;
 }
 
-/* 라인 형태 입력 필드 */
-.line-field {
+.line-field.box-style {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 13px 18px;
+    border: 1px solid #e1e8f0;
+    border-radius: 18px;
     background-color: #ffffff;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 14px 16px;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 0;
 }
 
-.line-field label {
+.line-field.box-style label {
+    margin-bottom: 0;
     font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-weight: 700;
+    color: #17191c;
+    min-width: 70px;
 }
 
-.line-field .input-group {
+.input-group {
     display: flex;
     align-items: center;
-    gap: 4px;
+    justify-content: flex-end;
+    gap: 6px;
+    flex: 1;
 }
 
-.line-field input[type="number"],
-.line-field input[type="text"] {
-    border: none;
-    border-bottom: 1px solid var(--border-color);
+.input-group input {
+    border: 0;
+    border-bottom: 1px solid #d5d7db;
     text-align: center;
     font-size: 15px;
-    font-weight: 600;
-    outline: none;
+    font-weight: 700;
+    color: #17191c;
     padding: 2px 4px;
-    width: 50px;
-    color: var(--text-primary);
+    background: transparent;
+    outline: none;
 }
 
-.line-field input:focus {
-    border-bottom-color: var(--primary-color);
+.input-group input#birthYear { width: 52px; }
+.input-group input#birthMonth,
+.input-group input#birthDay { width: 34px; }
+.input-group input#height,
+.input-group input#weight { width: 60px; }
+
+.input-group .unit {
+    font-size: 13px;
+    color: #9a9ea5;
 }
 
-.line-field .unit {
-    font-size: 14px;
-    color: var(--text-muted);
-}
-
-/* 성별 선택 버튼 (M / F) */
+/* 성별 선택 버튼 그룹 */
 .gender-select-group {
     display: flex;
     gap: 10px;
-    margin-bottom: 4px;
 }
 
 .gender-btn {
     flex: 1;
-    padding: 14px 0;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    background: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.2s;
+    height: 50px;
+    border: 1px solid #e1e8f0;
+    border-radius: 18px;
+    background: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    color: #9a9ea5;
+    transition: all 0.2s ease;
 }
 
 .gender-btn.active {
-    border-color: var(--primary-color);
-    background-color: var(--primary-light);
-    color: var(--primary-color);
+    border: 2px solid #345f9f;
+    background-color: #ebf3fa;
+    color: #345f9f;
 }
 
-/* 에러 & 성공 상태 */
-.line-field.has-error {
-    border-color: var(--error-color);
-}
-
-.line-field.has-ok {
-    border-color: var(--success-color);
-}
-
-.field-message {
-    font-size: 12px;
-    margin-top: 4px;
-    padding-left: 4px;
-}
-
-.field-message.error { color: var(--error-color); }
-.field-message.ok { color: var(--success-color); }
-
-/* ==========================================
-   5. BMI 계산 시각화 카드 (BMI Card)
-   ========================================== */
+/* BMI 산출 카드 */
 .bmi-card {
-    background-color: #f0f5fa;
-    border-radius: var(--radius-md);
-    padding: 16px;
-    margin-top: 8px;
+    background-color: #ebf3fa;
+    border-radius: 18px;
+    padding: 16px 18px;
+    margin-top: 4px;
 }
 
 .bmi-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
 }
 
 .bmi-title {
     font-size: 11px;
-    color: var(--text-muted);
-}
-
-.bmi-value {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--primary-color);
+    color: #8c939d;
 }
 
 .bmi-status-badge {
-    background-color: var(--primary-color);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 12px;
+    background-color: #345f9f;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+
+.bmi-value {
+    font-size: 22px;
+    font-weight: 900;
+    color: #345f9f;
+    margin-top: 2px;
 }
 
 .bmi-bar-wrapper {
@@ -254,7 +606,7 @@ body {
 .bmi-bar {
     height: 8px;
     border-radius: 4px;
-    background: linear-gradient(to right, #60a5fa 0%, #34d399 35%, #fbbf24 70%, #f87171 100%);
+    background: linear-gradient(to right, #8cb3dd 0%, #7dbd92 35%, #e1b96f 70%, #e07272 100%);
 }
 
 .bmi-pointer {
@@ -263,41 +615,35 @@ body {
     transform: translate(-50%, -50%);
     width: 14px;
     height: 14px;
-    background-color: #fff;
-    border: 3px solid var(--primary-color);
+    background-color: #ffffff;
+    border: 3px solid #345f9f;
     border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    transition: left 0.3s ease;
 }
 
 .bmi-labels {
     display: flex;
     justify-content: space-between;
-    font-size: 10px;
-    color: var(--text-muted);
+    font-size: 9px;
+    color: #9a9ea5;
 }
 
 .bmi-notice {
     text-align: center;
     font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 10px;
+    color: #a3a7ad;
+    margin-top: 4px;
 }
 
-/* ==========================================
-   6. 라디오 옵션 카드 (Option Cards)
-   ========================================== */
-.option-group {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
+/* 라디오 옵션 선택 카드 (2~5단계) */
 .option-card {
     display: flex;
     align-items: center;
-    padding: 16px 20px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    background-color: #fff;
+    padding: 16px 18px;
+    border: 1px solid #e1e8f0;
+    border-radius: 18px;
+    background-color: #ffffff;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -307,48 +653,42 @@ body {
 }
 
 .radio-circle {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #cbd5e1;
+    width: 22px;
+    height: 22px;
+    border: 1px solid #d5d7db;
     border-radius: 50%;
     margin-right: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    background: #ffffff;
+    flex-shrink: 0;
+}
+
+.option-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #17191c;
 }
 
 .option-card.active {
-    border-color: var(--primary-color);
-    background-color: var(--primary-light);
+    border: 2px solid #345f9f;
+    background-color: #ebf3fa;
 }
 
 .option-card.active .radio-circle {
-    border-color: var(--primary-color);
-    background-color: var(--primary-color);
+    border-color: #345f9f;
+    background-color: #345f9f;
 }
 
 .option-card.active .radio-circle::after {
     content: "✓";
     color: #ffffff;
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 900;
 }
 
-.option-text {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.option-card.active .option-text {
-    color: var(--primary-color);
-    font-weight: 600;
-}
-
-/* ==========================================
-   7. 요약(Step 6) 카드 스타일 (Summary List)
-   ========================================== */
+/* 요약 리스트 (결과 확인 단계) */
 .summary-list {
     display: flex;
     flex-direction: column;
@@ -359,123 +699,89 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 16px;
-    background-color: var(--primary-light);
-    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    background-color: #ebf3fa;
+    border-radius: 18px;
 }
 
 .summary-label {
     font-size: 13px;
-    color: var(--primary-color);
-    font-weight: 500;
+    color: #345f9f;
 }
 
 .summary-value {
     font-size: 13px;
-    color: var(--primary-color);
+    font-weight: 700;
+    color: #345f9f;
+}
+
+/* 하단 이전/다음 버튼 영역 */
+.onboarding-footer {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+.btn-prev {
+    flex: 1;
+    height: 52px;
+    border: 1px solid #345f9f;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #345f9f;
+    font-size: 15px;
     font-weight: 700;
 }
 
-/* ==========================================
-   8. 하단 버튼 영역 (Bottom Actions)
-   ========================================== */
-.onboarding-footer {
-    margin-top: auto;
-    padding-top: 20px;
-    display: flex;
-    gap: 10px;
-}
-
-.btn-primary, .btn-secondary {
+.btn-next {
     flex: 1;
-    padding: 14px 0;
-    border-radius: var(--radius-md);
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: center;
+    height: 52px;
     border: none;
+    border-radius: 16px;
+    background: #a8b8d4; /* 입력 미완성 시 색상 */
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(52, 95, 159, 0.15);
     transition: background-color 0.2s;
 }
 
-.btn-primary {
-    background-color: var(--disabled-color);
-    color: #ffffff;
+.btn-next.ready,
+.btn-next.active {
+    background: #345f9f;
 }
 
-.btn-primary.enabled,
-.btn-primary:not(:disabled) {
-    background-color: var(--primary-color);
+/* 미디어 쿼리 (iPhone 16 및 모바일 환경 대응) */
+@media (max-width: 425px) {
+    .auth-page {
+        background: #ffffff;
+    }
+
+    .auth-shell {
+        min-height: 100vh;
+        min-height: 100dvh;
+        width: 100%;
+        margin: 0 auto;
+        border-radius: 0;
+        box-shadow: none;
+    }
 }
 
-.btn-primary:hover:not(:disabled) {
-    background-color: var(--primary-hover);
-}
+@media (max-height: 760px) {
+    .auth-shell {
+        min-height: 100dvh;
+    }
 
-.btn-secondary {
-    background-color: #ffffff;
-    border: 1px solid var(--primary-color);
-    color: var(--primary-color);
-}
+    .login-shell {
+        padding-top: 38px;
+    }
 
-/* ==========================================
-   9. 자바스크립트 연동 공통 (Modal & Password)
-   ========================================== */
+    .login-intro {
+        margin-bottom: 28px;
+    }
 
-/* 비밀번호 토글 버튼 */
-[data-password-toggle] {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-}
-
-[data-password-toggle] svg {
-    width: 20px;
-    height: 20px;
-    stroke: var(--text-muted);
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-/* 피그마 형태 알림 모달 (Dialog Element) */
-.message-modal {
-    border: none;
-    border-radius: var(--radius-lg);
-    padding: 0;
-    max-width: 300px;
-    width: 90%;
-    margin: auto;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.message-modal::backdrop {
-    background: rgba(0, 0, 0, 0.4);
-}
-
-.message-modal-body {
-    padding: 24px 20px;
-    text-align: center;
-}
-
-.message-modal-body p {
-    font-size: 15px;
-    color: var(--text-primary);
-    margin-bottom: 20px;
-    word-break: keep-all;
-}
-
-.message-modal-body button {
-    width: 100%;
-    padding: 10px 0;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    cursor: pointer;
+    .login-button {
+        margin-top: 28px;
+    }
 }
