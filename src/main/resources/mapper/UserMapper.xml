@@ -12,4 +12,12 @@
         WHERE login_id = #{loginId}
     </select>
 
+    <!-- 추천 계산에 쓰는 회원 신체정보 -->
+    <select id="getUserBody" parameterType="UserDTO" resultType="UserDTO">
+        SELECT user_id, name, gender, bmi,
+               TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) AS age
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
 </mapper>

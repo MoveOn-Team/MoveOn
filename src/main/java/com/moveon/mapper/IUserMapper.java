@@ -16,4 +16,8 @@ public interface IUserMapper {
 
     UserDTO getUserIdExists(UserDTO pDTO) throws Exception;
 
+    // 추천 계산에 쓰는 회원 신체정보 (만나이 · 성별 · BMI)
+
+    UserDTO getUserBody(UserDTO pDTO) throws Exception;
+
 }

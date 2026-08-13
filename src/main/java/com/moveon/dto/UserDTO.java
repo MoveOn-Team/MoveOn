@@ -35,8 +35,14 @@ public class UserDTO {
 
     private String createdAt; // 가입일시
 
+    private String gender; // 성별 M / F
+
+    private double bmi; // 키·몸무게로 자동 계산되는 가상컬럼. INSERT/UPDATE 대상이 아니다
+
     // 아래는 DB 테이블에 없는 조회 전용 컬럼(ALIAS)
 
     private String existsYn; // 중복 여부. 존재하면 Y
+
+    private int age; // 만 나이. birth_date 로 계산해서 받는다
 
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.moveon.mapper.IFacilityMapper">
+
+    <!--
+      해당 종목을 할 수 있는 가까운 시설
+
+      거리 계산과 정렬을 SQL 에서 끝낸다.
+      시설이 1,300곳이라 전부 자바로 가져와 정렬하면 낭비다.
+    -->
+    <select id="getNearbyFacilities" resultType="FacilityDTO">
+        SELECT f.facility_id, f.name, f.gu_name, f.road_addr, f.lot_addr,
+               f.lat, f.lng, f.phone, f.homepage_url, f.guide_url, f.capacity,
+               6371 * ACOS(LEAST(1,
+                   COS(RADIANS(#{lat})) * COS(RADIANS(f.lat))
+                 * COS(RADIANS(f.lng) - RADIANS(#{lng}))
+                 + SIN(RADIANS(#{lat})) * SIN(RADIANS(f.lat)))) AS distance_km
+          FROM facility_sports fs
+          JOIN facilities f ON f.facility_id = fs.facility_id
+         WHERE fs.sport_id = #{sportId}
+           AND f.is_active = 1
+         ORDER BY distance_km
+         LIMIT #{limit}
+    </select>
+
+    <!--
+      시설의 해당 종목 강좌
+
+      요금이 있는 강좌를 먼저 보여준다.
+      요금이 null 인 강좌는 원본에 값이 없는 것이라 뒤로 보낸다.
+    -->
+    <select id="getPrograms" resultType="ProgramDTO">
+        SELECT p.program_id, p.facility_id, p.sport_id, p.name, p.target,
+               p.day_of_week,
+               TIME_FORMAT(p.start_time, '%H:%i') AS start_time,
+               TIME_FORMAT(p.end_time,   '%H:%i') AS end_time,
+               p.fee, p.capacity, p.apply_text, p.apply_method, p.reservation_url
+          FROM programs p
+         WHERE p.facility_id = #{facilityId}
+           AND p.sport_id = #{sportId}
+         ORDER BY p.fee IS NULL, p.fee, p.program_id
+    </select>
+
+</mapper>
