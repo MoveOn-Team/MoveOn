@@ -29,7 +29,7 @@
                 <input id="loginId" name="loginId" type="text" autocomplete="username" placeholder="사용할 아이디">
                 <button id="checkLoginIdButton" class="line-button" type="button">중복 확인</button>
             </div>
-            <p id="loginIdMessage" class="field-message">아이디 중복 확인이 필요합니다.</p>
+            <p id="loginIdMessage" class="field-message"></p>
         </div>
 
         <div class="line-field">
@@ -53,7 +53,7 @@
         <div class="line-field">
             <label for="password">비밀번호 <em>*</em></label>
             <div class="password-line">
-                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="영문, 숫자, 특수문자 포함 8자 이상">
+                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="영문, 숫자, 특수문자 포함 8~16자">
                 <button class="password-eye" type="button" data-password-toggle="#password" aria-label="비밀번호 보기"></button>
             </div>
             <p id="passwordMessage" class="field-message"></p>
@@ -164,8 +164,19 @@
         function validatePassword() {
             const passwordOk = moveOnAuth.isValidPassword(password.value);
             const confirmOk = password.value === passwordConfirm.value && passwordConfirm.value !== "";
-            moveOnAuth.setFieldMessage(document.getElementById("passwordMessage"), password.value ? (passwordOk ? "사용할 수 있는 비밀번호입니다." : "영문, 숫자, 특수문자를 포함한 8자 이상으로 입력해 주세요.") : "", password.value ? (passwordOk ? "ok" : "error") : "");
-            moveOnAuth.setFieldMessage(document.getElementById("passwordConfirmMessage"), passwordConfirm.value ? (confirmOk ? "비밀번호가 일치합니다." : "비밀번호가 일치하지 않습니다.") : "", passwordConfirm.value ? (confirmOk ? "ok" : "error") : "");
+
+            moveOnAuth.setFieldMessage(
+                document.getElementById("passwordMessage"),
+                moveOnAuth.getPasswordMessage(password.value),
+                password.value ? (passwordOk ? "ok" : "error") : ""
+            );
+
+            moveOnAuth.setFieldMessage(
+                document.getElementById("passwordConfirmMessage"),
+                passwordConfirm.value ? (confirmOk ? "비밀번호가 일치합니다." : "비밀번호가 일치하지 않습니다.") : "",
+                passwordConfirm.value ? (confirmOk ? "ok" : "error") : ""
+            );
+
             return passwordOk && confirmOk;
         }
         password.addEventListener("input", validatePassword);

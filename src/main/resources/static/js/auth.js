@@ -96,7 +96,19 @@
 
     // 5. 비밀번호 유효성 검사 (영문, 숫자, 특수문자 포함 8자리 이상)
     function isValidPassword(password) {
-        return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d\s]).{8,}$/.test(password);
+        return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d\s]).{8,16}$/.test(password);
+    }
+
+    // 5-1. 비밀번호에서 빠진 조건을 찾아 안내 문구를 돌려준다.
+    //      길이는 맨 뒤에서 본다. 타이핑 도중엔 항상 짧아서 다른 안내가 묻히기 때문이다.
+    function getPasswordMessage(password) {
+        if (!password) return "";
+        if (password.length < 8) return "8자 이상 입력해 주세요.";
+        if (password.length > 16) return "16자 이하로 입력해 주세요.";
+        if (!/[A-Za-z]/.test(password)) return "영문이 포함되지 않았습니다.";
+        if (!/\d/.test(password)) return "숫자가 포함되지 않았습니다.";
+        if (!/[^A-Za-z\d\s]/.test(password)) return "특수문자가 포함되지 않았습니다.";
+        return "사용 가능한 비밀번호입니다.";
     }
 
     // 6. 비밀번호 눈 아이콘 및 토글 이벤트 처리
@@ -374,6 +386,7 @@
         postJson: postJson,
         showMessage: showMessage,
         setFieldMessage: setFieldMessage,
-        isValidPassword: isValidPassword
+        isValidPassword: isValidPassword,
+        getPasswordMessage: getPasswordMessage
     };
 }());
