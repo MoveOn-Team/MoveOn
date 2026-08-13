@@ -128,6 +128,8 @@
         const onboardingContainer = document.querySelector(".onboarding-container");
         if (!onboardingContainer) return; // 온보딩 페이지가 아닐 경우 실행 안 함
 
+        const contextPath = document.body.dataset.contextPath || "";
+
         let currentStep = 1;
         const totalSteps = 5;
 
@@ -241,6 +243,14 @@
                     showMessage("키와 몸무게를 올바르게 입력해주세요.");
                     return false;
                 }
+                const birthDate = new Date(`${year}-${month}-${day}T00:00:00`);
+                if (birthDate.getFullYear() !== Number(year) ||
+                    birthDate.getMonth() + 1 !== Number(month) ||
+                    birthDate.getDate() !== Number(day)) {
+                    showMessage("올바른 생년월일을 입력해주세요.");
+                    return false;
+                }
+
                 formData.birthDate = `${year}-${month}-${day}`;
                 return true;
             } else if (step === 2) {
@@ -323,10 +333,12 @@
                 } else {
                     // 최종 제출 (POST /user/onboarding)
                     try {
-                        const result = await postJson("/user/onboarding", formData);
-                        showMessage("성향조사가 성공적으로 등록되었습니다!", function () {
-                            location.href = "/main"; // 제출 성공 후 이동 페이지
-                        });
+                        const result = await postJson(contextPath + "/user/onboarding", formData);
+                        const success = result.msg === "온보딩 정보가 저장되었습니다.";
+
+                        showMessage(result.msg, success ? function () {
+                            // 메인 화면 주소가 확정되면 이곳에서 이동한다.
+                        } : null);
                     } catch (err) {
                         showMessage(err.message);
                     }
