@@ -821,4 +821,116 @@ button {
     .login-button {
         margin-top: 28px;
     }
+    /* ================================================= */
+    /* [추가] 맞춤 운동 추천 페이지 (recommendList) 스타일 */
+    /* ================================================= */
+
+    /* 상단 제목 & 재진단 버튼 flex 배치 */
+    .recommend-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .btn-retest {
+        font-size: 12px;
+        color: #666;
+        text-decoration: none;
+        border: 1px solid #e5e7eb;
+        padding: 5px 12px;
+        border-radius: 20px;
+        background-color: #fff;
+    }
+
+    /* 내 성향 태그 (배지) 스타일 */
+    .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 10px 0 16px 0;
+    }
+
+    .tag-badge {
+        background-color: #f3f4f6;
+        color: #4b5563;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    /* TOP 3 추천 목록 카드 스타일 */
+    .recommend-card-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 16px;
+        margin-bottom: 80px; /* 하단 네비바에 가려지지 않게 여백 추가 */
+    }
+
+    .sport-card {
+        background: #ffffff;
+        border: 1px solid #f0f0f0;
+        border-radius: 16px;
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .sport-card .sport-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #111;
+    }
+
+    .sport-card .score-box {
+        text-align: right;
+    }
+
+    .sport-card .score-num {
+        font-size: 20px;
+        font-weight: 800;
+        color: #2563eb; /* 포인트 블루 컬러 */
+    }
+
+    /* 하단 네비게이션 바 화면 고정 */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 430px; /* 모바일 프레임 너비에 맞춤 */
+        background: #ffffff;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 10px 0 16px 0;
+        z-index: 999;
+    }
+
+    .bottom-nav a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #9ca3af;
+        font-size: 11px;
+    }
+
+    .bottom-nav a.active {
+        color: #111827;
+        font-weight: bold;
+    }
+
+    .bottom-nav .nav-icon {
+        font-size: 18px;
+        margin-bottom: 2px;
+    }
 }

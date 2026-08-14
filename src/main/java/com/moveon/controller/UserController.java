@@ -91,6 +91,18 @@ public class UserController {
         return "user/onboarding";
     }
 
+    /** 추천 페이지 이동 */
+    @GetMapping("/recommendList")
+    public String onboardingPage() {
+        log.info("{}.recommendPage Start!", this.getClass().getName());
+
+        log.info("{}.recommendPage End!", this.getClass().getName());
+
+        return "user/recommendList";
+    }
+
+
+
 
     /** 회원가입 아이디 중복 체크 */
     @ResponseBody

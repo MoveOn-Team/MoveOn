@@ -37,7 +37,7 @@ public class RecommendController {
     /**
      * 맞춤 운동 추천 화면
      */
-    @GetMapping(value = "/recommend")
+    @GetMapping(value = "/recommendList")
     public String recommend(@RequestParam(value = "userId", defaultValue = "1") int userId,
                             @RequestParam(value = "lat", required = false) Double lat,
                             @RequestParam(value = "lng", required = false) Double lng,

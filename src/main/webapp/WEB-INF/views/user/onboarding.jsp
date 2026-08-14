@@ -229,6 +229,27 @@
   </div>
 </main>
 
-<script src="${pageContext.request.contextPath}/js/auth.js"></script>
+<script src="${pageContext.request.contextPath}/js/auth.js">
+
+  // onboarding.jsp 내 스크립트 영역
+  fetch("${pageContext.request.contextPath}/user/onboarding", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(onboardingData)
+  })
+          .then(response => response.json())
+          .then(data => {
+            alert(data.msg); // "온보딩 정보가 저장되었습니다."
+
+            // 저장 성공 시 추천 화면(/recommend)으로 이동
+            window.location.href = "${pageContext.request.contextPath}/recommendList";
+          })
+          .catch(error => {
+            console.error("Error:", error);
+            alert("저장 중 오류가 발생했습니다.");
+          });
+</script>
 </body>
 </html>

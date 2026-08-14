@@ -400,4 +400,61 @@
         isValidPassword: isValidPassword,
         getPasswordMessage: getPasswordMessage
     };
+
+    // =========================================================
+    // 8. 맞춤 운동 추천 (SC-010 추천 메인 & SC-011 종목 상세) 전용 로직
+    // =========================================================
+    function initRecommend() {
+        const recommendPage = document.querySelector(".recommend-page");
+        if (!recommendPage) return; // 추천 페이지가 아니면 실행 안 함
+
+        const contextPath = document.body.dataset.contextPath || "";
+
+        // 1. 종목 상세 화면(SC-011): 공공체육시설 클릭 시 비동기로 강좌 목록 및 링크 변경
+        const facilityCards = document.querySelectorAll(".facility-card[data-facility-id]");
+        facilityCards.forEach(function (card) {
+            card.addEventListener("click", function () {
+                const facilityId = this.getAttribute("data-facility-id");
+                const sportId = this.getAttribute("data-sport-id");
+
+                // 카드 활성화 UI 변경
+                facilityCards.forEach(function (c) { c.classList.remove("active"); });
+                this.classList.add("active");
+
+                // 해당 시설 선택 시 URL 파라미터 업데이트 후 강좌 비동기 조회 (페이지 전체 새로고침 없이)
+                const url = new URL(window.location.href);
+                url.searchParams.set("facilityId", facilityId);
+                window.history.replaceState({}, "", url);
+
+                // 비동기 강좌 영역만 업데이트 요청
+                fetch(contextPath + "/recommend/" + sportId + "?facilityId=" + facilityId, {
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                    .then(function (response) { return response.text(); })
+                    .then(function (html) {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, "text/html");
+
+                        // 강좌 목록 및 버튼 영역 업데이트
+                        const newProgramList = doc.querySelector("#programListArea");
+                        const newActionGroup = doc.querySelector("#detailActionGroup");
+
+                        if (newProgramList && document.querySelector("#programListArea")) {
+                            document.querySelector("#programListArea").innerHTML = newProgramList.innerHTML;
+                        }
+                        if (newActionGroup && document.querySelector("#detailActionGroup")) {
+                            document.querySelector("#detailActionGroup").innerHTML = newActionGroup.innerHTML;
+                        }
+                    })
+                    .catch(function (err) {
+                        console.error("강좌 정보를 불러오는 중 오류 발생:", err);
+                    });
+            });
+        });
+    }
+
+    // DOM 로드 완료 후 추천 화면 로직 초기화 추가
+    document.addEventListener("DOMContentLoaded", initRecommend);
+
 }());
+
