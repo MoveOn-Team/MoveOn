@@ -3,13 +3,20 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>MoveOn - 성향 조사 및 신체정보</title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
 </head>
 <body class="auth-page" data-context-path="${pageContext.request.contextPath}">
 
-<main class="auth-shell">
+<%-- startStep 은 컨트롤러가 정한다. 처음 진단이면 1, 다시 진단이면 2.
+     data-saved-* 는 이미 저장된 신체정보다. 1단계를 건너뛸 때 이 값을 그대로 다시 보낸다. --%>
+<main class="auth-shell"
+      data-start-step="${startStep}"
+      data-saved-birth="${saved.birthDate}"
+      data-saved-gender="${saved.gender}"
+      data-saved-height="${saved.height}"
+      data-saved-weight="${saved.weight}">
   <div class="onboarding-container">
     <!-- 상단 헤더 & 프로그래스 바 -->
     <div class="onboarding-header">
@@ -25,7 +32,7 @@
 
     <!-- Step 1: 신체 정보 -->
     <div class="step-content" id="step1">
-      <div class="step-indicator">1 / 5 · 신체정보</div>
+      <div class="step-indicator" data-label="신체정보"></div>
       <h2 class="step-title">기본 정보를 알려주세요</h2>
       <p class="step-description">나이·체형에 맞는 강도로 종목을 골라드려요</p>
 
@@ -34,11 +41,16 @@
         <div class="line-field box-style">
           <label>생년월일</label>
           <div class="input-group">
-            <input type="number" id="birthYear" placeholder="YYYY" min="1900" max="2026" maxlength="4"> <span class="unit">년</span>
-            <input type="number" id="birthMonth" placeholder="MM" min="1" max="12" maxlength="2"> <span class="unit">월</span>
-            <input type="number" id="birthDay" placeholder="DD" min="1" max="31" maxlength="2"> <span class="unit">일</span>
+            <%-- type="number" 는 maxlength 가 통하지 않고 max 도 타이핑을 막지 못한다.
+                 자릿수가 정해진 값이라 text + inputmode 로 두고 auth.js 에서 직접 제한한다.
+                 inputmode="numeric" 이면 폰에서 숫자 키패드가 뜬다. --%>
+            <input type="text" inputmode="numeric" id="birthYear" placeholder="YYYY" maxlength="4"> <span class="unit">년</span>
+            <input type="text" inputmode="numeric" id="birthMonth" placeholder="MM" maxlength="2"> <span class="unit">월</span>
+            <input type="text" inputmode="numeric" id="birthDay" placeholder="DD" maxlength="2"> <span class="unit">일</span>
           </div>
         </div>
+        <%-- 세 칸을 다 채웠을 때만 이 자리에 안내문이 뜬다 --%>
+        <p id="birthMessage" class="field-message"></p>
 
         <!-- 성별 선택 -->
         <div class="gender-select-group">
@@ -89,7 +101,7 @@
 
     <!-- Step 2: 동반자 (companion) -->
     <div class="step-content" id="step2" style="display: none;">
-      <div class="step-indicator">2 / 5 · 동반자</div>
+      <div class="step-indicator" data-label="동반자"></div>
       <h2 class="step-title">운동은 주로<br>누구와 하고 싶으세요?</h2>
       <p class="step-description">답에 따라 추천 종목이 달라져요</p>
 
@@ -114,7 +126,7 @@
 
     <!-- Step 3: 승부욕 (competition) -->
     <div class="step-content" id="step3" style="display: none;">
-      <div class="step-indicator">3 / 5 · 승부욕</div>
+      <div class="step-indicator" data-label="승부욕"></div>
       <h2 class="step-title">경쟁하는 운동이<br>즐거우신가요?</h2>
       <p class="step-description">답에 따라 추천 종목이 달라져요</p>
 
@@ -139,7 +151,7 @@
 
     <!-- Step 4: 장소 (place) -->
     <div class="step-content" id="step4" style="display: none;">
-      <div class="step-indicator">4 / 5 · 장소</div>
+      <div class="step-indicator" data-label="장소"></div>
       <h2 class="step-title">실내와 실외 중<br>어디가 더 좋으세요?</h2>
       <p class="step-description">답에 따라 추천 종목이 달라져요</p>
 
@@ -164,7 +176,7 @@
 
     <!-- Step 5: 강도 (intensity) -->
     <div class="step-content" id="step5" style="display: none;">
-      <div class="step-indicator">5 / 5 · 강도</div>
+      <div class="step-indicator" data-label="강도"></div>
       <h2 class="step-title">어느 정도로<br>움직이고 싶으세요?</h2>
       <p class="step-description">답에 따라 추천 종목이 달라져요</p>
 

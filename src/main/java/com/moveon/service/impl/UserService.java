@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.Optional;
@@ -143,7 +142,10 @@ public class UserService implements IUserService {
         pDTO.setCompetition(normalizeCode(pDTO.getCompetition()));
         pDTO.setPlace(normalizeCode(pDTO.getPlace()));
         pDTO.setIntensity(normalizeCode(pDTO.getIntensity()));
-        pDTO.setBmi(calculateBmi(pDTO.getHeight(), pDTO.getWeight()));
+
+        // BMI 는 계산해서 넣지 않는다.
+        // users.bmi 가 키·몸무게로 자동 계산되는 가상 컬럼이라 DB 가 알아서 채운다.
+        // 여기서 setBmi 를 해도 updateOnboarding 이 쓰지 않아 아무 일도 일어나지 않는다.
 
         return userMapper.updateOnboarding(pDTO);
     }
@@ -164,11 +166,6 @@ public class UserService implements IUserService {
         return rDTO;
     }
 
-    /** 입력된 키와 몸무게로 BMI를 소수점 첫째 자리까지 계산한다. */
-    private BigDecimal calculateBmi(BigDecimal height, BigDecimal weight) {
-        BigDecimal heightMeter = height.divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
-        return weight.divide(heightMeter.multiply(heightMeter), 1, RoundingMode.HALF_UP);
-    }
 
     /** BMI 수치에 맞는 화면 표시 문구를 반환한다. */
     private String getBmiStatus(BigDecimal bmi) {
@@ -186,11 +183,42 @@ public class UserService implements IUserService {
 
     /** 온보딩 필수 입력값과 정해진 코드값을 확인한다. */
     private void validateOnboarding(OnboardingDTO pDTO) {
-        if (pDTO.getBirthDate() == null || pDTO.getGender() == null ||
-            pDTO.getHeight() == null || pDTO.getWeight() == null ||
-            pDTO.getCompanion() == null || pDTO.getCompetition() == null ||
+
+        // 화면이 안 고른 값을 빈 문자열("")로 보내는 경우가 있다.
+        // null 과 ""를 섞어 두면 아래 판단이 어긋나므로 먼저 null 로 맞춘다.
+        if (isBlank(pDTO.getGender())) pDTO.setGender(null);
+        if (isBlank(pDTO.getCompanion())) pDTO.setCompanion(null);
+        if (isBlank(pDTO.getCompetition())) pDTO.setCompetition(null);
+        if (isBlank(pDTO.getPlace())) pDTO.setPlace(null);
+        if (isBlank(pDTO.getIntensity())) pDTO.setIntensity(null);
+
+        // 성향 4축은 어느 경우에나 필수다
+        if (pDTO.getCompanion() == null || pDTO.getCompetition() == null ||
             pDTO.getPlace() == null || pDTO.getIntensity() == null) {
-            throw new IllegalArgumentException("모든 온보딩 정보를 입력해 주세요.");
+            throw new IllegalArgumentException("성향 항목을 모두 선택해 주세요.");
+        }
+
+        if (!COMPANIONS.contains(normalizeCode(pDTO.getCompanion())) ||
+            !COMPETITIONS.contains(normalizeCode(pDTO.getCompetition())) ||
+            !PLACES.contains(normalizeCode(pDTO.getPlace())) ||
+            !INTENSITIES.contains(normalizeCode(pDTO.getIntensity()))) {
+            throw new IllegalArgumentException("선택한 온보딩 항목을 확인해 주세요.");
+        }
+
+        // 신체정보는 '전부 오거나 전부 안 오거나' 둘 중 하나여야 한다.
+        //   첫 진단      네 값이 모두 온다
+        //   다시 진단    성향만 다시 고르므로 네 값이 모두 비어 온다
+        // 일부만 오면 BMI 를 계산할 수 없어 중간 상태가 저장된다.
+        boolean anyBody = pDTO.getBirthDate() != null || pDTO.getGender() != null ||
+                          pDTO.getHeight() != null || pDTO.getWeight() != null;
+        boolean allBody = pDTO.getBirthDate() != null && pDTO.getGender() != null &&
+                          pDTO.getHeight() != null && pDTO.getWeight() != null;
+
+        if (!anyBody) {
+            return; // 성향만 다시 고른 경우. 여기서 끝낸다
+        }
+        if (!allBody) {
+            throw new IllegalArgumentException("신체 정보를 모두 입력해 주세요.");
         }
 
         if (pDTO.getBirthDate().isAfter(LocalDate.now())) {
@@ -202,13 +230,14 @@ public class UserService implements IUserService {
             throw new IllegalArgumentException("키와 몸무게를 확인해 주세요.");
         }
 
-        if (!GENDERS.contains(normalizeCode(pDTO.getGender())) ||
-            !COMPANIONS.contains(normalizeCode(pDTO.getCompanion())) ||
-            !COMPETITIONS.contains(normalizeCode(pDTO.getCompetition())) ||
-            !PLACES.contains(normalizeCode(pDTO.getPlace())) ||
-            !INTENSITIES.contains(normalizeCode(pDTO.getIntensity()))) {
+        if (!GENDERS.contains(normalizeCode(pDTO.getGender()))) {
             throw new IllegalArgumentException("선택한 온보딩 항목을 확인해 주세요.");
         }
+    }
+
+    /** 값이 없거나 공백뿐인지 확인한다. */
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     /** 온보딩 필수 정보가 모두 저장되었는지 확인한다. */

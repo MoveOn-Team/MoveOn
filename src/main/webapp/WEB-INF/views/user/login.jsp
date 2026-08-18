@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MOVE:ON 로그인</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
 </head>
@@ -67,12 +67,15 @@
         try {
             const result = await moveOnAuth.post(contextPath + "/user/loginProc", {loginId, password});
             const success = (result.msg || "").includes("로그인되었습니다");
-            moveOnAuth.setFieldMessage(message, result.msg, success ? "ok" : "error");
+
+            // 성공은 팝업으로 알리고 바로 넘어가므로 입력칸 아래에는 남기지 않는다.
+            // 남겨두면 뒤로가기로 돌아왔을 때 초록 줄과 문구가 그대로 보인다.
+            moveOnAuth.setFieldMessage(message, success ? "" : result.msg, success ? "" : "error");
 
             if (success) {
                 // 성향조사를 안 했으면 온보딩부터, 마쳤으면 맞춤 추천으로 보낸다.
                 const next = result.onboardingCompleted
-                    ? contextPath + "/recommend"
+                    ? contextPath + "/recommend/recommendList"
                     : contextPath + "/user/onboarding-page";
                 moveOnAuth.showMessage(result.msg, function () { location.href = next; });
             } else {

@@ -68,25 +68,32 @@
     <update id="updatePassword" parameterType="UserDTO">
         UPDATE users
         SET password = #{password},
-            salt = #{salt},
-            updated_at = CURRENT_TIMESTAMP
+            salt = #{salt}
         WHERE login_id = #{loginId}
           AND email = #{email}
     </update>
 
     <!-- 로그인한 회원의 신체 정보와 운동 성향 저장 -->
+    <!-- 신체정보는 값이 넘어왔을 때만 고침.
+        '다시 진단' 처럼 성향만 다시 고르는 경우, 신체정보가 비어서 오는데
+         그때도 SET 에 넣으면 기존 키·몸무게가 지워진다.
+
+        <set> 은 안쪽 <if> 가 빠져서 생기는 맨 끝 쉼표를 알아서 떼어준다.
+        bmi 는 키·몸무게로 자동 계산되는 가상 컬럼이라 여기에 넣으면 UPDATE 가 실패함. -->
     <update id="updateOnboarding" parameterType="OnboardingDTO">
         UPDATE users
-        SET birth_date = #{birthDate},
-            gender = #{gender},
-            height_cm = #{height},
-            weight_kg = #{weight},
-            <!-- bmi 는 키·몸무게로 자동 계산되는 가상 컬럼이라 직접 넣으면 UPDATE 가 실패한다 -->
+        <set>
+            <if test="birthDate != null">birth_date = #{birthDate},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="height != null">height_cm = #{height},</if>
+            <if test="weight != null">weight_kg = #{weight},</if>
+
+            -- 성향 4축은 항상 함께 저장된다
             trait_companion = #{companion},
             trait_competition = #{competition},
             trait_place = #{place},
-            trait_intensity = #{intensity},
-            updated_at = CURRENT_TIMESTAMP
+            trait_intensity = #{intensity}
+        </set>
         WHERE user_id = #{userId}
     </update>
 
@@ -102,7 +109,7 @@
                trait_competition AS competition,
                trait_place AS place,
                trait_intensity AS intensity,
-               <!-- 성향 4축은 한 번에 저장되므로 하나만 확인하면 완료 여부를 알 수 있다 -->
+               -- 성향 4축은 한 번에 저장되므로 하나만 확인하면 완료 여부를 알 수 있다
                IF(trait_companion IS NULL, 0, 1) AS onboarding_completed
         FROM users
         WHERE user_id = #{userId}
