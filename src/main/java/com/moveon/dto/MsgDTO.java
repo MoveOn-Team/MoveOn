@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 
+
 /**
- * 실행 결과를 화면에 안내하는 메시지 DTO.
+ * 실행 결과를 화면에 안내하는 메시지.
  */
 @Getter
 @Setter
@@ -15,5 +16,5 @@ public class MsgDTO {
     private String msg; // 실행 성공 또는 실패 안내 메시지
 
     @JsonInclude(JsonInclude.Include.ALWAYS)
-    private boolean onboardingCompleted;
+    private boolean onboardingCompleted; // 로그인 후 어디로 보낼지
 }

@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MOVE:ON 회원가입</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
 </head>
@@ -91,6 +91,7 @@
         const passwordConfirm = document.getElementById("passwordConfirm");
         let checkedLoginId = "";
         let requestedEmail = "";
+        let stopTimer = null;   // 인증번호 타이머를 멈추는 함수
         let verifiedEmail = "";
 
         // 입력값이 바뀌면 기존 중복 확인과 이메일 인증 결과를 무효화한다.
@@ -133,6 +134,11 @@
                     verifiedEmail = "";
                     document.getElementById("emailCodeField").classList.add("is-visible");
                     emailCode.focus();
+
+                    // 서버가 5분을 재고 있으므로 화면에도 같은 시간을 보여준다
+                    stopTimer = moveOnAuth.startCodeTimer(
+                            document.getElementById("emailCodeMessage"), 5,
+                            function () { verifiedEmail = ""; });
                 } else moveOnAuth.showMessage(result.msg);
             } catch (error) {
                 moveOnAuth.setFieldMessage(message, error.message, "error");
@@ -151,6 +157,13 @@
                 const result = await moveOnAuth.post(contextPath + "/user/verifyEmailCode", {email: email.value.trim(), emailCode: emailCode.value.trim(), purpose: "JOIN"});
                 const success = (result.msg || "").includes("완료");
                 verifiedEmail = success ? email.value.trim() : "";
+
+                // 인증이 끝났으면 남은 시간 표시를 멈춘다.
+                // 안 멈추면 성공 문구를 타이머가 1초 뒤 덮어쓴다.
+                if (success && stopTimer) {
+                    stopTimer();
+                    stopTimer = null;
+                }
                 moveOnAuth.setFieldMessage(message, result.msg, success ? "ok" : "error");
                 moveOnAuth.showMessage(result.msg);
             } catch (error) {

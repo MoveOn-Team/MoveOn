@@ -10,9 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.regex.Pattern;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,14 +33,14 @@ public class UserController {
 
     private static final long EMAIL_CODE_VALID_MILLIS = 5 * 60 * 1000L; // 인증번호 유효시간 5분
 
-    // 비밀번호는 8자리 이상이며 영문, 숫자, 특수문자를 각각 하나 이상 포함한다.
+    // 비밀번호는 8자리 이상이며 영문, 숫자, 특수문자를 각각 하나 이상 포함함.
     private static final Pattern PASSWORD_PATTERN = Pattern.compile(
             "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d\\s]).{8,16}$"
     );
 
     private final IUserService userService; // 회원 관련 비즈니스 로직 호출
 
-    /** 로그인 JSP 화면으로 이동한다. */
+    /** 로그인 JSP 화면으로 이동. */
     @GetMapping(value = "/login")
     public String login() {
         log.info("{}.login Start!", this.getClass().getName());
@@ -46,7 +48,7 @@ public class UserController {
         return "user/login";
     }
 
-    /** 회원가입 JSP 화면으로 이동한다. */
+    /** 회원가입 JSP 화면으로 이동. */
     @GetMapping(value = "/join")
     public String join() {
         log.info("{}.join Start!", this.getClass().getName());
@@ -54,7 +56,7 @@ public class UserController {
         return "user/join";
     }
 
-    /** 아이디 찾기 JSP 화면으로 이동한다. */
+    /** 아이디 찾기 JSP 화면으로 이동. */
     @GetMapping(value = "/find-id")
     public String findId() {
         log.info("{}.findId Start!", this.getClass().getName());
@@ -62,7 +64,7 @@ public class UserController {
         return "user/find-id";
     }
 
-    /** 비밀번호 찾기 JSP 화면으로 이동한다. */
+    /** 비밀번호 찾기 JSP 화면으로 이동. */
     @GetMapping(value = "/find-password")
     public String findPassword() {
         log.info("{}.findPassword Start!", this.getClass().getName());
@@ -71,23 +73,37 @@ public class UserController {
     }
 
     /**
-     * 온보딩(성향조사) JSP 화면으로 이동한다.
+     * 온보딩(성향조사) JSP 화면으로 이동.
      *
      * 주소를 /onboarding 이 아니라 /onboarding-page 로 둔 이유는
-     * /onboarding 이 이미 데이터 조회·저장용(JSON)으로 쓰이고 있어서다.
-     * 같은 주소에 GET 매핑이 두 개면 서버가 뜨지 않는다.
+     * /onboarding 이 이미 데이터 조회·저장용(JSON)으로 쓰이고 있어서임.
+     * 같은 주소에 GET 매핑이 두 개면 서버가 뜨지 않음.
      */
     @GetMapping(value = "/onboarding-page")
-    public String onboardingPage(HttpSession session) {
+    public String onboardingPage(HttpSession session, ModelMap model) throws Exception {
         log.info("{}.onboardingPage Start!", this.getClass().getName());
 
-        // 로그인하지 않고 주소를 직접 친 경우 로그인 화면으로 돌려보낸다.
-        if (session.getAttribute("SS_USER_NO") == null) {
+        // 로그인하지 않고 주소를 직접 친 경우 로그인 화면으로 돌려보냄.
+        Integer userId = getSessionUserId(session);
+        if (userId == null) {
             log.info("{}.onboardingPage End! 비로그인 접근", this.getClass().getName());
             return "redirect:/user/login";
         }
 
-        log.info("{}.onboardingPage End!", this.getClass().getName());
+        OnboardingDTO pDTO = new OnboardingDTO();
+        pDTO.setUserId(userId);
+        OnboardingDTO saved = userService.getOnboarding(pDTO);
+
+        // 이미 성향조사를 마친 회원이 '다시 진단' 으로 들어온 경우
+        // 신체정보(1단계)는 건너뛰고 성향(2단계)부터 보여줌.
+        // 신체정보는 내 정보 탭에서 따로 고칠 수 있음.
+        int startStep = saved.isOnboardingCompleted() ? 2 : 1;
+        model.addAttribute("startStep", startStep);
+
+        // 저장된 값을 미리 내려보내 화면이 그대로 다시 제출하게 함.
+        model.addAttribute("saved", saved);
+
+        log.info("{}.onboardingPage End! startStep : {}", this.getClass().getName(), startStep);
         return "user/onboarding";
     }
 
@@ -308,9 +324,9 @@ public class UserController {
             return message("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
 
-        // 이전에 로그인한 세션이 남아 있으면 버리고 새로 만든다.
-        //   - 로그아웃 없이 다른 계정으로 로그인할 수 있게 한다
-        //   - 로그인 시점에 세션 ID가 바뀌므로 세션 고정 공격도 막힌다
+        // 이전에 로그인한 세션이 남아 있으면 버리고 새로 만듦
+        //   - 로그아웃 없이 다른 계정으로 로그인할 수 있게 함
+        //   - 로그인 시점에 세션 ID가 바뀌므로 세션 고정 공격도 막힘
         session.invalidate();
         session = request.getSession(true);
 
@@ -318,7 +334,7 @@ public class UserController {
         session.setAttribute("SS_USER_ID", rDTO.getLoginId());
         session.setAttribute("SS_USER_NAME", rDTO.getName());
 
-        // 성향조사를 마쳤는지 확인한다. 화면은 이 값으로 온보딩과 맞춤추천 중 어디로 갈지 정한다.
+        // 성향조사를 마쳤는지 확인함. 화면은 이 값으로 온보딩과 맞춤추천 중 어디로 갈지 정함.
         OnboardingDTO oDTO = new OnboardingDTO();
         oDTO.setUserId(rDTO.getUserId());
         OnboardingDTO onboarding = userService.getOnboarding(oDTO);
@@ -460,7 +476,7 @@ public class UserController {
             log.info("온보딩 저장 결과 : {} / userId : {}", result > 0 ? "성공" : "실패", userId);
             log.info("{}.saveOnboarding End!", this.getClass().getName());
             return result > 0
-                    ? message("온보딩 정보가 저장되었습니다.")
+                    ? message("성향 조사가 완료되었어요.")
                     : message("온보딩 정보 저장에 실패했습니다.");
 
         } catch (IllegalArgumentException e) {
@@ -492,7 +508,7 @@ public class UserController {
         return rDTO;
     }
 
-    /** 인증 목적에 맞는 회원 정보인지 확인한다. */
+    /** 인증 목적에 맞는 회원 정보인지 확인. */
     private MsgDTO validateEmailRequest(UserDTO pDTO, String purpose) throws Exception {
 
         if (JOIN.equals(purpose)) {
@@ -516,7 +532,7 @@ public class UserController {
         return null;
     }
 
-    /** 입력된 이메일 인증 목적을 정해진 구분값으로 변환한다. */
+    /** 입력된 이메일 인증 목적을 정해진 구분값으로 변환. */
     private String normalizePurpose(String purpose) {
 
         if (purpose == null) {
@@ -532,13 +548,13 @@ public class UserController {
         return null;
     }
 
-    /** 세션에 해당 이메일의 인증 완료 정보가 있는지 확인한다. */
+    /** 세션에 해당 이메일의 인증 완료 정보가 있는지 확인. */
     private boolean isEmailVerified(HttpSession session, String purpose, String email) {
         Object verifiedEmail = session.getAttribute(EMAIL_VERIFIED + purpose);
         return email != null && email.equals(verifiedEmail);
     }
 
-    /** 사용이 끝난 이메일 인증 정보를 세션에서 제거한다. */
+    /** 사용이 끝난 이메일 인증 정보를 세션에서 제거. */
     private void clearEmailSession(HttpSession session, String purpose) {
         session.removeAttribute(EMAIL_CODE + purpose);
         session.removeAttribute(EMAIL_ADDRESS + purpose);
@@ -546,30 +562,30 @@ public class UserController {
         session.removeAttribute(EMAIL_VERIFIED + purpose);
     }
 
-    /** 비밀번호가 화면에서 정한 형식에 맞는지 확인한다. */
+    /** 비밀번호가 화면에서 정한 형식에 맞는지 확인. */
     private boolean isValidPassword(String password) {
         return password != null && PASSWORD_PATTERN.matcher(password).matches();
     }
 
-    /** 문자열이 비어 있거나 공백만 있는지 확인한다. */
+    /** 문자열이 비어 있거나 공백만 있는지 확인. */
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
     }
 
-    /** 세션에서 로그인한 회원 번호를 가져온다. */
+    /** 세션에서 로그인한 회원 번호를 가져옴. */
     private Integer getSessionUserId(HttpSession session) {
         Object userId = session.getAttribute("SS_USER_NO");
         return userId instanceof Number ? ((Number) userId).intValue() : null;
     }
 
-    /** 화면에 전달할 실행 결과 메시지를 만든다. */
+    /** 화면에 전달할 실행 결과 메시지를 만듦. */
     private MsgDTO message(String msg) {
         MsgDTO rDTO = new MsgDTO();
         rDTO.setMsg(msg);
         return rDTO;
     }
 
-    /** 메시지와 함께 온보딩(성향조사) 완료 여부를 담아 돌려준다. */
+    /** 메시지와 함께 온보딩(성향조사) 완료 여부를 담아 돌려줌. */
     private MsgDTO message(String msg, boolean onboardingCompleted) {
         MsgDTO rDTO = new MsgDTO();
         rDTO.setMsg(msg);

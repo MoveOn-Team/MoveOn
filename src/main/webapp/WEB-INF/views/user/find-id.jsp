@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MOVE:ON 아이디 찾기</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
 </head>
@@ -37,7 +37,6 @@
             </div>
             <p id="emailCodeMessage" class="field-message"></p>
         </div>
-        <button id="findIdButton" class="primary-button bottom-button" type="button">아이디 찾기</button>
     </form>
 
     <!-- 찾은 아이디 결과 영역 -->
@@ -63,6 +62,7 @@
         const email = document.getElementById("email");
         const emailCode = document.getElementById("emailCode");
         let requestedEmail = "";
+        let stopTimer = null;   // 인증번호 타이머를 멈추는 함수
         let verifiedEmail = "";
 
         // 회원 정보가 일치할 때 아이디 찾기 인증번호를 요청한다.
@@ -78,6 +78,11 @@
                     verifiedEmail = "";
                     document.getElementById("emailCodeField").classList.add("is-visible");
                     emailCode.focus();
+
+                    // 서버가 5분을 재고 있으므로 화면에도 같은 시간을 보여준다
+                    stopTimer = moveOnAuth.startCodeTimer(
+                            document.getElementById("emailCodeMessage"), 5,
+                            function () { verifiedEmail = ""; });
                 } else moveOnAuth.showMessage(result.msg);
             } catch (error) {
                 moveOnAuth.setFieldMessage(message, error.message, "error");
@@ -96,8 +101,22 @@
                 const result = await moveOnAuth.post(contextPath + "/user/verifyEmailCode", {email: email.value.trim(), emailCode: emailCode.value.trim(), purpose: "FIND_ID"});
                 const success = (result.msg || "").includes("완료");
                 verifiedEmail = success ? email.value.trim() : "";
+
+                // 인증이 끝났으면 남은 시간 표시를 멈춘다.
+                // 안 멈추면 성공 문구를 타이머가 1초 뒤 덮어쓴다.
+                if (success && stopTimer) {
+                    stopTimer();
+                    stopTimer = null;
+                }
                 moveOnAuth.setFieldMessage(message, result.msg, success ? "ok" : "error");
-                moveOnAuth.showMessage(result.msg);
+
+                // 인증이 되면 아이디를 바로 찾아 준다.
+                // 버튼을 한 번 더 누르게 하지 않는다.
+                if (success) {
+                    findId();
+                } else {
+                    moveOnAuth.showMessage(result.msg);
+                }
             } catch (error) {
                 verifiedEmail = "";
                 moveOnAuth.setFieldMessage(message, error.message, "error");
@@ -106,7 +125,8 @@
         });
 
         // 인증된 이름과 이메일로 아이디를 조회한다.
-        document.getElementById("findIdButton").addEventListener("click", async function () {
+        // 인증 성공 직후에 바로 부른다.
+        async function findId() {
             if (verifiedEmail !== email.value.trim()) return moveOnAuth.showMessage("이메일 인증을 완료해 주세요.");
             try {
                 const result = await moveOnAuth.post(contextPath + "/user/searchUserId", {name: name.value.trim(), email: email.value.trim()});
@@ -118,7 +138,8 @@
             } catch (error) {
                 moveOnAuth.showMessage(error.message);
             }
-        });
+        }
+
     }());
 </script>
 </body>

@@ -94,13 +94,62 @@
         }
     }
 
+    /**
+     * 인증번호 남은 시간 표시
+     *
+     * 서버(UserController.EMAIL_CODE_VALID_MILLIS)가 5분을 재고 있는데
+     * 화면에 아무 표시가 없으면, 사용자는 시간이 지난 뒤 '확인' 을 눌러야
+     * 만료된 걸 알게 된다. 남은 시간을 보여줘서 미리 알 수 있게 한다.
+     *
+     * 회원가입·아이디 찾기·비밀번호 찾기 세 화면이 같이 쓴다.
+     *
+     * @param element  남은 시간을 찍을 요소 (인증번호 칸 아래 메시지 자리)
+     * @param minutes  유효 시간(분). 서버와 같은 값이어야 한다
+     * @param onExpire 만료됐을 때 부를 함수 (인증 상태를 지우는 용도)
+     * @return         타이머를 멈추는 함수. 인증에 성공하면 이걸 부른다
+     */
+    function startCodeTimer(element, minutes, onExpire) {
+
+        // 이미 돌고 있던 타이머가 있으면 멈춘다.
+        // 인증 요청을 여러 번 누르면 타이머가 겹쳐 시간이 두 배로 줄어든다.
+        if (element.dataset.timerId) {
+            clearInterval(Number(element.dataset.timerId));
+        }
+
+        let left = minutes * 60;
+
+        function draw() {
+            if (left <= 0) {
+                clearInterval(id);
+                delete element.dataset.timerId;
+                setFieldMessage(element, "인증번호가 만료되었어요. 다시 요청해 주세요.", "error");
+                if (typeof onExpire === "function") {
+                    onExpire();
+                }
+                return;
+            }
+            const m = Math.floor(left / 60);
+            const s = String(left % 60).padStart(2, "0");
+            setFieldMessage(element, `남은 시간 ${m}:${s}`, "");
+            left--;
+        }
+
+        draw(); // 1초 기다리지 않고 바로 보여준다
+        const id = setInterval(draw, 1000);
+        element.dataset.timerId = String(id);
+
+        return function stop() {
+            clearInterval(id);
+            delete element.dataset.timerId;
+        };
+    }
+
     // 5. 비밀번호 유효성 검사 (영문, 숫자, 특수문자 포함 8자리 이상)
     function isValidPassword(password) {
         return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d\s]).{8,16}$/.test(password);
     }
 
     // 5-1. 비밀번호에서 빠진 조건을 찾아 안내 문구를 돌려준다.
-    //      길이는 맨 뒤에서 본다. 타이핑 도중엔 항상 짧아서 다른 안내가 묻히기 때문이다.
     function getPasswordMessage(password) {
         if (!password) return "";
         if (password.length < 8) return "8자 이상 입력해 주세요.";
@@ -142,14 +191,24 @@
 
         const contextPath = document.body.dataset.contextPath || "";
 
-        let currentStep = 1;
+        // 어느 단계에서 시작할지는 서버가 정해 data-start-step 으로 내려준다.
+        //   1  처음 진단      신체정보부터
+        //   2  다시 진단      신체정보는 이미 있으므로 성향부터
+        const shell = document.querySelector(".auth-shell");
+        const minStep = Number((shell && shell.dataset.startStep) || 1);
+
+        let currentStep = minStep;
         const totalSteps = 5;
 
+        // 다시 진단으로 들어온 경우 저장된 신체정보를 미리 채워 둔다.
+        // 비워 두면 요약이 'NaN세' 로 나오고, 서버도 '일부만 왔다'고 보고 저장을 막는다.
+        const saved = (shell && shell.dataset) || {};
+
         const formData = {
-            birthDate: "",
-            gender: "",
-            height: null,
-            weight: null,
+            birthDate: saved.savedBirth || "",
+            gender: saved.savedGender || "",
+            height: saved.savedHeight ? Number(saved.savedHeight) : null,
+            weight: saved.savedWeight ? Number(saved.savedWeight) : null,
             companion: "",
             competition: "",
             place: "",
@@ -210,6 +269,78 @@
             }
         });
 
+        // 생년월일 입력칸
+        //
+        // 숫자가 아닌 글자와 자릿수만 막는다. 값의 범위는 건드리지 않는다.
+        // 2099 를 쳤을 때 몰래 2026 으로 바꿔놓으면 사용자는 자기가 뭘 잘못 눌렀는지
+        // 알 수 없다. 친 대로 두고 안내문과 팝업으로 알려주는 편이 낫다.
+        const birthLength = {birthYear: 4, birthMonth: 2, birthDay: 2};
+
+        Object.keys(birthLength).forEach(function (id) {
+            const input = document.getElementById(id);
+            if (!input) return;
+
+            const maxLength = birthLength[id];
+
+            input.addEventListener("input", function () {
+                this.value = this.value.replace(/\D/g, "").slice(0, maxLength);
+                checkBirth();
+            });
+        });
+
+        const BIRTH_INVALID = "생년월일이 정확한지 확인해 주세요.";
+
+        /**
+         * 생년월일이 쓸 수 있는 날짜인지 본다.
+         * 문제가 없으면 null, 있으면 안내 문구를 돌려준다.
+         *
+         * 입력칸은 자릿수만 막으므로 범위 검사는 전부 여기서 한다.
+         *   13 월, 32 일   달력에 없어 Date 가 만들어지지 않는다
+         *   2 월 30 일     같은 이유로 걸린다
+         *   2099-06-06    달력에는 있지만 아직 오지 않은 날
+         *   2026-12-31    올해지만 아직 오지 않은 날
+         *   1800-01-01    너무 예전이라 잘못 친 값으로 본다
+         */
+        function birthError(year, month, day) {
+            const date = new Date(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T00:00:00`);
+
+            if (date.getFullYear() !== Number(year) ||
+                date.getMonth() + 1 !== Number(month) ||
+                date.getDate() !== Number(day)) {
+                return BIRTH_INVALID;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (date > today) return BIRTH_INVALID;
+            if (Number(year) < 1900) return BIRTH_INVALID;
+
+            return null;
+        }
+
+        /**
+         * 세 칸을 다 채웠을 때만 입력칸 아래에 안내 문구를 띄운다.
+         * 채우는 도중에 띄우면 한 글자 칠 때마다 빨간 글씨가 깜빡여 거슬린다.
+         */
+        function checkBirth() {
+            const box = document.querySelector(".line-field.box-style");
+            const message = document.getElementById("birthMessage");
+            if (!message) return null;
+
+            const year = document.getElementById("birthYear").value;
+            const month = document.getElementById("birthMonth").value;
+            const day = document.getElementById("birthDay").value;
+
+            const filled = year.length === 4 && month.length >= 1 && day.length >= 1;
+            const error = filled ? birthError(year, month, day) : null;
+
+            message.textContent = error || "";
+            message.className = "field-message" + (error ? " error" : "");
+            if (box) box.classList.toggle("has-error", Boolean(error));
+
+            return error;
+        }
+
         // 성별 버튼 바인딩
         document.querySelectorAll(".gender-btn").forEach(function (btn) {
             btn.addEventListener("click", function () {
@@ -255,11 +386,11 @@
                     showMessage("키와 몸무게를 올바르게 입력해주세요.");
                     return false;
                 }
-                const birthDate = new Date(`${year}-${month}-${day}T00:00:00`);
-                if (birthDate.getFullYear() !== Number(year) ||
-                    birthDate.getMonth() + 1 !== Number(month) ||
-                    birthDate.getDate() !== Number(day)) {
-                    showMessage("올바른 생년월일을 입력해주세요.");
+                // 입력칸 아래 안내문과 같은 검사를 쓴다.
+                // 안내문을 못 보고 다음을 눌렀을 때를 대비한 마지막 관문이다.
+                const birthMessage = checkBirth();
+                if (birthMessage) {
+                    showMessage(birthMessage);
                     return false;
                 }
 
@@ -326,14 +457,31 @@
             const target = document.getElementById("step" + step);
             if (target) target.style.display = "block";
 
-            // 상단 프로그래스 바 업데이트
+            // 상단 프로그래스 바.
+            // 다시 진단이면 minStep 앞의 칸은 아예 감춰서 1부터 세는 것처럼 보이게 한다.
             document.querySelectorAll(".progress-step").forEach(function (bar, idx) {
-                bar.classList.toggle("active", idx < step);
+                const barStep = idx + 1;                       // 이 칸이 가리키는 단계
+                bar.style.display = barStep < minStep ? "none" : "";
+                bar.classList.toggle("active", barStep <= step);
             });
 
+            // '1 / 4 · 동반자' 처럼 번호를 다시 매겨 찍는다.
+            // JSP 에는 라벨만 두고 번호는 여기서 계산한다.
+            if (target) {
+                const indicator = target.querySelector(".step-indicator[data-label]");
+                if (indicator) {
+                    indicator.textContent =
+                        (step - minStep + 1) + " / " + (totalSteps - minStep + 1)
+                        + " · " + indicator.dataset.label;
+                }
+            }
+
             // 뒤로가기/이전 버튼 처리
-            if (btnBack) btnBack.style.visibility = step > 1 ? "visible" : "hidden";
-            if (btnPrev) btnPrev.style.display = step > 1 ? "inline-block" : "none";
+            //
+            // 다시 진단(minStep=2)으로 들어왔으면 첫 화면에서도 나갈 수단이 있어야 하므로
+            // 뒤로가기는 계속 보여준다. 반면 '이전' 은 갈 단계가 있을 때만 보여준다.
+            if (btnBack) btnBack.style.visibility = (step > minStep || minStep > 1) ? "visible" : "hidden";
+            if (btnPrev) btnPrev.style.display = step > minStep ? "inline-block" : "none";
 
             if (step === 6) {
                 renderSummary();
@@ -356,11 +504,12 @@
                     // 최종 제출 (POST /user/onboarding)
                     try {
                         const result = await postJson(contextPath + "/user/onboarding", formData);
-                        const success = result.msg === "온보딩 정보가 저장되었습니다.";
+                        // 서버 문구가 바뀌어도 깨지지 않게 '완료' 라는 말로 판단한다
+                        const success = (result.msg || "").includes("완료되었어요");
 
                         showMessage(result.msg, success ? function () {
                             // 성향조사를 마쳤으므로 맞춤 추천 화면으로 보낸다.
-                            location.href = contextPath + "/recommend";
+                            location.href = contextPath + "/recommend/recommendList";
                         } : null);
                     } catch (err) {
                         showMessage(err.message);
@@ -371,7 +520,7 @@
 
         if (btnPrev) {
             btnPrev.addEventListener("click", function () {
-                if (currentStep > 1) {
+                if (currentStep > minStep) {
                     currentStep--;
                     goToStep(currentStep);
                 }
@@ -380,12 +529,55 @@
 
         if (btnBack) {
             btnBack.addEventListener("click", function () {
-                if (currentStep > 1) {
+                if (currentStep > minStep) {
                     currentStep--;
                     goToStep(currentStep);
+                } else {
+                    // 더 돌아갈 단계가 없으면 온보딩 화면을 떠난다.
+                    // 다시 진단으로 들어온 경우 추천 화면으로 돌아가는 길이 된다.
+                    history.back();
                 }
             });
         }
+
+        /**
+         * 저장된 신체정보를 1단계 입력칸에 미리 채운다.
+         *
+         * 다시 진단은 1단계를 건너뛰므로 아무도 입력칸을 채우지 않는다.
+         * 그런데 요약 화면의 BMI 는 1단계의 bmiValueText 를 읽어 쓰기 때문에,
+         * 채워두고 calculateBMI() 를 한 번 돌려야 '--.- 측정 대기' 가 사라진다.
+         */
+        function fillSavedBody() {
+            if (!formData.birthDate && !formData.height) return; // 처음 진단이면 채울 게 없다
+
+            const parts = String(formData.birthDate).split("-");
+            if (parts.length === 3) {
+                const y = document.getElementById("birthYear");
+                const m = document.getElementById("birthMonth");
+                const d = document.getElementById("birthDay");
+                if (y) y.value = parts[0];
+                if (m) m.value = String(Number(parts[1]));
+                if (d) d.value = String(Number(parts[2]));
+            }
+
+            const heightEl = document.getElementById("height");
+            const weightEl = document.getElementById("weight");
+            if (heightEl && formData.height) heightEl.value = formData.height;
+            if (weightEl && formData.weight) weightEl.value = formData.weight;
+
+            // 성별 버튼도 눌린 상태로 맞춘다
+            document.querySelectorAll(".gender-btn").forEach(function (btn) {
+                btn.classList.toggle("active", btn.getAttribute("data-gender") === formData.gender);
+            });
+
+            calculateBMI(); // BMI 카드를 채운다. 요약 화면이 이 값을 읽어 간다.
+        }
+
+        fillSavedBody();
+
+        // 첫 화면을 그린다.
+        // HTML 의 style="display:none" 에만 기대면 다시 진단일 때 1단계가 그대로 보인다.
+        goToStep(currentStep);
     }
 
     // DOM 로드 완료 후 온보딩 초기화
@@ -397,6 +589,7 @@
         postJson: postJson,
         showMessage: showMessage,
         setFieldMessage: setFieldMessage,
+        startCodeTimer: startCodeTimer,
         isValidPassword: isValidPassword,
         getPasswordMessage: getPasswordMessage
     };

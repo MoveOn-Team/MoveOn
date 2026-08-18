@@ -8,8 +8,9 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+
 /**
- * 온보딩 신체 정보와 운동 성향을 전달하는 DTO.
+ * 온보딩 신체 정보와 운동 성향을 전달함.
  */
 @Getter
 @Setter

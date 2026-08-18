@@ -4,11 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 
+
 /**
- * users 테이블과 회원 화면에서 사용하는 DTO.
- *
- * DB의 snake_case 컬럼은 application.properties의
- * map-underscore-to-camel-case 설정으로 camelCase 필드에 매핑된다.
+ * users 테이블과 회원 화면에서 사용됨.
  */
 @Getter
 @Setter
@@ -25,10 +23,7 @@ public class UserDTO {
 
     private boolean ageConfirmed; // 만 14세 이상 확인 여부
     private boolean termsAgreed; // 필수 이용약관 동의 여부
-    private String termsAgreedAt; // 필수 이용약관 동의 시각
     private int privacyAgreed; // 선택 개인정보 동의 여부(1 또는 0)
-
-    private String createdAt; // 회원가입 일시
 
     @JsonInclude(JsonInclude.Include.ALWAYS)
     private int exists; // 회원 정보 존재 여부(1 또는 0)
