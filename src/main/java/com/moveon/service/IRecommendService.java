@@ -1,12 +1,19 @@
 package com.moveon.service;
 
 import com.moveon.dto.FacilityDTO;
+import com.moveon.dto.ProfileDTO;
 import com.moveon.dto.ProgramDTO;
+import com.moveon.dto.RentalDTO;
 import com.moveon.dto.SportDTO;
 
 import java.util.List;
 
+
 public interface IRecommendService {
+
+    // 화면 위쪽 성향 요약 카드 (성향 4축 · 나이 · BMI · 현위치 동네)
+
+    ProfileDTO getProfile(int userId, double lat, double lng) throws Exception;
 
     // 지속 적합도 TOP3 (화면에 보여줄 상위 3개)
 
@@ -26,6 +33,10 @@ public interface IRecommendService {
 
     // 특정 시설의 해당 종목 강좌
 
-    List<ProgramDTO> getPrograms(int facilityId, int sportId) throws Exception;
+    List<ProgramDTO> getPrograms(int userId, int facilityId, int sportId) throws Exception;
+
+    // 대관 가능한 가까운 곳. 강좌가 없는 종목에서 대신 보여준다
+
+    List<RentalDTO> getNearbyRentals(int sportId, double lat, double lng, int limit) throws Exception;
 
 }

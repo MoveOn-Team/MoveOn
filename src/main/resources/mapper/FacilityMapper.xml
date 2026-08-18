@@ -1,45 +1,128 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.moveon.mapper.IFacilityMapper">
 
-    <!--
-      해당 종목을 할 수 있는 가까운 시설
-
-      거리 계산과 정렬을 SQL 에서 끝낸다.
-      시설이 1,300곳이라 전부 자바로 가져와 정렬하면 낭비다.
-    -->
+    <!-- 해당 종목을 할 수 있는 가까운 시설 -->
     <select id="getNearbyFacilities" resultType="FacilityDTO">
         SELECT f.facility_id, f.name, f.gu_name, f.road_addr, f.lot_addr,
-               f.lat, f.lng, f.phone, f.homepage_url, f.guide_url, f.capacity,
-               6371 * ACOS(LEAST(1,
-                   COS(RADIANS(#{lat})) * COS(RADIANS(f.lat))
-                 * COS(RADIANS(f.lng) - RADIANS(#{lng}))
-                 + SIN(RADIANS(#{lat})) * SIN(RADIANS(f.lat)))) AS distance_km
+               f.lat, f.lng, f.phone, f.homepage_url, f.capacity,
+               -- 예약 링크는 시설이 아니라 '시설 x 종목' 단위.
+               -- 같은 복합시설이라도 테니스장만 예약 대상인 경우가 있음.
+               fs.reserve_url,
+               -- 시설 홈페이지가 없을 때 강좌를 확인할 자치구 대표 사이트
+               ds.site_url AS district_url,
+               -- 두 좌표 사이 실제 거리를 미터로 주는 내장 함수. 1000 으로 나눠 km 로 쓴다.
+               -- POINT 는 (경도, 위도) 순서다.
+               ST_Distance_Sphere(POINT(#{lng}, #{lat}),
+                                  POINT(f.lng, f.lat)) / 1000 AS distance_km
           FROM facility_sports fs
           JOIN facilities f ON f.facility_id = fs.facility_id
+          LEFT JOIN district_sites ds ON ds.gu_name = f.gu_name
          WHERE fs.sport_id = #{sportId}
            AND f.is_active = 1
          ORDER BY distance_km
          LIMIT #{limit}
     </select>
 
-    <!--
-      시설의 해당 종목 강좌
+    <!-- 시설의 해당 종목 운영 강좌
 
-      요금이 있는 강좌를 먼저 보여준다.
-      요금이 null 인 강좌는 원본에 값이 없는 것이라 뒤로 보낸다.
-    -->
+         정렬 순서
+           1) 회원 나이에 맞는 강좌 먼저
+           2) 요금이 있는 강좌 먼저 (요금 null 은 원본에 값이 없는 것)
+           3) 요금 낮은 순
+           4) program_id 순 (같은 값일 때 순서를 고정해 새로고침마다 안 바뀌게)
+
+         나이가 맞지 않는 강좌는 아예 뺌.
+         축구/풋살은 185개 중 성인 대상이 30개뿐이라(나머지는 유아·어린이 축구교실)
+         걸러내지 않으면 성인 회원에게 쓸모없는 목록만 보임.
+
+         target 은 '성인', '어린이,청소년', '성인,(여성)' 처럼 자유 문장이라 REGEXP 로 본다.
+         대상이 안 적힌 강좌(NULL)는 판단할 수 없으므로 남긴다. -->
     <select id="getPrograms" resultType="ProgramDTO">
         SELECT p.program_id, p.facility_id, p.sport_id, p.name, p.target,
                p.day_of_week,
                TIME_FORMAT(p.start_time, '%H:%i') AS start_time,
                TIME_FORMAT(p.end_time,   '%H:%i') AS end_time,
-               p.fee, p.capacity, p.apply_text, p.apply_method, p.reservation_url
+               p.fee, p.capacity, p.reservation_url
           FROM programs p
          WHERE p.facility_id = #{facilityId}
            AND p.sport_id = #{sportId}
+           AND ( p.target IS NULL
+              OR p.target REGEXP '누구나|전체|제한없|일반'
+              OR (#{ageBand} = 'ADULT'  AND p.target REGEXP '성인')
+              OR (#{ageBand} = 'TEEN'   AND p.target REGEXP '청소년|중등|고등|초중고')
+              OR (#{ageBand} = 'CHILD'  AND p.target REGEXP '어린이|유아|초등')
+              -- 어르신도 성인 대상 강좌를 신청할 수 있어 함께 남긴다
+              OR (#{ageBand} = 'SENIOR' AND p.target REGEXP '노인|어르신|경로|성인') )
          ORDER BY p.fee IS NULL, p.fee, p.program_id
+    </select>
+
+    <!-- 대관 가능한 곳 (서울시 공공서비스예약)
+
+         축구·풋살은 강좌 185개 중 성인 대상이 30개뿐이고 나머지는 유아·어린이 축구교실임.
+         이런 종목은 '강좌 수강' 이 아니라 '구장 대관' 이 정상적인 이용 방법이라,
+         강좌가 없을 때 이 목록을 대신 보여줌.
+
+         reservation_raw.min_class(풋살장·테니스장…)를 우리 종목번호로 옮겨 맞춤.
+         예약이 끝난 건과 주소가 없는 건은 뺀다.
+    -->
+    <!-- 공통 조건
+
+         svc_stat('접수중'/'예약마감')은 우리가 데이터를 받아온 시점의 스냅샷이라 시간이 지나면 틀린다.
+         실제로 상태는 '접수중' 인데 접수기간이 이미 끝난 건이 84건 있다.
+         그래서 상태 대신 접수 종료일시를 오늘과 견준다. 이건 다시 받아오지 않아도 스스로 맞는다.
+
+         또 같은 장소가 월별로 따로 등록된다.
+         (서서울호수공원 풋살장 = 8월분 3건 + 9월분 3건)
+         장소마다 접수 마감이 가장 이른 것 하나만 남겨 목록이 겹치지 않게 한다.
+    -->
+    <sql id="openRental">
+        r.svc_url LIKE 'http%'
+        AND r.lat IS NOT NULL AND r.lng IS NOT NULL
+        -- 원본이 '2026-08-19 23:59:00.0' 처럼 끝에 .0 이 붙어 오므로 앞 19자만 쓴다
+        AND STR_TO_DATE(LEFT(r.rcpt_end, 19), '%Y-%m-%d %H:%i:%s') &gt;= NOW()
+    </sql>
+
+    <select id="getNearbyRentals" resultType="RentalDTO">
+        SELECT r.place_name, r.min_class, r.pay_yn, r.svc_url,
+               ST_Distance_Sphere(POINT(#{lng}, #{lat}),
+                                  POINT(r.lng, r.lat)) / 1000 AS distance_km
+          FROM reservation_raw r
+          JOIN (SELECT place_name, MIN(rcpt_end) AS first_end
+                  FROM reservation_raw r
+                 WHERE <include refid="openRental"/>
+                 GROUP BY place_name) pick
+            ON pick.place_name = r.place_name AND pick.first_end = r.rcpt_end
+         WHERE <include refid="openRental"/>
+           AND r.min_class = CASE #{sportId}
+                               WHEN 4 THEN '배드민턴장'
+                               WHEN 5 THEN '탁구장'
+                               WHEN 6 THEN '테니스장'
+                               WHEN 7 THEN '농구장'
+                               WHEN 9 THEN '골프장'
+                             END
+         GROUP BY r.place_name
+         ORDER BY distance_km
+         LIMIT #{limit}
+    </select>
+
+    <!-- 축구/풋살(8)만 풋살장·축구장 두 종류를 함께 본다 -->
+    <select id="getNearbyFootballRentals" resultType="RentalDTO">
+        SELECT r.place_name, r.min_class, r.pay_yn, r.svc_url,
+               ST_Distance_Sphere(POINT(#{lng}, #{lat}),
+                                  POINT(r.lng, r.lat)) / 1000 AS distance_km
+          FROM reservation_raw r
+          JOIN (SELECT place_name, MIN(rcpt_end) AS first_end
+                  FROM reservation_raw r
+                 WHERE <include refid="openRental"/>
+                 GROUP BY place_name) pick
+            ON pick.place_name = r.place_name AND pick.first_end = r.rcpt_end
+         WHERE <include refid="openRental"/>
+           AND r.min_class IN ('풋살장', '축구장')
+         GROUP BY r.place_name
+         ORDER BY distance_km
+         LIMIT #{limit}
     </select>
 
 </mapper>

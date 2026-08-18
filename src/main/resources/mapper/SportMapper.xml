@@ -1,81 +1,68 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTO Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.moveon.mapper.ISportMapper">
 
-    <!--
-      추천 대상 종목 + 점수 재료 조회
+    <!-- 추천 대상 종목 + 점수 재료 조회
 
-      가져오는 것
-        trait_score        회원 성향 4축에 해당하는 sport_traits 점수의 평균 (0~100)
+        종목 하나마다 아래 세 값을 계산해 붙임.
+        trait_score        회원이 고른 성향 4개와 맞는 sport_traits 점수의 평균 (0~100)
         participation_rate 회원의 연령대·성별에 맞는 참여율(%)
-                           없으면 연령대만 -> 그것도 없으면 전체 순으로 대체한다
-        nearest_km         가장 가까운 시설(시설종목) 또는 코스(야외종목)까지 거리
+        nearest_km         갈 수 있는 가장 가까운 시설 또는 코스까지 거리
 
-      홈트(HOME)는 보여줄 시설이 없어 추천 대상에서 제외한다.
-    -->
+        점수 계산(가중치·정규화)은 여기서 하지 않음. RecommendService 몫.
+
+        회원의 나이·연령대·성향은 자바가 이미 알고 있으므로 값으로 받음.
+        SQL 안에서 users 를 다시 읽지 않아 쿼리가 단순해짐.
+
+        홈트(HOME)는 갈 시설이 없어 추천 대상에서 제외함. -->
     <select id="getSportsForRecommend" resultType="SportDTO">
-        WITH me AS (
-            SELECT gender, bmi,
-                   trait_companion, trait_competition, trait_place, trait_intensity,
-                   TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) AS age
-              FROM users
-             WHERE user_id = #{userId}
-        ),
-        myage AS (
-            SELECT me.*,
-                   CASE WHEN age >= 70 THEN '70대이상'
-                        ELSE CONCAT(FLOOR(age / 10) * 10, '대') END AS age_group
-              FROM me
-        )
-        SELECT s.sport_id, s.name, s.category, s.is_indoor, s.min_people,
-               s.is_competitive, s.met_value, s.description,
+        SELECT s.sport_id, s.name, s.category, s.min_people, s.met_value,
 
-               /* 성향 : 4개 축 점수의 평균 */
+               -- 성향 : 회원이 고른 4개와 일치하는 점수의 평균
                (SELECT AVG(t.score)
                   FROM sport_traits t
                  WHERE t.sport_id = s.sport_id
-                   AND ( (t.axis = 'COMPANION'   AND t.option_code = m.trait_companion)
-                      OR (t.axis = 'COMPETITION' AND t.option_code = m.trait_competition)
-                      OR (t.axis = 'PLACE'       AND t.option_code = m.trait_place)
-                      OR (t.axis = 'INTENSITY'   AND t.option_code = m.trait_intensity) )
+                   AND ( (t.axis = 'COMPANION'   AND t.option_code = #{companion})
+                      OR (t.axis = 'COMPETITION' AND t.option_code = #{competition})
+                      OR (t.axis = 'PLACE'       AND t.option_code = #{place})
+                      OR (t.axis = 'INTENSITY'   AND t.option_code = #{intensity}) )
                ) AS trait_score,
 
-               /* 통계 : 연령대+성별 -> 연령대 -> 전체 순으로 대체 */
+               -- 통계 : 연령대+성별 -> 연령대 -> 전체 순으로 찾는다.
+               -- COALESCE 는 앞에서부터 값이 있는 첫 번째를 고른다.
+               -- 조사 자료가 없다는 이유로 종목이 밀리면 안 되기 때문이다.
                COALESCE(
                  (SELECT r.participation_rate FROM sport_retention_stats r
                    WHERE r.sport_id = s.sport_id
-                     AND r.gender = m.gender AND r.age_group = m.age_group),
+                     AND r.gender = #{gender} AND r.age_group = #{ageGroup}),
                  (SELECT r.participation_rate FROM sport_retention_stats r
                    WHERE r.sport_id = s.sport_id
-                     AND r.gender IS NULL AND r.age_group = m.age_group),
+                     AND r.gender IS NULL AND r.age_group = #{ageGroup}),
                  (SELECT r.participation_rate FROM sport_retention_stats r
                    WHERE r.sport_id = s.sport_id
                      AND r.gender IS NULL AND r.age_group IS NULL)
                ) AS participation_rate,
 
-               /* 접근성 : 시설종목은 최근접 시설, 야외종목은 최근접 코스 시작점 */
+               -- 접근성 : 시설 종목은 시설에서, 야외 종목은 코스 시작점에서 잰다.
+               -- ST_Distance_Sphere 는 두 좌표 사이 실제 거리를 미터로 준다.
+               -- POINT 는 (경도, 위도) 순서다. 위도를 먼저 넣으면 엉뚱한 값이 나온다.
                CASE s.category
                  WHEN 'FACILITY' THEN (
-                     SELECT MIN(6371 * ACOS(LEAST(1,
-                              COS(RADIANS(#{lat})) * COS(RADIANS(f.lat))
-                            * COS(RADIANS(f.lng) - RADIANS(#{lng}))
-                            + SIN(RADIANS(#{lat})) * SIN(RADIANS(f.lat)))))
+                     SELECT MIN(ST_Distance_Sphere(POINT(#{lng}, #{lat}),
+                                                   POINT(f.lng, f.lat))) / 1000
                        FROM facility_sports fs
                        JOIN facilities f ON f.facility_id = fs.facility_id
                       WHERE fs.sport_id = s.sport_id AND f.is_active = 1)
                  ELSE (
-                     SELECT MIN(6371 * ACOS(LEAST(1,
-                              COS(RADIANS(#{lat})) * COS(RADIANS(c.start_lat))
-                            * COS(RADIANS(c.start_lng) - RADIANS(#{lng}))
-                            + SIN(RADIANS(#{lat})) * SIN(RADIANS(c.start_lat)))))
+                     SELECT MIN(ST_Distance_Sphere(POINT(#{lng}, #{lat}),
+                                                   POINT(c.start_lng, c.start_lat))) / 1000
                        FROM courses c
                       WHERE c.is_active = 1
-                        AND c.course_type = CASE s.name WHEN '등산' THEN 'HIKE' ELSE 'WALK' END)
+                        AND c.course_type = IF(s.name = '등산', 'HIKE', 'WALK'))
                END AS nearest_km
 
           FROM sports s
-         CROSS JOIN myage m
          WHERE s.is_active = 1
            AND s.category &lt;&gt; 'HOME'
          ORDER BY s.sport_id
