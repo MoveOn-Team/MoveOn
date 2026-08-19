@@ -593,4 +593,75 @@
         isValidPassword: isValidPassword,
         getPasswordMessage: getPasswordMessage
     };
+
+    // =========================================================
+    // 8. 지역 스포츠 행사 (목록, 탭, 상세 이동, 네비게이션)
+    // =========================================================
+    function initEventModule() {
+        const eventApp = document.querySelector(".app-shell");
+        if (!eventApp) return; // 행사 페이지가 아닐 경우 실행 안 함
+
+        // 1. Tab 스위칭 (가까운 순 / 마감 임박순)
+        const tabBtns = document.querySelectorAll(".tab-btn");
+        tabBtns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                tabBtns.forEach(function (b) { b.classList.remove("active"); });
+                this.classList.add("active");
+
+                const filterType = this.dataset.filter; // "near" or "close"
+                // TODO: 필요 시 서버 API 호출 또는 리스트 정렬 함수 실행
+            });
+        });
+
+        // 2. 행사 카드 클릭 시 상세 페이지로 이동
+        const eventCards = document.querySelectorAll(".event-card");
+        eventCards.forEach(function (card) {
+            card.addEventListener("click", function () {
+                const eventId = this.dataset.eventId;
+                if (eventId) {
+                    location.href = (document.body.dataset.contextPath || "") + "/user/eventDetail/" + eventId;
+                }
+            });
+        });
+
+        // 3. 상세 페이지 버튼 이벤트 (길찾기 / 사이트로 이동)
+        const btnLocation = document.getElementById("btnLocation");
+        const btnExternal = document.getElementById("btnExternal");
+
+        if (btnLocation) {
+            btnLocation.addEventListener("click", function () {
+                const mapUrl = this.dataset.mapUrl;
+                if (mapUrl) {
+                    window.open(mapUrl, "_blank");
+                } else {
+                    showMessage("위치 정보를 준비 중입니다.");
+                }
+            });
+        }
+
+        if (btnExternal) {
+            btnExternal.addEventListener("click", function () {
+                const targetUrl = this.dataset.targetUrl;
+                if (targetUrl) {
+                    window.open(targetUrl, "_blank");
+                } else {
+                    showMessage("외부 신청 페이지로 이동할 수 없습니다.");
+                }
+            });
+        }
+
+        // 4. 상단 갱신 버튼 이벤트
+        const btnRefresh = document.getElementById("btnRefresh");
+        if (btnRefresh) {
+            btnRefresh.addEventListener("click", function () {
+                location.reload();
+            });
+        }
+    }
+
+    // DOM 로드 완료 시 실행 리스트에 추가
+    document.addEventListener("DOMContentLoaded", function () {
+        initOnboarding();
+        initEventModule();
+    });
 }());
