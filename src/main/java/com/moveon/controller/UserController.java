@@ -10,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -89,6 +91,87 @@ public class UserController {
 
         log.info("{}.onboardingPage End!", this.getClass().getName());
         return "user/onboarding";
+    }
+
+    // =========================================================
+// 지역 스포츠 행사 관련 Controller
+// =========================================================
+
+    /**
+     * 행사 목록 화면 이동
+     * URL: http://localhost:8080/user/eventList
+     */
+    /**
+     * 행사 목록 화면 이동
+     * URL: http://localhost:8080/user/eventList
+     */
+    @GetMapping("eventList")
+    public String eventList(ModelMap model) throws Exception {
+        log.info(this.getClass().getName() + ".eventList Start!");
+
+        //============================================================
+                        //화면 테스트용 데이터입니다
+
+        // 임시 테스트 데이터 생성
+        List<Map<String, Object>> eventList = new ArrayList<>();
+
+        Map<String, Object> e1 = new HashMap<>();
+        e1.put("id", "1");
+        e1.put("title", "2026 마포구 러닝 페스티벌");
+        e1.put("eventDate", new java.util.Date());
+        e1.put("location", "상암월드컵경기장");
+        e1.put("distance", "3.2");
+        e1.put("tags", Arrays.asList("러닝", "선착순"));
+        e1.put("dDayStatus", "D-3");
+        e1.put("price", 10000);
+        e1.put("isHighlight", true);
+        e1.put("isExpired", false);
+        eventList.add(e1);
+
+        Map<String, Object> e2 = new HashMap<>();
+        e2.put("id", "2");
+        e2.put("title", "한강 시민 풋살대회");
+        e2.put("eventDate", new java.util.Date());
+        e2.put("location", "반포 한강공원");
+        e2.put("distance", "12.5");
+        e2.put("tags", Arrays.asList("축구/풋살", "무료"));
+        e2.put("dDayStatus", "마감임박");
+        e2.put("price", 0);
+        e2.put("isHighlight", false);
+        e2.put("isExpired", false);
+        eventList.add(e2);
+
+        model.addAttribute("eventList", eventList);
+
+        return "user/eventList";
+    }
+
+    /**
+     * 행사 상세 화면 이동
+     * URL: http://localhost:8080/user/eventDetail/1
+     */
+    @GetMapping("eventDetail/{eventId}")
+    public String eventDetail(@PathVariable("eventId") String eventId, ModelMap model) throws Exception {
+        log.info(this.getClass().getName() + ".eventDetail Start!");
+
+        // 임시 테스트 상세 데이터 생성
+        Map<String, Object> event = new HashMap<>();
+        event.put("id", eventId);
+        event.put("statusText", "접수중");
+        event.put("title", "2026 마포구 러닝 페스티벌");
+        event.put("eventDateTimeStr", "2026.08.30 (일) 09:00");
+        event.put("applyPeriodStr", "2026.08.01 ~ 2026.08.25");
+        event.put("locationDetail", "상암월드컵경기장 평화의광장");
+        event.put("categoryStr", "마라톤 / 러닝");
+        event.put("targetAudience", "누구나 참여 가능");
+        event.put("price", 10000);
+        event.put("contactNumber", "02-1234-5678");
+        event.put("mapUrl", "https://map.kakao.com");
+        event.put("externalUrl", "https://example.com");
+
+        model.addAttribute("event", event);
+
+        return "user/eventDetail";
     }
 
 
