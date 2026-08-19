@@ -4,27 +4,38 @@ import com.moveon.dto.SportDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
- * 종목 · 추천 관련 SQL
+ * 점수 계산은 SQL이 아니라 RecommendService에서 함.
+ * 여기서는 계산에 필요한 재료(성향점수 · 참여율 · 최근접거리)만 가져옴.
+ * 가중치나 정규화 방식이 바뀌어도 SQL 을 안 고치게 하기 위함.
  *
- * 실제 SQL 은 src/main/resources/mapper/SportMapper.xml 에 있다.
- *
- * 점수 계산은 SQL 이 아니라 RecommendService 에서 한다.
- * 여기서는 계산에 필요한 재료(성향점수 · 참여율 · 최근접거리)만 가져온다.
- * 가중치나 정규화 방식이 바뀌어도 SQL 을 안 고치게 하기 위함이다.
+ * DTO에 담아 하나로 넘길 수도 있었는데 안 한 이유는,
+ * SportDTO 에 lat·lng 같은 조회 조건이 들어가면 종목 정보(결과)와 섞이기 때문임.
+ * FacilityDTO 는 더 심해서, lat·lng 가 이미 시설의 좌표로 쓰이고 있어 이름까지 겹침.
  */
 @Mapper
 public interface ISportMapper {
 
     /**
-     * 추천 대상 종목과 점수 재료를 한 번에 조회한다.
+     * 추천 대상 종목과 점수 재료를 한 번에 조회함.
      *
-     * @param userId 회원번호 (성향 4축 · 나이 · 성별을 여기서 읽는다)
-     * @param lat    현위치 위도
-     * @param lng    현위치 경도
+     * @param companion    동반자 성향 (ALONE / PAIR / GROUP)
+     * @param competition  승부 성향   (OWN_PACE / ANY / WIN)
+     * @param place        장소 성향   (INDOOR / ANY / OUTDOOR)
+     * @param intensity    강도 성향   (LIGHT / MODERATE / HARD)
+     * @param gender       성별 (M / F). 참여율 통계를 고를 때 씀
+     * @param ageGroup     연령대 ('30대', '70대이상'). 자바에서 만들어 넘김
+     * @param lat          현위치 위도
+     * @param lng          현위치 경도
      */
-    java.util.List<SportDTO> getSportsForRecommend(@Param("userId") int userId,
-                                                   @Param("lat") double lat,
-                                                   @Param("lng") double lng) throws Exception;
-
+    List<SportDTO> getSportsForRecommend(@Param("companion") String companion,
+                                         @Param("competition") String competition,
+                                         @Param("place") String place,
+                                         @Param("intensity") String intensity,
+                                         @Param("gender") String gender,
+                                         @Param("ageGroup") String ageGroup,
+                                         @Param("lat") double lat,
+                                         @Param("lng") double lng) throws Exception;
 }

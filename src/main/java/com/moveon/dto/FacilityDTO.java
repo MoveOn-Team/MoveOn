@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 
+
 /**
  * 공공체육시설 (facilities 테이블)
  */
@@ -22,20 +23,21 @@ public class FacilityDTO {
 
     private String lotAddr; // 지번주소
 
-    private double lat;
+    private double lat; // 위도
 
-    private double lng;
+    private double lng; // 경도
 
-    private String phone;
+    private String phone; // 전화번호
 
-    private String homepageUrl;
-
-    private String guideUrl; // 안내 페이지. 운영시간·요금이 바뀔 수 있어 원본으로 보낸다
+    private String homepageUrl; // 홈페이지
 
     private Integer capacity; // 동시 수용 인원
 
-    // 아래는 DB 테이블에 없는 조회 전용 값(ALIAS)
+    /** 아래는 DB 테이블에 없는 조회 전용 값 */
 
     private double distanceKm; // 현위치에서의 거리
 
+    private String reserveUrl; // 서울시 공공서비스예약 페이지. facility_sports 에서 종목별로 가져옴.
+
+    private String districtUrl; // 자치구 시설관리공단 주소. 시설 홈페이지가 없을 때 씀
 }

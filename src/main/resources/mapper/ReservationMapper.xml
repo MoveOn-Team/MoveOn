@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.moveon.mapper.IReservationMapper">
+
+    <!--
+      받아온 예약 건 저장
+
+      <foreach> 로 여러 행을 한 번에 넣는다. 한 건씩 넣으면 600여 번 왕복해 느리다.
+      같은 svc_id 가 이미 있으면 상태와 주소만 갱신한다(ON DUPLICATE KEY UPDATE).
+      그래서 매달 다시 돌려도 중복이 생기지 않는다.
+    -->
+    <insert id="insertReservations" parameterType="map">
+        INSERT INTO reservation_raw
+          (svc_id, min_class, svc_stat, svc_name, pay_yn, place_name,
+           use_target, svc_url, lng, lat, open_bgn, open_end, rcpt_bgn, rcpt_end,
+           area_name, tel_no, v_min, v_max)
+        VALUES
+        <foreach collection="list" item="r" separator=",">
+          (#{r.svcId}, #{r.minClass}, #{r.svcStat}, #{r.svcName},
+           #{r.payYn}, #{r.placeName}, #{r.useTarget}, #{r.svcUrl}, #{r.lng}, #{r.lat},
+           #{r.openBgn}, #{r.openEnd}, #{r.rcptBgn}, #{r.rcptEnd},
+           #{r.areaName}, #{r.telNo}, #{r.vMin}, #{r.vMax})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+          svc_stat = VALUES(svc_stat),
+          svc_url  = VALUES(svc_url),
+          rcpt_end = VALUES(rcpt_end)
+    </insert>
+
+    <!-- 다시 붙이기 전에 기존 연결을 지운다 -->
+    <update id="clearFacilityReserveUrl">
+        UPDATE facility_sports SET reserve_url = NULL
+    </update>
+
+    <!-- 예약 링크를 시설 x 종목에 붙임
+
+      소분류(테니스장·풋살장…)를 우리 종목번호로 옮겨 맞춘 뒤,
+      시설명이 같거나 100m 안에 있는 시설에 연결한다.
+      접수가 끝난 건은 붙이지 않는다.
+    -->
+    <update id="matchFacilityReserveUrl">
+        UPDATE facility_sports fs
+          JOIN facilities f ON f.facility_id = fs.facility_id
+          JOIN (SELECT r.svc_url, r.place_name, r.lat, r.lng,
+                       CASE r.min_class
+                         WHEN '테니스장'   THEN 6
+                         WHEN '풋살장'     THEN 8
+                         WHEN '축구장'     THEN 8
+                         WHEN '농구장'     THEN 7
+                         WHEN '배드민턴장' THEN 4
+                         WHEN '탁구장'     THEN 5
+                         WHEN '골프장'     THEN 9
+                       END AS sport_id
+                  FROM reservation_raw r
+                 WHERE r.svc_url LIKE 'http%'
+                   -- 원본이 '2026-08-19 23:59:00.0' 처럼 끝에 .0 이 붙어 온다.
+                   -- 그대로 변환하면 UPDATE 에서 오류가 나므로 앞 19자만 쓴다.
+                   AND STR_TO_DATE(LEFT(r.rcpt_end, 19), '%Y-%m-%d %H:%i:%s') &gt;= NOW()) m
+            ON m.sport_id = fs.sport_id
+           AND ( m.place_name = f.name
+              OR ST_Distance_Sphere(POINT(f.lng, f.lat), POINT(m.lng, m.lat)) &lt;= 100 )
+           SET fs.reserve_url = m.svc_url
+    </update>
+
+</mapper>

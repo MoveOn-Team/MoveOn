@@ -2,15 +2,15 @@ package com.moveon.mapper;
 
 import com.moveon.dto.FacilityDTO;
 import com.moveon.dto.ProgramDTO;
+import com.moveon.dto.RentalDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+
 /**
- * 시설 · 강좌 조회 SQL
- *
- * 맞춤추천 종목 상세(SC-011)와 즉시운동 탭(SC-020~021)에서 함께 쓴다.
+ * 맞춤 운동 추천 상세와 즉시운동 탭에서 함께 씀.
  */
 @Mapper
 public interface IFacilityMapper {
@@ -30,8 +30,29 @@ public interface IFacilityMapper {
 
     /**
      * 특정 시설에서 여는 해당 종목 강좌 목록
+     *
+     * @param facilityId 시설번호
+     * @param sportId    종목번호
+     * @param ageBand    회원 연령대 (CHILD / TEEN / ADULT / SENIOR)
+     *                   나이에 맞는 강좌를 위로 올리는 데 씀.
      */
     List<ProgramDTO> getPrograms(@Param("facilityId") int facilityId,
-                                 @Param("sportId") int sportId) throws Exception;
+                                 @Param("sportId") int sportId,
+                                 @Param("ageBand") String ageBand) throws Exception;
+
+    /**
+     * 대관 가능한 가까운 곳 (서울시 공공서비스예약)
+     *
+     * 강좌가 없는 종목에서 대신 보여준다.
+     */
+    List<RentalDTO> getNearbyRentals(@Param("sportId") int sportId,
+                                     @Param("lat") double lat,
+                                     @Param("lng") double lng,
+                                     @Param("limit") int limit) throws Exception;
+
+    /** 축구/풋살은 풋살장·축구장 두 종류를 함께 본다 */
+    List<RentalDTO> getNearbyFootballRentals(@Param("lat") double lat,
+                                             @Param("lng") double lng,
+                                             @Param("limit") int limit) throws Exception;
 
 }

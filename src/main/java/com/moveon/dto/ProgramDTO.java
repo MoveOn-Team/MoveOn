@@ -35,10 +35,6 @@ public class ProgramDTO {
 
     private Integer capacity; // 정원
 
-    private String applyText; // 접수 안내 원문. 날짜 파싱이 불가능해 그대로 보여준다
-
-    private String applyMethod; // 접수방법. 없으면 예약 버튼을 숨긴다
-
     private String reservationUrl; // 예약 페이지 링크
 
 }
