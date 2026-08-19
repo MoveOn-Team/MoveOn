@@ -30,20 +30,24 @@
         <span>즉시운동</span>
     </span>
 
-    <span class="tab-item is-todo" aria-disabled="true">
+    <!-- 3. 행사 탭 -->
+    <a class="tab-item ${active eq 'event' ? 'is-on' : ''}"
+       href="${pageContext.request.contextPath}/user/eventList">
         <svg viewBox="0 0 24 24" aria-hidden="true">
             <rect x="3.5" y="5" width="17" height="16" rx="3"/>
             <path d="M3.5 10h17M8 3v4M16 3v4"/>
         </svg>
         <span>행사</span>
-    </span>
+    </a>
 
-    <span class="tab-item is-todo" aria-disabled="true">
+    <!-- 4. 내정보 탭 -->
+    <a class="tab-item ${active eq 'myPage' ? 'is-on' : ''}"
+       href="${pageContext.request.contextPath}/user/myPage">
         <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="8" r="4"/>
             <path d="M4.5 20.5c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5"/>
         </svg>
         <span>내정보</span>
-    </span>
+    </a>
 
 </nav>

@@ -189,6 +189,51 @@ public class UserController {
         return "user/eventDetail";
     }
 
+    /**
+     * 내 정보 (마이페이지)
+     * URL: http://localhost:8080/user/myPage
+     */
+    @GetMapping("myPage")
+    public String myPage(HttpSession session, ModelMap model) throws Exception {
+        log.info(this.getClass().getName() + ".myPage Start!");
+
+        // 온보딩/DB에서 가져올 유저 신체 및 기본 정보 (임시 테스트 데이터)
+        Map<String, Object> userInfo = new HashMap<>();
+        userInfo.put("userName", "김백호");
+        userInfo.put("email", "moveon@gmail.com");
+        userInfo.put("region", "강서구 화곡동");
+        userInfo.put("height", 170);
+        userInfo.put("weight", 65);
+
+        // BMI 자동 계산 formula: kg / (m)^2
+        double heightM = 170.0 / 100.0;
+        double bmi = 65.0 / (heightM * heightM);
+        userInfo.put("bmi", String.format("%.1f", bmi)); // 22.5
+        userInfo.put("streakDays", 12);
+
+        model.addAttribute("userInfo", userInfo);
+
+        return "user/myPage";
+    }
+
+    /**
+     * 운동 리포트 화면
+     * URL: http://localhost:8080/user/workoutReport
+     */
+    @GetMapping("workoutReport")
+    public String workoutReport(HttpSession session, ModelMap model) throws Exception {
+        log.info(this.getClass().getName() + ".workoutReport Start!");
+
+        // 리포트용 임시 데이터 세팅
+        model.addAttribute("weeklyCount", 4);
+        model.addAttribute("weeklyMinutes", 210);
+        model.addAttribute("totalBurnedKcal", "1,240");
+        model.addAttribute("streakDays", 12);
+        model.addAttribute("totalRecords", 38);
+
+        return "user/workoutReport";
+    }
+
 
     /** 회원가입 아이디 중복 체크 */
     @ResponseBody

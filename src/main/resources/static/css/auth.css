@@ -536,19 +536,21 @@ button {
    17. 지역 스포츠 행사 (목록 및 상세)
    --------------------------------------------------------------------- */
 
-/* 메인 앱 레이아웃 구조 */
+/* 1. 메인 앱 컨테이너 (고정 휴대폰 틀, 배경 shadow 제거) */
 .app-shell {
     display: flex;
     flex-direction: column;
-    width: min(calc(100% - 32px), 393px);
-    height: 852px;
-    margin: 24px auto;
-    padding: 24px 20px 0;
-    background: #fdfbf7; /* 배경 연한 크림색 */
-    border-radius: 42px;
-    box-shadow: 0 18px 48px rgba(30, 44, 68, .14);
+    width: 100%;
+    max-width: 430px; /* PC에서도 너무 퍼지지 않는 모바일 최적 너비 */
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 24px 20px 90px; /* 하단 탭바 여백 확보 */
+    background: #ffffff; /* 깔끔한 흰색 배경 */
+    border-radius: 0; /* 둥근 휴대폰 프레임 제거 */
+    box-shadow: none; /* 그림자 제거 */
     position: relative;
-    overflow: hidden;
+    box-sizing: border-box;
+    overflow-y: auto !important;
 }
 
 .app-content {
@@ -1168,3 +1170,396 @@ button {
         margin-bottom: 1.75rem;
     }
 }
+
+/* =========================================================
+   마이페이지 (내 정보) 스타일
+   ========================================================= */
+.mypage-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-bottom: 90px;
+}
+
+.profile-card {
+    padding: 18px 20px;
+}
+.profile-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.user-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+}
+.user-sub {
+    font-size: 13px;
+    color: #888;
+    margin-top: 4px;
+}
+.btn-edit-profile {
+    border: 1px solid #E5E7EB;
+    background: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #6B7280;
+    cursor: pointer;
+}
+
+/* 신체 정보 카드 3종 */
+.body-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+.stat-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.stat-card.bmi-card {
+    background: #6C5CE7;
+    color: #fff;
+}
+.stat-label {
+    font-size: 12px;
+    color: #888;
+}
+.bmi-card .stat-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+.stat-value {
+    font-size: 18px;
+    font-weight: 700;
+}
+.stat-value strong {
+    font-size: 13px;
+    font-weight: 400;
+    margin-left: 2px;
+}
+
+/* 오늘의 운동 */
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.card-title { font-size: 16px; font-weight: 700; }
+.card-date, .streak-count { font-size: 13px; color: #6C5CE7; font-weight: 600; }
+
+.workout-list { display: flex; flex-direction: column; gap: 8px; }
+.workout-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid #E5E7EB;
+}
+.workout-item.completed {
+    border-color: #6C5CE7;
+    background: #F8F7FF;
+}
+.workout-item.planned {
+    border-style: dashed;
+}
+.check-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #6C5CE7;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+.check-icon.empty {
+    background: #fff;
+    border: 1px solid #D1D5DB;
+}
+.workout-info strong { font-size: 14px; display: block; }
+.workout-info p { font-size: 11px; color: #888; margin-top: 2px; }
+
+.btn-add-workout {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    background: #F9FAFB;
+    border: 1px solid #F3F4F6;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #4B5563;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+/* 연속 출석 */
+.week-days { display: flex; justify-content: space-between; }
+.day-chip {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: 1px solid #E5E7EB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #6B7280;
+}
+.day-chip.active {
+    background: #8075F0;
+    color: #fff;
+    border-color: #8075F0;
+}
+
+/* 하단 메뉴 리스트 */
+.menu-list-card { padding: 4px 16px; }
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #F3F4F6;
+    text-decoration: none;
+    color: #111;
+    font-size: 14px;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-item.logout-item { color: #9CA3AF; }
+.menu-item .arrow { color: #D1D5DB; }
+
+/* =========================================================
+   공통 하단 탭바 (tabbar.jsp) 스타일 & SVG 크기 고정
+   ========================================================= */
+/* 2. 하단 공통 탭바 (화면 하단 정렬) */
+.tabbar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px; /* .app-shell과 동일한 너비 지정 */
+    height: 65px;
+    background: #ffffff;
+    border-top: 1px solid #F3F4F6;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    padding-bottom: 5px;
+    box-sizing: border-box;
+}
+
+.tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-decoration: none;
+    color: #9CA3AF;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* 활성화된 탭 색상 */
+.tab-item.is-on {
+    color: #6C5CE7;
+}
+
+.tab-item.is-todo {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ★ 거대해진 SVG 아이콘 크기 및 스타일 고정 ★ */
+.tab-item svg {
+    width: 24px !important;
+    height: 24px !important;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* =========================================================
+   마이페이지 스크롤 및 모달 레이어 스타일
+   ========================================================= */
+/* 스크롤 및 하단 잘림 해결 */
+.app-shell {
+    overflow-y: auto !important;
+    padding-bottom: 90px !important; /* 하단 탭바에 가려지지 않도록 조절 */
+    -ms-overflow-style: none; /* IE, Edge 스크롤바 숨김 */
+    scrollbar-width: none; /* Firefox 스크롤바 숨김 */
+}
+.app-shell::-webkit-scrollbar {
+    display: none; /* Chrome, Safari 스크롤바 숨김 */
+}
+
+/* 3. 모달 레이어 위치 맞춤 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 2000;
+}
+.modal-overlay.show {
+    display: flex;
+}
+
+/* 모달 컨텐츠 팝업 */
+.modal-content {
+    background: #FAFAFD;
+    width: 100%;
+    max-width: 430px; /* 탭바 너비와 동일 */
+    max-height: 85vh;
+    border-radius: 24px 24px 0 0;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-header h2 { font-size: 16px; font-weight: 700; color: #6B7280; text-align: center; width: 100%; }
+.btn-close-modal { background: none; border: none; font-size: 18px; color: #888; cursor: pointer; }
+
+/* 칩 버튼 그룹 */
+.form-group label { font-size: 14px; font-weight: 700; display: block; margin-bottom: 8px; }
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-group .chip {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #E5E7EB;
+    background: #fff;
+    font-size: 13px;
+    color: #4B5563;
+    cursor: pointer;
+}
+.chip-group .chip.active {
+    background: #8075F0;
+    color: #fff;
+    border-color: #8075F0;
+}
+
+/* 예상 칼로리 박스 */
+.calorie-box {
+    background: #F0EEFF;
+    border: 1px solid #C6C0F9;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+}
+.calorie-box span { font-size: 12px; color: #6C5CE7; display: block; }
+.calorie-box strong { font-size: 26px; color: #6C5CE7; font-weight: 800; }
+
+.input-card input, .input-card textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    background: #fff;
+    font-size: 13px;
+    box-sizing: border-box;
+}
+
+.modal-footer { display: flex; gap: 10px; margin-top: 10px; }
+.btn-modal-cancel { flex: 1; padding: 14px; background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; font-weight: 700; }
+.btn-modal-submit { flex: 1.5; padding: 14px; background: #8075F0; color: #fff; border: none; border-radius: 14px; font-weight: 700; }
+
+/* =========================================================
+   운동 리포트 전용 스타일
+   ========================================================= */
+.report-shell { display: flex; flex-direction: column; gap: 14px; }
+
+.nav-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+.btn-back { font-size: 24px; text-decoration: none; color: #111; font-weight: 300; }
+
+.report-banner-card {
+    background: #6C5CE7;
+    color: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.banner-sub { font-size: 13px; opacity: 0.8; }
+.banner-title { font-size: 24px; font-weight: 800; }
+.banner-desc { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+
+.stat-card.center { text-align: center; }
+
+/* 막대 차트 구현 */
+.chart-card { padding: 18px; }
+.bar-chart-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 120px;
+    margin-top: 16px;
+    padding-top: 10px;
+}
+.bar-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+    justify-content: flex-end;
+    flex: 1;
+}
+.bar-group .bar {
+    width: 20px;
+    background: #E5E7EB;
+    border-radius: 6px;
+    transition: height 0.3s ease;
+}
+.bar-group.active .bar { background: #6C5CE7; }
+.bar-group span { font-size: 10px; color: #9CA3AF; }
+
+/* 많이 한 종목 & 상세 통계 */
+.rank-list { list-style: none; padding: 0; margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+.rank-list li { display: flex; justify-content: space-between; font-size: 14px; border-bottom: 1px solid #F3F4F6; padding-bottom: 8px; }
+.rank-list li:last-child { border-bottom: none; padding-bottom: 0; }
+.rank-name { font-weight: 600; color: #374151; }
+.rank-value { color: #6B7280; font-size: 13px; }
+
+.detail-stats-card { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.detail-row { display: flex; justify-content: space-between; font-size: 14px; }
+.detail-row span { color: #6B7280; }
+.detail-row strong { color: #111; }
