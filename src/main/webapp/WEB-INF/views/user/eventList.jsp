@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>지역 스포츠 행사</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
 </head>
 <body data-context-path="${pageContext.request.contextPath}">
 <div class="auth-page">
@@ -64,6 +64,8 @@
         <c:set var="active" value="event" />
         <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
     </div>
+
+    <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 </div>
 <script src="${pageContext.request.contextPath}/js/auth.js"></script>
 </body>
