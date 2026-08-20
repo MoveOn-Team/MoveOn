@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>MoveOn - 성향 조사 및 신체정보</title>
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
 </head>
 <body class="auth-page" data-context-path="${pageContext.request.contextPath}">
 
@@ -242,5 +242,6 @@
 </main>
 
 <script src="${pageContext.request.contextPath}/js/auth.js"></script>
+<jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 </body>
 </html>

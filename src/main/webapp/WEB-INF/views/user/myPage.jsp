@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>내 정보 - MOVE:ON</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
 </head>
 <body data-context-path="${pageContext.request.contextPath}">
 <div class="app-container">
@@ -203,7 +203,7 @@
 </script>
 
 <script src="${pageContext.request.contextPath}/js/auth.js"></script>
-</body>
-</html>
+
+<jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 </body>
 </html>

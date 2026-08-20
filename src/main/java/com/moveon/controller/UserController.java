@@ -113,7 +113,7 @@ public class UserController {
      * 내 정보 (마이페이지)
      * URL: http://localhost:8080/user/myPage
      */
-    @GetMapping("myPage")
+    @GetMapping("/myPage")
     public String myPage(HttpSession session, ModelMap model) throws Exception {
         log.info(this.getClass().getName() + ".myPage Start!");
 
@@ -132,6 +132,7 @@ public class UserController {
         userInfo.put("streakDays", 12);
 
         model.addAttribute("userInfo", userInfo);
+        model.addAttribute("active", "myPage");
 
         return "user/myPage";
     }
@@ -140,7 +141,7 @@ public class UserController {
      * 운동 리포트 화면
      * URL: http://localhost:8080/user/workoutReport
      */
-    @GetMapping("workoutReport")
+    @GetMapping("/workoutReport")
     public String workoutReport(HttpSession session, ModelMap model) throws Exception {
         log.info(this.getClass().getName() + ".workoutReport Start!");
 
