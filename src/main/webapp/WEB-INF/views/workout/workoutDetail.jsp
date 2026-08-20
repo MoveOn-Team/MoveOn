@@ -1,16 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>${detail.name}</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.2">
 </head>
-<body>
-<div class="app-shell">
+<body class="auth-page">
+<main class="auth-shell workout-shell">
     <!-- 상단 뒤로가기 버튼 -->
     <div class="detail-header">
         <button type="button" class="back-btn" onclick="history.back();">
@@ -81,7 +81,9 @@
     </div>
 
     <!-- 하단 탭바 공통 인클루드 -->
-    <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
-</div>
+</main>
+
+<c:set var="active" value="workout"/>
+<jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 </body>
 </html>

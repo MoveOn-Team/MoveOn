@@ -77,10 +77,11 @@
         </c:otherwise>
     </c:choose>
 
-    <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 </main>
 
+<%-- active 는 include 보다 먼저 정해야 한다. 뒤에 두면 탭바가 값을 못 받는다. --%>
 <c:set var="active" value="recommend"/>
+<jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
 <script src="${pageContext.request.contextPath}/js/recommend.js"></script>
 </body>

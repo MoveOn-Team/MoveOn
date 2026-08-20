@@ -1,15 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>오늘의 운동 완료</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.2">
 </head>
-<body>
-<div class="app-shell">
+<body class="auth-page">
+<main class="auth-shell workout-shell">
     <div class="result-date">8월 5일 (수)</div>
 
     <!-- 오늘의 운동 완료 그린 메인 배너 -->
@@ -46,11 +47,13 @@
 
     <!-- 하단 전환 버튼 -->
     <div class="result-action-group">
-        <a href="${pageContext.request.contextPath}/recommend/recommendList" class="btn-sub-action text-center">홈으로</a>
-        <a href="${pageContext.request.contextPath}/mypage/workoutReport" class="btn-main-action text-center">내 리포트 보기</a>
+        <a href="${pageContext.request.contextPath}/recommend/recommendList" class="btn-sub-action">홈으로</a>
+        <a href="${pageContext.request.contextPath}/mypage/workoutReport" class="btn-main-action">내 리포트 보기</a>
     </div>
 
-    <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
-</div>
+</main>
+
+<c:set var="active" value="workout"/>
+<jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 </body>
 </html>
