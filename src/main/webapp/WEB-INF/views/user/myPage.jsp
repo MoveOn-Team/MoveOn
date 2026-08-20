@@ -1,16 +1,15 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>내 정보 - MOVE:ON</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
 </head>
-<body data-context-path="${pageContext.request.contextPath}">
-<div class="app-container">
-    <main class="app-shell mypage-shell">
+<body class="auth-page" data-context-path="${pageContext.request.contextPath}">
+<main class="auth-shell mypage-shell">
 
         <header class="page-header">
             <h1 class="page-title">내 정보</h1>
@@ -100,9 +99,9 @@
             </a>
         </section>
 
-    </main>
+</main>
 
-    <!-- 운동 기록 모달 (추가된 부분) -->
+<!-- 운동 기록 모달 -->
     <div class="modal-overlay" id="workoutModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -163,13 +162,9 @@
         </div>
     </div>
 
-    <!-- 공통 하단 탭바 -->
-    <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
-</div>
+<jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 
-<script src="${pageContext.request.contextPath}/js/auth.js"></script>
-
-<!-- 모달 제어 전역 스크립트 (캐시 문제 해결용) -->
+<!-- 모달 제어 -->
 <script>
     function openWorkoutModal() {
         var modal = document.getElementById("workoutModal");
