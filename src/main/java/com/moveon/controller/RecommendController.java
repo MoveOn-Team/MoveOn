@@ -78,6 +78,7 @@ public class RecommendController {
 
         // 현위치를 받아 쓴 것인지, 기본 좌표로 계산한 것인지 화면에 알려준다
         model.addAttribute("usingGps", lat != null && lng != null);
+        model.addAttribute("active", "recommend");
 
         log.info("{}.recommend End!", this.getClass().getName());
 

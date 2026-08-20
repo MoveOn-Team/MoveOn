@@ -1,0 +1,541 @@
+/* =========================================================
+   즉시 운동하기 (시설 / 야외 / 집) & 상세화면 전용 스타일
+   ========================================================= */
+
+/* body 배경색을 흰색(#FFFFFF)으로 변경하여 바깥쪽 경계선 제거 */
+body {
+    background-color: #FFFFFF !important;
+    margin: 0;
+    padding-bottom: 90px;
+}
+/* 상단 헤더 */
+.page-header {
+    padding: 20px 20px 10px 20px;
+}
+.page-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #111111;
+    margin: 0 0 6px 0;
+}
+.page-subtitle {
+    font-size: 13px;
+    color: #8E8E93;
+    margin: 0;
+}
+
+/* 1. 상단 메인 탭 */
+.main-tab-group {
+    display: flex;
+    background: #EBECE8;
+    border-radius: 14px;
+    padding: 4px;
+    margin: 12px 20px;
+}
+.main-tab-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #8E8E93;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+.main-tab-btn.is-active {
+    background: #4A9A72;
+    color: #FFFFFF;
+}
+
+/* 2. 서브 태그 목록 */
+.sub-tag-group {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 20px 16px 20px;
+    scrollbar-width: none;
+}
+.sub-tag-group::-webkit-scrollbar {
+    display: none;
+}
+.sub-tag-btn {
+    white-space: nowrap;
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1px solid #E5E5EA;
+    background: #FFFFFF;
+    color: #666666;
+    font-size: 13px;
+    cursor: pointer;
+}
+.sub-tag-btn.is-active {
+    background: #4A9A72;
+    color: #FFFFFF;
+    border-color: #4A9A72;
+    font-weight: 600;
+}
+
+/* 3. 시설 목록 카드 */
+.facility-list {
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.facility-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 20px;
+    text-decoration: none;
+    border: 1.5px solid transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+.facility-card.is-highlight {
+    border-color: #4A9A72;
+}
+.facility-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111111;
+    margin: 0 0 6px 0;
+}
+.facility-address {
+    font-size: 13px;
+    color: #8E8E93;
+    margin: 0;
+}
+.distance-badge {
+    background: #E8F4EE;
+    color: #4A9A72;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 12px;
+}
+
+/* =========================================================
+   상세 페이지 스타일
+   ========================================================= */
+
+.detail-header {
+    padding: 16px 20px 8px 20px;
+}
+.back-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.detail-title-area {
+    padding: 0 20px 16px 20px;
+}
+.detail-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111111;
+    margin: 0 0 8px 0;
+}
+.detail-subtext {
+    font-size: 13px;
+    color: #8E8E93;
+    margin: 0;
+}
+
+/* 3개 요약 카드 */
+.summary-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 0 20px 16px 20px;
+}
+.summary-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 12px 8px;
+    text-align: center;
+}
+.summary-card .label {
+    display: block;
+    font-size: 11px;
+    color: #9CA3AF;
+    margin-bottom: 4px;
+}
+.summary-card .value {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #111111;
+}
+
+/* 상세 표 */
+.info-table-box {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    margin: 0 20px 16px 20px;
+    padding: 6px 16px;
+}
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #F3F4F6;
+    font-size: 13px;
+}
+.info-row:last-child {
+    border-bottom: none;
+}
+.info-label {
+    color: #8E8E93;
+}
+.info-value {
+    color: #111111;
+    font-weight: 600;
+}
+
+/* 안내 박스 */
+.notice-alert-box {
+    background: #FFF8EE;
+    border: 1px solid #FFE3C2;
+    border-radius: 14px;
+    margin: 0 20px 20px 20px;
+    padding: 12px 16px;
+}
+.notice-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #B57218;
+    margin: 0 0 2px 0;
+}
+.notice-desc {
+    font-size: 12px;
+    color: #D98F2B;
+    margin: 0;
+}
+
+/* 지도 영역 */
+.map-placeholder {
+    height: 120px;
+    background: repeating-linear-gradient(
+            45deg,
+            #EAECE9,
+            #EAECE9 10px,
+            #F2F4F1 10px,
+            #F2F4F1 20px
+    );
+    margin: 0 20px 8px 20px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.map-pin {
+    width: 16px;
+    height: 16px;
+    background: #4A9A72;
+    border: 3px solid #FFFFFF;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.map-sub-info {
+    font-size: 12px;
+    color: #8E8E93;
+    text-align: center;
+    margin: 0 0 20px 0;
+}
+
+/* 하단 버튼 2개 */
+.detail-action-btns {
+    display: flex;
+    gap: 10px;
+    padding: 0 20px 20px 20px;
+}
+.btn-outline {
+    flex: 1;
+    padding: 14px 0;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    background: #FFFFFF;
+    font-size: 15px;
+    font-weight: 700;
+    color: #374151;
+    cursor: pointer;
+}
+.btn-primary {
+    flex: 1.5;
+    padding: 14px 0;
+    border-radius: 12px;
+    border: none;
+    background: #4A9A72;
+    font-size: 15px;
+    font-weight: 700;
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
+/* 야외 둘레길 전용 텍스트 스타일 */
+.trail-info {
+    font-size: 13px;
+    font-weight: 500;
+    color: #8E8E93;
+    margin: 0 0 4px 0;
+}
+.trail-subinfo {
+    font-size: 12px;
+    color: #A5AAA3;
+    margin: 0;
+}
+
+/* 야외 전용: 하단 '지도로 코스 보기' 큰 버튼 */
+.btn-map-view {
+    width: 100%;
+    padding: 16px 0;
+    background-color: #4A9A72;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    margin-top: 8px;
+    margin-bottom: 20px;
+}
+
+.btn-map-view:active {
+    background-color: #3d805e;
+}
+
+/* =========================================================
+   [집에서] 탭 / 운동진행 / 운동결과 전용 스타일
+   ========================================================= */
+
+/* 강도 / 소요시간 선택 옵션 */
+.select-section {
+    margin-bottom: 16px;
+}
+.section-label {
+    font-size: 13px;
+    color: #8E8E93;
+    display: block;
+    margin-bottom: 8px;
+}
+.option-grid {
+    display: flex;
+    gap: 8px;
+}
+.option-btn {
+    flex: 1;
+    padding: 12px 0;
+    border: 1px solid #E5E5EA;
+    border-radius: 12px;
+    background-color: #FFFFFF;
+    color: #8E8E93;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.option-btn.is-active {
+    border-color: #4A9A72;
+    background-color: #F0F7F3;
+    color: #4A9A72;
+}
+
+/* 운동 계획 만들기 버튼 */
+.btn-make-plan {
+    width: 100%;
+    padding: 14px 0;
+    background-color: #4A9A72;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+/* 루틴 카드 */
+.routine-group {
+    margin-bottom: 16px;
+}
+.routine-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4A9A72;
+    margin-bottom: 6px;
+    display: block;
+}
+.routine-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5EA;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1C1C1E;
+}
+.count-badge {
+    font-size: 12px;
+    color: #8E8E93;
+    font-weight: 500;
+}
+
+/* 하단 트윈 액션 버튼 */
+.home-action-group, .play-action-group, .result-action-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.btn-sub-action, .btn-skip {
+    flex: 1;
+    padding: 14px 0;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5EA;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1C1C1E;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+}
+.btn-main-action, .btn-complete {
+    flex: 1;
+    padding: 14px 0;
+    background-color: #4A9A72;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #FFFFFF;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+}
+.text-center { display: inline-block; line-height: 20px; }
+
+/* --- 운동 진행 화면 (workoutPlay) --- */
+.play-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+.btn-back-arrow { font-size: 18px; text-decoration: none; color: #1C1C1E; }
+.play-status-text { font-size: 14px; color: #8E8E93; font-weight: 600; }
+.btn-pause { border: none; background: none; color: #4A9A72; font-weight: 700; font-size: 14px; cursor: pointer; }
+
+.progress-bar-group {
+    display: flex;
+    gap: 6px;
+    margin: 12px 0 20px 0;
+}
+.progress-step {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background-color: #E5E5EA;
+}
+.progress-step.is-active { background-color: #4A9A72; }
+
+.media-box {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    background: repeating-linear-gradient(45deg, #F2F2F7, #F2F2F7 10px, #E5E5EA 10px, #E5E5EA 20px);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.set-tag-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background-color: #0F5338;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+.media-placeholder { color: #A5AAA3; font-weight: 600; font-size: 14px; }
+
+.exercise-info-section {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.exercise-title { font-size: 20px; font-weight: 800; margin: 0 0 6px 0; }
+.exercise-desc { font-size: 12px; color: #8E8E93; margin: 0 0 12px 0; line-height: 1.4; }
+
+.set-check-group { display: flex; gap: 6px; }
+.set-check-item {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background-color: #F2F2F7;
+    color: #8E8E93;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+}
+.set-check-item.is-done { background-color: #4A9A72; color: #FFFFFF; }
+.set-check-item.is-current { border: 2px solid #4A9A72; background-color: #FFFFFF; color: #4A9A72; }
+
+.info-right { text-align: right; }
+.set-label { font-size: 11px; color: #8E8E93; display: block; }
+.set-value { font-size: 22px; font-weight: 800; color: #4A9A72; display: block; margin: 2px 0; }
+.rest-label { font-size: 11px; color: #8E8E93; }
+
+.next-exercise-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5EA;
+    border-radius: 14px;
+    padding: 14px 16px;
+}
+.next-title { font-size: 11px; color: #8E8E93; display: block; }
+.next-name { font-size: 13px; font-weight: 700; color: #1C1C1E; }
+.next-arrow { color: #C7C7CC; }
+
+/* --- 운동 완료 화면 (workoutResult) --- */
+.result-date { text-align: center; color: #8E8E93; font-size: 13px; margin: 10px 0; font-weight: 600; }
+.result-summary-banner {
+    background-color: #4A9A72;
+    border-radius: 16px;
+    padding: 24px;
+    color: #FFFFFF;
+    margin-bottom: 16px;
+}
+.banner-sub { font-size: 13px; opacity: 0.9; display: block; margin-bottom: 6px; }
+.banner-title { font-size: 26px; font-weight: 800; margin: 0; }
+
+.result-stats-grid { display: flex; gap: 8px; margin-bottom: 16px; }
+.stat-card {
+    flex: 1;
+    background-color: #FFFFFF;
+    border: 1px solid #E5E5EA;
+    border-radius: 14px;
+    padding: 14px 8px;
+    text-align: center;
+}
+.stat-label { font-size: 11px; color: #8E8E93; display: block; margin-bottom: 4px; }
+.stat-value { font-size: 15px; font-weight: 800; color: #1C1C1E; }
+
