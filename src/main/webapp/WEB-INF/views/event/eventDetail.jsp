@@ -84,8 +84,12 @@
         <div class="info-row">
             <span class="info-label">종목</span>
             <span class="info-val">
+                <%-- 자료에는 "하프,10km" 처럼 붙어 있다.
+                     쉼표 뒤를 한 칸 띄워야 종목이 몇 개인지 눈에 들어온다. --%>
                 <c:choose>
-                    <c:when test="${not empty event.distances}">${event.distances}</c:when>
+                    <c:when test="${not empty event.distances}">
+                        ${fn:replace(event.distances, ',', ', ')}
+                    </c:when>
                     <c:otherwise>${event.eventType}</c:otherwise>
                 </c:choose>
             </span>
@@ -114,8 +118,18 @@
         <div class="info-row">
             <span class="info-label">문의</span>
             <span class="info-val">
+                <%-- 연락처가 여러 개인 대회가 많다.
+                       070-7727-1751, 카카오톡 아이디: mbn서울마라톤
+                       전화 070-7725-6258 / 메일 run.ytn@gmail.com
+                     한 줄로 이어 붙이면 어디까지가 전화번호인지 알 수 없다.
+                     쉼표와 빗금이 둘 다 쓰이므로 fn:split 에 두 글자를 함께 넘긴다.
+                     (fn:split 은 구분자를 '글자 모음' 으로 받는다) --%>
                 <c:choose>
-                    <c:when test="${not empty event.contact}">${event.contact}</c:when>
+                    <c:when test="${not empty event.contact}">
+                        <c:forEach var="one" items="${fn:split(event.contact, ',/')}">
+                            <span class="contact-line">${fn:trim(one)}</span>
+                        </c:forEach>
+                    </c:when>
                     <c:otherwise>&mdash;</c:otherwise>
                 </c:choose>
             </span>

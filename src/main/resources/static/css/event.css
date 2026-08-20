@@ -115,29 +115,56 @@
     opacity: 0.75;
 }
 
+/* 날짜 상자.
+   '일' 을 크게 두고 월·요일은 오른쪽에 두 줄로 작게 붙인다.
+   세로로 석 줄(11월 / 15 / 일)을 쌓던 때는 상자가 5rem 이나 되고
+   정작 먼저 읽어야 할 숫자가 작았다. 지금은 4rem 으로 낮고 숫자가 크다. */
 .event-date-box {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    /* 가운데 정렬을 하면 안 된다.
+       '9월' 과 '12월' 은 폭이 달라서, 가운데로 모으면 카드마다
+       숫자와 월이 좌우로 흔들린다. 왼쪽에 붙이고 안쪽 여백으로 자리를 잡는다. */
+    justify-content: flex-start;
+    gap: 0.375rem;
     flex: none;
-    width: 4.25rem;
-    height: 5rem;
+    width: 5rem;
+    height: 4rem;
+    padding: 0 0.375rem;
     background: #f7f3eb;
     border-radius: 1rem;
     color: var(--event-accent);
+}
+
+.event-date-box .day {
+    /* 숫자 칸을 두 자리 폭으로 고정하고 오른쪽에 붙인다.
+       이렇게 해야 3일과 15일이 섞여 있어도 옆의 '11월/일' 이 같은 자리에서 시작한다.
+       고정하지 않으면 카드마다 월·요일이 좌우로 흔들린다. */
+    min-width: 2.375rem;
+    text-align: right;
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.event-date-box .ym {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.0625rem;
 }
 
 .event-date-box .month,
 .event-date-box .weekday {
     font-size: 0.6875rem;
     font-weight: 700;
+    line-height: 1.2;
 }
 
-.event-date-box .day {
-    font-size: 1.375rem;
-    font-weight: 800;
-    line-height: 1.2;
+/* 요일은 같은 상자 안의 곁들이라 한 단계 흐리게 둔다 */
+.event-date-box .weekday {
+    opacity: 0.7;
 }
 
 .event-card.expired .event-date-box {
@@ -294,12 +321,21 @@
     color: var(--event-accent);
 }
 
+/* 연락처는 한 줄에 하나씩. 전화번호와 카카오톡 아이디가 붙어 있으면
+   어디까지가 번호인지 읽어 내야 한다. */
+.contact-line {
+    display: block;
+}
+
 /* ---------- 안내 문구 ---------- */
+/* 상자를 두르지 않는다. 추천 탭 상세의 같은 문구와 모양을 맞춘다.
+   상자로 감싸면 '읽어야 하는 경고' 처럼 보이는데,
+   실제로는 '자료가 바뀔 수 있다' 는 꼬리말에 가깝다. */
 .data-notice {
-    margin: 0 0 3rem;
+    margin: 0.75rem 0 3rem;
     color: #a1a5ab;
-    font-size: 0.8125rem;
-    line-height: 1.4;
+    font-size: 0.6875rem;
+    line-height: 1.5;
     text-align: right;
 }
 

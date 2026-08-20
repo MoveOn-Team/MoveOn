@@ -25,11 +25,13 @@
         <section class="profile-card">
             <h2>${profile.titleTop}<br>${profile.titleBottom}</h2>
 
+            <%-- 이름표는 <b> 로 감싸 흐리게 둔다.
+                 가운뎃점을 쓰면 알약마다 6px 씩 더 먹어 네 개가 한 줄에 안 들어갔다. --%>
             <div class="profile-tags">
-                <span>동반자 · ${profile.companionLabel}</span>
-                <span>승부욕 · ${profile.competitionLabel}</span>
-                <span>장소 · ${profile.placeLabel}</span>
-                <span>강도 · ${profile.intensityLabel}</span>
+                <span><b>동반자</b>${profile.companionLabel}</span>
+                <span><b>승부욕</b>${profile.competitionLabel}</span>
+                <span><b>장소</b>${profile.placeLabel}</span>
+                <span><b>강도</b>${profile.intensityLabel}</span>
             </div>
 
             <p class="profile-foot">
