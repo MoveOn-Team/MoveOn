@@ -73,18 +73,17 @@
                     <div class="event-card ${event.applyState eq 'CLOSED' ? 'expired' : ''}"
                          data-event-id="${event.eventId}">
 
-                        <%-- 날짜는 '일' 을 크게 두고 월·요일을 옆에 붙인다.
-                             세로로 석 줄을 쌓으면 상자만 길어지고, 정작 먼저 봐야 할
-                             숫자가 작아진다. 목록에서 눈이 처음 닿는 곳이 여기다. --%>
-                        <div class="event-date-box">
-                            <span class="day">${event.startDate.dayOfMonth}</span>
-                            <span class="ym">
-                                <span class="month">${event.startDate.monthValue}월</span>
-                                <span class="weekday">${fn:split(DOW, ',')[event.startDate.dayOfWeek.value - 1]}</span>
-                            </span>
-                        </div>
+                        <span class="event-bar"></span>
 
                         <div class="event-info">
+                            <%-- 날짜는 제목 위에 한 줄로 둔다.
+                                 전에는 왼쪽에 상자를 두고 '11월 / 15 / 일' 을 세로로 쌓았는데,
+                                 상자만 길어지고 요일은 글자 하나로 줄어 읽히지 않았다. --%>
+                            <p class="event-date">
+                                ${event.startDate.monthValue}월 ${event.startDate.dayOfMonth}일
+                                ${fn:split(DOW, ',')[event.startDate.dayOfWeek.value - 1]}요일
+                            </p>
+
                             <h2 class="event-title">${event.title}</h2>
 
                             <p class="event-location">
