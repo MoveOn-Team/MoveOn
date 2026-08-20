@@ -120,7 +120,7 @@ public class UserController {
      * 행사 목록 화면 이동
      * URL: http://localhost:8080/user/eventList
      */
-    @GetMapping("eventList")
+    @GetMapping("/eventList")
     public String eventList(ModelMap model) throws Exception {
         log.info(this.getClass().getName() + ".eventList Start!");
 
@@ -157,6 +157,7 @@ public class UserController {
         eventList.add(e2);
 
         model.addAttribute("eventList", eventList);
+        model.addAttribute("active", "event");
 
         return "user/eventList";
     }
@@ -165,7 +166,7 @@ public class UserController {
      * 행사 상세 화면 이동
      * URL: http://localhost:8080/user/eventDetail/1
      */
-    @GetMapping("eventDetail/{eventId}")
+    @GetMapping("/eventDetail/{eventId}")
     public String eventDetail(@PathVariable("eventId") String eventId, ModelMap model) throws Exception {
         log.info(this.getClass().getName() + ".eventDetail Start!");
 
@@ -193,7 +194,7 @@ public class UserController {
      * 내 정보 (마이페이지)
      * URL: http://localhost:8080/user/myPage
      */
-    @GetMapping("myPage")
+    @GetMapping("/myPage")
     public String myPage(HttpSession session, ModelMap model) throws Exception {
         log.info(this.getClass().getName() + ".myPage Start!");
 
@@ -212,6 +213,7 @@ public class UserController {
         userInfo.put("streakDays", 12);
 
         model.addAttribute("userInfo", userInfo);
+        model.addAttribute("active", "myPage");
 
         return "user/myPage";
     }
@@ -220,7 +222,7 @@ public class UserController {
      * 운동 리포트 화면
      * URL: http://localhost:8080/user/workoutReport
      */
-    @GetMapping("workoutReport")
+    @GetMapping("/workoutReport")
     public String workoutReport(HttpSession session, ModelMap model) throws Exception {
         log.info(this.getClass().getName() + ".workoutReport Start!");
 

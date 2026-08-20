@@ -7,8 +7,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MOVE:ON 맞춤 운동 추천</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/recommend.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/recommend.css?v=1.1">
 </head>
 <body class="auth-page">
 <main class="auth-shell recommend-shell">
@@ -77,10 +77,10 @@
         </c:otherwise>
     </c:choose>
 
+    <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 </main>
 
 <c:set var="active" value="recommend"/>
-<jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
 <script src="${pageContext.request.contextPath}/js/recommend.js"></script>
 </body>

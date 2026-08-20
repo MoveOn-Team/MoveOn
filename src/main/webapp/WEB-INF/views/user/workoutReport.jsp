@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>운동 리포트 - MOVE:ON</title>
-  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
 </head>
 <body data-context-path="${pageContext.request.contextPath}">
 <div class="app-container">

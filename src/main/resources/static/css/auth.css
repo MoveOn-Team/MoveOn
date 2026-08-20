@@ -1375,9 +1375,21 @@ button {
 }
 
 /* 활성화된 탭 색상 */
-.tab-item.is-on {
-    color: #6C5CE7;
+.tab-item {
+    color: #A5AAA3;
 }
+
+/* SVG 아이콘 및 경로 색상을 글자색(currentColor)과 동기화 */
+.tab-item svg,
+.tab-item svg path {
+    fill: currentColor !important;
+}
+
+/* 탭별 개별 활성화 색상 */
+.tab-item.recommend.is-on { color: #2F5597 !important; font-weight: 700; }
+.tab-item.workout.is-on   { color: #4A9A72 !important; font-weight: 700; }
+.tab-item.event.is-on     { color: #D98F2B !important; font-weight: 700; }
+.tab-item.mypage.is-on    { color: #7C6CE0 !important; font-weight: 700; }
 
 .tab-item.is-todo {
     opacity: 0.5;
@@ -1563,3 +1575,367 @@ button {
 .detail-row { display: flex; justify-content: space-between; font-size: 14px; }
 .detail-row span { color: #6B7280; }
 .detail-row strong { color: #111; }
+
+/* =========================================================
+   하단 공통 탭바 정렬 & 아이콘 크기 완전 고정
+   ========================================================= */
+.tabbar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px; /* 모든 페이지 공통 너비 */
+    height: 64px;
+    background: #ffffff;
+    border-top: 1px solid #F3F4F6;
+    display: flex;
+    justify-content: space-around; /* 4개 탭 균등 분배 */
+    align-items: center;
+    z-index: 1000;
+    padding: 0 10px 4px 10px;
+    box-sizing: border-box;
+}
+
+/* 탭 버튼 개별 아이템 정렬 */
+.tab-item {
+    flex: 1; /* 4개 탭이 정확히 1:1:1:1 비율을 가짐 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-decoration: none;
+    color: #9CA3AF;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    height: 100%;
+}
+
+/* 활성화 탭 색상 */
+.tab-item.is-on {
+    color: #6C5CE7;
+    font-weight: 700;
+}
+
+/* 아이콘 SVG 완벽 고정 (페이지 전환 시 커짐/틀어짐 방지) */
+.tab-item svg {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    display: block;
+}
+
+/* =========================================================
+   전체 페이지 레이아웃 및 하단 탭바 규격 강제 통일 (CSS 전용)
+   ========================================================= */
+
+/* 1. 모든 메인 화면 레이아웃 폭 및 여백 통일 */
+.app-shell,
+.auth-shell,
+.mypage-shell,
+.report-shell,
+.app-container {
+    width: 100% !important;
+    max-width: 393px !important; /* 전체 화면 폭 393px로 완전 통일 */
+    margin: 0 auto !important;   /* 화면 중앙 정렬 */
+    box-sizing: border-box !important;
+}
+
+/* 2. 하단 탭바 위치 및 크기 완전 고정 */
+.tabbar,
+.bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important; /* 중앙 정렬 */
+    width: 100% !important;
+    max-width: 393px !important; /* 메인 레이아웃과 동일한 너비 */
+    height: 64px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #F3F4F6 !important;
+    display: flex !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    z-index: 1000 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* 3. 탭바 내부 아이템 균등 분배 */
+.tabbar > *,
+.bottom-nav > * {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+/* 4. 탭바 내 SVG / 이미지 / 아이콘 크기 고정 (일렁임/대형화 방지) */
+.tabbar svg, .bottom-nav svg,
+.tabbar img, .bottom-nav img,
+.tab-item svg, .nav-item svg {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    max-width: 22px !important;
+    max-height: 22px !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+/* =========================================================
+   하단 탭바 SVG 아이콘 잘림 및 두꺼워짐 현상 완벽 수정
+   ========================================================= */
+
+/* 1. SVG 크기 및 잘림 방지 (세로가 긴 '즉시운동' 아이콘 비율 보존) */
+.tabbar svg,
+.bottom-nav svg,
+.tab-item svg {
+    width: 24px !important;
+    height: auto !important;          /* 고정 높이를 풀어 찌그러짐 방지 */
+    max-height: 26px !important;
+    overflow: visible !important;     /* 사각형 테두리 잘림 현상 방지 */
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+/* 2. 아이콘 두꺼워짐 원인 제거 (외곽선 stroke 제거 및 면 fill 고정) */
+.tab-item svg path {
+    fill: currentColor !important;
+    stroke: none !important;           /* 굵게 만들던 stroke 테두리 강제 제거 */
+}
+
+/* =========================================================
+   전체 페이지 브라우저 스크롤바 숨기기 (스크롤 동작은 유지)
+   ========================================================= */
+html, body {
+    -ms-overflow-style: none;  /* IE, Edge legacy */
+    scrollbar-width: none;     /* Firefox */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;             /* Chrome, Safari, Opera */
+}
+
+/* =========================================================
+   하단 탭바 고유 색상 스타일 (강제 적용)
+   ========================================================= */
+.tabbar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    height: 65px;
+    background-color: #FFFFFF;
+    border-top: 1px solid #E5E5EA;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+}
+
+.tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #8E8E93 !important; /* 기본 회색 */
+    gap: 4px;
+    flex: 1;
+}
+
+.tab-item svg path {
+    fill: currentColor;
+}
+
+.tab-item span {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* --- 탭별 활성화(is-on) 고유 색상 --- */
+
+/* 1. 추천 탭 (파란색) */
+.tab-item.recommend.is-on,
+.tab-item.recommend.is-on span {
+    color: #2E65D8 !important;
+}
+.tab-item.recommend.is-on svg path {
+    fill: #2E65D8 !important;
+}
+
+/* 2. 즉시운동 탭 (초록색) */
+.tab-item.workout.is-on,
+.tab-item.workout.is-on span {
+    color: #4A9A72 !important;
+}
+.tab-item.workout.is-on svg path {
+    fill: #4A9A72 !important;
+}
+
+/* 3. 행사 탭 (주황색) */
+.tab-item.event.is-on,
+.tab-item.event.is-on span {
+    color: #D97706 !important;
+}
+.tab-item.event.is-on svg path {
+    fill: #D97706 !important;
+}
+
+/* 4. 내정보 탭 (보라색) */
+.tab-item.mypage.is-on,
+.tab-item.mypage.is-on span {
+    color: #7C3AED !important;
+}
+.tab-item.mypage.is-on svg path {
+    fill: #7C3AED !important;
+}
+
+
+
+/* =========================================================
+   하단 탭바 통합 정렬 & 탭별 고유 색상
+   ========================================================= */
+.tabbar {
+    position: fixed !important;
+    left: 50% !important;
+    bottom: 0 !important;
+    transform: translateX(-50%) !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    width: 100% !important;
+    max-width: 430px !important;
+    height: 65px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #ebedf0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 0) !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+.tabbar .tab-item {
+    display: flex !important;
+    flex: 1 !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    height: 100% !important;
+    color: #b0b5bc !important; /* 기본 비활성 회색 */
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.tabbar .tab-item svg {
+    width: 25px !important;
+    height: 25px !important;
+    display: block !important;
+}
+
+.tabbar .tab-item span {
+    line-height: 1 !important;
+}
+
+/* --- 탭별 활성화 (is-on) 고유 색상 --- */
+
+/* 1. 추천 탭 (파란색) */
+.tabbar .tab-item.recommend.is-on,
+.tabbar .tab-item.recommend.is-on span {
+    color: #2E65D8 !important;
+}
+.tabbar .tab-item.recommend.is-on svg,
+.tabbar .tab-item.recommend.is-on svg * {
+    fill: #2E65D8 !important;
+}
+
+/* 2. 즉시운동 탭 (초록색) */
+.tabbar .tab-item.workout.is-on,
+.tabbar .tab-item.workout.is-on span {
+    color: #4A9A72 !important;
+}
+.tabbar .tab-item.workout.is-on svg,
+.tabbar .tab-item.workout.is-on svg * {
+    fill: #4A9A72 !important;
+}
+
+/* 3. 행사 탭 (주황색) */
+.tabbar .tab-item.event.is-on,
+.tabbar .tab-item.event.is-on span {
+    color: #D97706 !important;
+}
+.tabbar .tab-item.event.is-on svg,
+.tabbar .tab-item.event.is-on svg * {
+    fill: #D97706 !important;
+}
+
+/* 4. 내정보 탭 (보라색) */
+.tabbar .tab-item.mypage.is-on,
+.tabbar .tab-item.mypage.is-on span {
+    color: #7C3AED !important;
+}
+.tabbar .tab-item.mypage.is-on svg,
+.tabbar .tab-item.mypage.is-on svg * {
+    fill: #7C3AED !important;
+}
+
+/* =========================================================
+   탭별 활성화 (is-on) 고유 색상 강제 적용 (Stroke & Fill 완벽 대응)
+   ========================================================= */
+
+/* 1. 추천 탭 (파란색) */
+.tabbar .tab-item.recommend.is-on,
+.tabbar .tab-item.recommend.is-on span {
+    color: #2E65D8 !important;
+}
+.tabbar .tab-item.recommend.is-on svg,
+.tabbar .tab-item.recommend.is-on svg * {
+    fill: #2E65D8 !important;
+}
+
+/* 2. 즉시운동 탭 (초록색) */
+.tabbar .tab-item.workout.is-on,
+.tabbar .tab-item.workout.is-on span {
+    color: #4A9A72 !important;
+}
+.tabbar .tab-item.workout.is-on svg,
+.tabbar .tab-item.workout.is-on svg * {
+    fill: #4A9A72 !important;
+}
+
+/* 3. 행사 탭 (주황색) */
+.tabbar .tab-item.event.is-on,
+.tabbar .tab-item.event.is-on span {
+    color: #D97706 !important;
+}
+.tabbar .tab-item.event.is-on svg,
+.tabbar .tab-item.event.is-on svg * {
+    fill: #D97706 !important;
+}
+
+/* 4. 내정보 탭 (보라색) */
+.tabbar .tab-item.mypage.is-on,
+.tabbar .tab-item.mypage.is-on span {
+    color: #7C3AED !important;
+}
+.tabbar .tab-item.mypage.is-on svg,
+.tabbar .tab-item.mypage.is-on svg * {
+    fill: #7C3AED !important;
+}
