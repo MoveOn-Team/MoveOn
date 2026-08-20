@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "moveon",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": ["/c", "mvnw.cmd", "spring-boot:run"],
+      "port": 8080
+    }
+  ]
+}

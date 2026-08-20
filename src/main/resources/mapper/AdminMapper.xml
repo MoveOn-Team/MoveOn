@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.moveon.mapper.IAdminMapper">
+
+    <!-- 로그인. 비밀번호 비교는 서비스에서 salt 를 붙여 해시한 뒤 한다. -->
+    <select id="getAdmin" resultType="AdminDTO">
+        SELECT admin_id, login_id, password, salt, name, created_at
+          FROM admins
+         WHERE login_id = #{loginId}
+         LIMIT 1
+    </select>
+
+    <!--
+        관리자용 목록.
+        사용자 화면과 달리 status 를 가리지 않는다. 검수해야 할 것을 봐야 하기 때문이다.
+
+        정렬은 PENDING 을 맨 위로 올린다. 관리자가 할 일이 그것이기 때문이다.
+        CASE 가 만든 숫자로 줄을 세운다.
+    -->
+    <select id="getAdminEventList" resultType="EventDTO">
+        SELECT event_id, title, event_type, sido, sigungu, place_name,
+               lat, lng, start_date, end_date, apply_start, apply_end,
+               target, distances, fee_text, contact, homepage_url,
+               status, source, source_url, approved_by, approved_at, collected_at
+          FROM events
+        <if test="status != null and status != ''">
+         WHERE status = #{status}
+        </if>
+         ORDER BY CASE status WHEN 'PENDING' THEN 0
+                              WHEN 'PUBLISHED' THEN 1
+                              ELSE 2 END,
+                  collected_at DESC
+    </select>
+
+    <select id="getAdminEvent" resultType="EventDTO">
+        SELECT event_id, title, event_type, sido, sigungu, place_name,
+               lat, lng, start_date, end_date, apply_start, apply_end,
+               target, distances, fee_text, contact, homepage_url,
+               status, source, source_url, approved_by, approved_at, collected_at
+          FROM events
+         WHERE event_id = #{eventId}
+    </select>
+
+    <select id="getEventTitles" resultType="String">
+        SELECT title FROM events
+    </select>
+
+    <insert id="insertEvent" parameterType="EventDTO"
+            useGeneratedKeys="true" keyProperty="eventId">
+        INSERT INTO events
+            (title, event_type, sido, sigungu, place_name, lat, lng,
+             start_date, end_date, apply_start, apply_end,
+             target, distances, fee_text, contact, homepage_url,
+             status, source, source_url, collected_at)
+        VALUES
+            (#{title}, #{eventType}, #{sido}, #{sigungu}, #{placeName}, #{lat}, #{lng},
+             #{startDate}, #{endDate}, #{applyStart}, #{applyEnd},
+             #{target}, #{distances}, #{feeText}, #{contact}, #{homepageUrl},
+             #{status}, #{source}, #{sourceUrl}, NOW())
+    </insert>
+
+    <!--
+        수정.
+        &lt;set&gt; 안의 &lt;if&gt; 로 값이 온 칸만 바꾼다.
+        폼에서 비워 둔 칸 때문에 이미 채워 둔 값이 지워지는 일을 막는다.
+        회원 온보딩(UserMapper.updateOnboarding)에서 같은 이유로 쓰고 있다.
+    -->
+    <update id="updateEvent" parameterType="EventDTO">
+        UPDATE events
+        <set>
+            <if test="title      != null and title      != ''">title       = #{title},</if>
+            <if test="eventType  != null and eventType  != ''">event_type  = #{eventType},</if>
+            <if test="sido       != null and sido       != ''">sido        = #{sido},</if>
+            <if test="sigungu    != null and sigungu    != ''">sigungu     = #{sigungu},</if>
+            <if test="placeName  != null and placeName  != ''">place_name  = #{placeName},</if>
+            <if test="lat != 0">lat = #{lat},</if>
+            <if test="lng != 0">lng = #{lng},</if>
+            <if test="startDate  != null">start_date  = #{startDate},</if>
+            <if test="endDate    != null">end_date    = #{endDate},</if>
+            <if test="applyStart != null">apply_start = #{applyStart},</if>
+            <if test="applyEnd   != null">apply_end   = #{applyEnd},</if>
+            <if test="target     != null">target      = #{target},</if>
+            <if test="distances  != null">distances   = #{distances},</if>
+            <if test="feeText    != null">fee_text    = #{feeText},</if>
+            <if test="contact    != null">contact     = #{contact},</if>
+            <if test="homepageUrl != null and homepageUrl != ''">homepage_url = #{homepageUrl},</if>
+            <if test="sourceUrl   != null and sourceUrl   != ''">source_url   = #{sourceUrl},</if>
+        </set>
+        WHERE event_id = #{eventId}
+    </update>
+
+    <!--
+        승인 / 반려.
+        PUBLISHED 로 바꿀 때만 누가 언제 했는지 남긴다.
+        반려는 되돌릴 수 있어야 해서 기록을 지우지 않고 그대로 둔다.
+    -->
+    <update id="updateStatus">
+        UPDATE events
+           SET status = #{status},
+               approved_by = CASE WHEN #{status} = 'PUBLISHED' THEN #{adminId} ELSE approved_by END,
+               approved_at = CASE WHEN #{status} = 'PUBLISHED' THEN NOW() ELSE approved_at END
+         WHERE event_id = #{eventId}
+    </update>
+
+</mapper>

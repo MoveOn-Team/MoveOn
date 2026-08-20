@@ -32,7 +32,7 @@
 
     <!-- 3. 행사 탭 -->
     <a class="tab-item ${active eq 'event' ? 'is-on' : ''}"
-       href="${pageContext.request.contextPath}/user/eventList">
+       href="${pageContext.request.contextPath}/event/eventList">
         <svg viewBox="0 0 24 24" aria-hidden="true">
             <rect x="3.5" y="5" width="17" height="16" rx="3"/>
             <path d="M3.5 10h17M8 3v4M16 3v4"/>

@@ -1,0 +1,150 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MOVE:ON ${event.title}</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/event.css">
+</head>
+<body class="auth-page" data-context-path="${pageContext.request.contextPath}">
+
+<c:set var="DOW" value="월,화,수,목,금,토,일"/>
+
+<main class="auth-shell event-shell">
+
+    <%-- 목록으로 돌아갈 때 현위치를 이어줘야 거리 표시가 그대로 유지된다.
+         history.back() 을 쓰면 주소로 바로 들어온 경우에 갈 곳이 없다. --%>
+    <a class="back-button"
+       href="${pageContext.request.contextPath}/event/eventList?lat=${lat}&lng=${lng}"
+       aria-label="뒤로 가기">&#8249;</a>
+
+    <div class="detail-header-card">
+        <span class="detail-badge">
+            <c:choose>
+                <c:when test="${event.applyState eq 'CLOSED'}">접수마감</c:when>
+                    <c:when test="${event.applyState eq 'BEFORE'}">${event.applyStart.monthValue}/${event.applyStart.dayOfMonth} 접수 시작</c:when>
+                    <c:when test="${event.applyState eq 'OPEN' and event.dday eq null}">접수중 · 선착순</c:when>
+                    <c:when test="${event.applyState eq 'OPEN' and event.dday eq 0}">오늘 마감</c:when>
+                    <c:when test="${event.applyState eq 'OPEN'}">접수중 · D-${event.dday}</c:when>
+                    <c:otherwise>접수 정보 확인 필요</c:otherwise>
+            </c:choose>
+        </span>
+        <h1 class="detail-title">${event.title}</h1>
+        <p class="detail-sub">
+            ${event.sigungu}
+            · 현위치에서 <fmt:formatNumber value="${event.distanceKm}" maxFractionDigits="1"/>km
+        </p>
+    </div>
+
+    <div class="info-table-card">
+
+        <div class="info-row">
+            <span class="info-label">행사일시</span>
+            <span class="info-val highlight-text">
+                ${event.startDate.year}.${event.startDate.monthValue}.${event.startDate.dayOfMonth}
+                (${fn:split(DOW, ',')[event.startDate.dayOfWeek.value - 1]})
+                <%-- 며칠에 걸쳐 열리는 행사면 끝나는 날도 붙인다 --%>
+                <c:if test="${event.endDate ne null and event.endDate ne event.startDate}">
+                    ~ ${event.endDate.monthValue}.${event.endDate.dayOfMonth}
+                </c:if>
+            </span>
+        </div>
+
+        <%-- 접수 기간은 홈페이지에 안 적힌 대회가 실제로 있다.
+             그때는 빈 칸을 두지 말고 확인이 필요하다고 알려 준다. --%>
+        <div class="info-row">
+            <span class="info-label">접수기간</span>
+            <span class="info-val highlight-text">
+                <c:choose>
+                    <c:when test="${event.applyStart ne null and event.applyEnd ne null}">
+                        ${event.applyStart.monthValue}.${event.applyStart.dayOfMonth}
+                        ~ ${event.applyEnd.monthValue}.${event.applyEnd.dayOfMonth}
+                    </c:when>
+                    <c:when test="${event.applyEnd ne null}">
+                        ~ ${event.applyEnd.monthValue}.${event.applyEnd.dayOfMonth} 까지
+                    </c:when>
+                    <c:when test="${event.applyStart ne null}">
+                        ${event.applyStart.monthValue}.${event.applyStart.dayOfMonth} 부터 · 선착순 마감
+                    </c:when>
+                    <c:otherwise>사이트에서 확인</c:otherwise>
+                </c:choose>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">장소</span>
+            <span class="info-val">${event.placeName}</span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">종목</span>
+            <span class="info-val">
+                <c:choose>
+                    <c:when test="${not empty event.distances}">${event.distances}</c:when>
+                    <c:otherwise>${event.eventType}</c:otherwise>
+                </c:choose>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">대상</span>
+            <span class="info-val">
+                <c:choose>
+                    <c:when test="${not empty event.target}">${event.target}</c:when>
+                    <c:otherwise>제한 없음</c:otherwise>
+                </c:choose>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">참가비</span>
+            <span class="info-val">
+                <c:choose>
+                    <c:when test="${not empty event.feeText}">${event.feeText}</c:when>
+                    <c:otherwise>사이트에서 확인</c:otherwise>
+                </c:choose>
+            </span>
+        </div>
+
+        <div class="info-row">
+            <span class="info-label">문의</span>
+            <span class="info-val">
+                <c:choose>
+                    <c:when test="${not empty event.contact}">${event.contact}</c:when>
+                    <c:otherwise>&mdash;</c:otherwise>
+                </c:choose>
+            </span>
+        </div>
+    </div>
+
+    <div class="notice-box">
+        일정·참가비는 주최 측 사정으로 변경될 수 있습니다<br>
+        접수 전 원본 사이트에서 반드시 확인해주세요
+    </div>
+
+    <%-- 길찾기는 좌표로 연다.
+         추천 탭에서는 시설명이 지도 검색과 어긋나 주소로 찾았지만,
+         여기는 관리자가 넣을 때 좌표를 직접 확인해 두므로 좌표 링크가 정확하다. --%>
+    <div class="detail-btn-group">
+        <button type="button" id="btnLocation" class="btn-location"
+                data-map-url="https://map.kakao.com/link/map/${event.placeName},${event.lat},${event.lng}">
+            길찾기
+        </button>
+        <button type="button" id="btnExternal" class="btn-external"
+                data-target-url="${event.homepageUrl}">
+            사이트로 이동
+        </button>
+    </div>
+</main>
+
+<c:set var="active" value="event"/>
+<jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
+
+<script src="${pageContext.request.contextPath}/js/event.js"></script>
+</body>
+</html>
