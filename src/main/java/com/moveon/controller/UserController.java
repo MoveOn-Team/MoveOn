@@ -151,6 +151,7 @@ public class UserController {
         model.addAttribute("totalBurnedKcal", "1,240");
         model.addAttribute("streakDays", 12);
         model.addAttribute("totalRecords", 38);
+        model.addAttribute("active", "myPage");
 
         return "user/workoutReport";
     }

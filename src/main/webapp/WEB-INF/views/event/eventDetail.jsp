@@ -17,8 +17,8 @@
 
 <main class="auth-shell event-shell">
 
-    <%-- 목록으로 돌아갈 때 현위치를 이어줘야 거리 표시가 그대로 유지된다.
-         history.back() 을 쓰면 주소로 바로 들어온 경우에 갈 곳이 없다. --%>
+    <%-- 목록으로 돌아갈 때 현위치를 이어줘야 거리 표시가 그대로 유지됨.
+         history.back() 을 쓰면 주소로 바로 들어온 경우에 갈 곳이 없음. --%>
     <a class="back-button"
        href="${pageContext.request.contextPath}/event/eventList?lat=${lat}&lng=${lng}"
        aria-label="뒤로 가기">&#8249;</a>
@@ -48,15 +48,15 @@
             <span class="info-val highlight-text">
                 ${event.startDate.year}.${event.startDate.monthValue}.${event.startDate.dayOfMonth}
                 (${fn:split(DOW, ',')[event.startDate.dayOfWeek.value - 1]})
-                <%-- 며칠에 걸쳐 열리는 행사면 끝나는 날도 붙인다 --%>
+                <%-- 며칠에 걸쳐 열리는 행사면 끝나는 날도 붙임 --%>
                 <c:if test="${event.endDate ne null and event.endDate ne event.startDate}">
                     ~ ${event.endDate.monthValue}.${event.endDate.dayOfMonth}
                 </c:if>
             </span>
         </div>
 
-        <%-- 접수 기간은 홈페이지에 안 적힌 대회가 실제로 있다.
-             그때는 빈 칸을 두지 말고 확인이 필요하다고 알려 준다. --%>
+        <%-- 접수 기간은 홈페이지에 안 적힌 대회가 실제로 있음.
+             그때는 빈 칸을 두지 말고 확인이 필요하다고 알려줌. --%>
         <div class="info-row">
             <span class="info-label">접수기간</span>
             <span class="info-val highlight-text">
@@ -122,10 +122,10 @@
         </div>
     </div>
 
-    <div class="notice-box">
+    <p class="data-notice">
         일정·참가비는 주최 측 사정으로 변경될 수 있습니다<br>
         접수 전 원본 사이트에서 반드시 확인해주세요
-    </div>
+    </p>
 
     <%-- 길찾기는 좌표로 연다.
          추천 탭에서는 시설명이 지도 검색과 어긋나 주소로 찾았지만,
@@ -142,7 +142,6 @@
     </div>
 </main>
 
-<c:set var="active" value="event"/>
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
 <script src="${pageContext.request.contextPath}/js/event.js"></script>

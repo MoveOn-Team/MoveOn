@@ -17,11 +17,9 @@
    --------------------------------------------------------------------- */
 
 :root {
-    --tabbar-h: 4rem;
     --workout-accent: #4a9a72;
     --workout-accent-dark: #3d805e;
     --workout-accent-bg: #eaf4ee;
-    --workout-line: #dedcd5;
     --workout-muted: #9ea0a5;
 }
 
@@ -97,12 +95,13 @@
 
 .sub-tag-btn {
     flex: none;
-    padding: 0.4375rem 1rem;
+    padding: 0.4375rem 0.875rem;
     background: #ffffff;
-    border: 1px solid var(--workout-line);
-    border-radius: 1.25rem;
-    font-size: 0.8125rem;
-    color: #5d6066;
+    border: 1px solid var(--card-line);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #5c6470;
     white-space: nowrap;
     cursor: pointer;
 }
@@ -118,7 +117,7 @@
 .facility-list {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--card-gap);
 }
 
 .facility-card {
@@ -126,22 +125,27 @@
     justify-content: space-between;
     align-items: center;
     gap: 0.75rem;
-    padding: 1rem;
-    background: #ffffff;
-    border: 1px solid var(--workout-line);
-    border-radius: 1.25rem;
+    padding: var(--card-pad-y) var(--card-pad-x);
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
     cursor: pointer;
 }
 
-/* 지금 고른 종목에 가장 잘 맞는 곳 하나를 표시한다 */
+/* 지금 고른 종목에 가장 잘 맞는 곳 하나를 표시한다.
+   추천 탭의 1위 카드와 같은 방식이다. 테두리를 2px 로 키우고
+   그만큼 안쪽을 줄여 옆 카드와 높이가 어긋나지 않게 한다. */
 .facility-card.is-highlight {
     border-color: var(--workout-accent);
+    border-width: 2px;
+    padding: calc(var(--card-pad-y) - 1px) calc(var(--card-pad-x) - 1px);
 }
 
 .facility-name {
     margin: 0 0 0.375rem;
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: var(--card-title);
+    font-weight: 800;
+    letter-spacing: -.03em;
     color: #17191c;
 }
 
@@ -216,9 +220,9 @@
 
 .summary-card {
     padding: 0.75rem 0.5rem;
-    background: #ffffff;
-    border: 1px solid var(--workout-line);
-    border-radius: 0.875rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
     text-align: center;
 }
 
@@ -240,9 +244,9 @@
 .info-table-box {
     margin-bottom: 1rem;
     padding: 0.375rem 1rem;
-    background: #ffffff;
-    border: 1px solid var(--workout-line);
-    border-radius: 1.25rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
 }
 
 .info-row {
@@ -300,7 +304,7 @@
     justify-content: center;
     height: 7.5rem;
     margin-bottom: 0.5rem;
-    border-radius: 1.25rem;
+    border-radius: var(--card-radius);
     background: repeating-linear-gradient(45deg,
             #eaece9, #eaece9 0.625rem,
             #f2f4f1 0.625rem, #f2f4f1 1.25rem);
@@ -347,7 +351,7 @@
     flex: 1;
     padding: 0.75rem 0;
     background: #ffffff;
-    border: 1px solid var(--workout-line);
+    border: 1px solid var(--card-line);
     border-radius: 0.75rem;
     font-size: 0.875rem;
     font-weight: 600;
@@ -381,9 +385,9 @@
     gap: 0.75rem;
     margin-bottom: 0.5rem;
     padding: 0.875rem 1rem;
-    background: #ffffff;
-    border: 1px solid var(--workout-line);
-    border-radius: 0.75rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
     font-size: 0.875rem;
     font-weight: 600;
     color: #17191c;
@@ -455,7 +459,7 @@
     justify-content: center;
     height: 11.25rem;
     margin-bottom: 1.25rem;
-    border-radius: 1.25rem;
+    border-radius: var(--card-radius);
     background: repeating-linear-gradient(45deg,
             #f2f2ef, #f2f2ef 0.625rem,
             #e6e4dd 0.625rem, #e6e4dd 1.25rem);
@@ -558,9 +562,9 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.875rem 1rem;
-    background: #ffffff;
-    border: 1px solid var(--workout-line);
-    border-radius: 0.875rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
 }
 
 .next-title {
@@ -596,7 +600,7 @@
     margin-bottom: 1rem;
     padding: 1.5rem;
     background: var(--workout-accent);
-    border-radius: 1.25rem;
+    border-radius: var(--card-radius);
     color: #ffffff;
 }
 
@@ -622,9 +626,9 @@
 .stat-card {
     flex: 1;
     padding: 0.875rem 0.5rem;
-    background: #ffffff;
-    border: 1px solid var(--workout-line);
-    border-radius: 0.875rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
     text-align: center;
 }
 
@@ -687,7 +691,7 @@
 .btn-skip,
 .btn-outline {
     background: #ffffff;
-    border: 1px solid var(--workout-line);
+    border: 1px solid var(--card-line);
     color: #45484d;
 }
 

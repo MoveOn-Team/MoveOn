@@ -84,6 +84,11 @@ public class EventController {
         model.addAttribute("lng", myLng);
         model.addAttribute("usingGps", lat != null && lng != null);
 
+        // 하단 탭바에서 어느 탭을 켤지 알려 준다.
+        // 화면(JSP)의 <c:set> 으로는 안 된다. <jsp:include> 는 실행 시점에 끼워 넣는 것이라
+        // 끼워 넣은 쪽의 page 값을 못 본다. request 에 실어야 전달된다.
+        model.addAttribute("active", "event");
+
         log.info("{}.eventList End! {}건", this.getClass().getName(), events.size());
 
         return "event/eventList";
@@ -121,6 +126,7 @@ public class EventController {
         model.addAttribute("event", event);
         model.addAttribute("lat", myLat);
         model.addAttribute("lng", myLng);
+        model.addAttribute("active", "event");
 
         log.info("{}.eventDetail End!", this.getClass().getName());
 

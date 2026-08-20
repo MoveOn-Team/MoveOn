@@ -228,7 +228,6 @@
 
 </main>
 
-<c:set var="active" value="recommend"/>
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 
 <script src="${pageContext.request.contextPath}/js/recommend.js"></script>

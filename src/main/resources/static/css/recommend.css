@@ -10,10 +10,6 @@
    두 화면 모두 아래에 탭바가 깔리므로 본문 아래쪽을 그만큼 비워둔다.
    --------------------------------------------------------------------- */
 
-:root {
-    --tabbar-h: 4rem;
-}
-
 .recommend-shell,
 .detail-shell {
     padding-top: 1.75rem;
@@ -59,7 +55,7 @@
     padding: 1.25rem 1.25rem 1.125rem;
     color: #ffffff;
     background: #345f9f;
-    border-radius: 20px;
+    border-radius: var(--card-radius);
 }
 
 .profile-card h2 {
@@ -106,7 +102,7 @@
 .sport-list {
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
+    gap: var(--card-gap);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -116,11 +112,11 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 1rem 1.125rem;
+    padding: var(--card-pad-y) var(--card-pad-x);
     color: inherit;
-    background: #ffffff;
-    border: 1px solid #e6e9ee;
-    border-radius: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
 }
 
 /* 1 위만 눈에 띄게 한다 */
@@ -128,7 +124,7 @@
     border-color: #345f9f;
     border-width: 2px;
     /* 테두리가 두꺼워진 만큼 안쪽을 줄여 카드 높이를 맞춘다 */
-    padding: calc(1rem - 1px) calc(1.125rem - 1px);
+    padding: calc(var(--card-pad-y) - 1px) calc(var(--card-pad-x) - 1px);
 }
 
 .rank-badge {
@@ -153,7 +149,7 @@
 .sport-name {
     flex: 1;
     min-width: 0;
-    font-size: 1.0625rem;
+    font-size: var(--card-title);
     font-weight: 800;
     letter-spacing: -.03em;
     overflow: hidden;
@@ -192,7 +188,7 @@
     font-size: 0.8125rem;
     line-height: 1.6;
     background: #f7f8f9;
-    border-radius: 16px;
+    border-radius: var(--card-radius);
 }
 
 
@@ -246,7 +242,7 @@
     min-width: 0;
     padding: 0.75rem 0.5rem;
     text-align: center;
-    border: 1px solid #e6e9ee;
+    border: 1px solid var(--card-line);
     border-radius: 14px;
 }
 
@@ -282,8 +278,8 @@
     padding: 0.9375rem 1.0625rem;
     color: inherit;
     background: #ffffff;
-    border: 1px solid #e6e9ee;
-    border-radius: 16px;
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
 }
 
 /* 지금 보고 있는 시설 */
@@ -336,7 +332,7 @@
     gap: 0.75rem;
     padding: 0.9375rem 1.0625rem;
     border: 1px solid #eceff3;
-    border-radius: 16px;
+    border-radius: var(--card-radius);
 }
 
 .program-body {
@@ -402,7 +398,7 @@
     color: #a1a5ab;
     font-size: 0.6875rem;
     line-height: 1.5;
-    text-align: center;
+    text-align: right;
 }
 
 .more-button {
@@ -414,7 +410,7 @@
     font-size: 0.8125rem;
     font-weight: 700;
     background: #f7f8f9;
-    border: 1px solid #e6e9ee;
+    border: 1px solid var(--card-line);
     border-radius: 14px;
 }
 

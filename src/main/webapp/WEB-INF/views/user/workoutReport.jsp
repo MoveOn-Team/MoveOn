@@ -87,7 +87,6 @@
   </main>
 
   <!-- 공통 하단 탭바 -->
-  <c:set var="active" value="myPage" />
   <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 </div>
 

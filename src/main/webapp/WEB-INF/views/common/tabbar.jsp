@@ -1,15 +1,21 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
-<%--
-  하단 탭바 (4개 화면 공통)
+<%-- 하단 탭바 (4개 화면 공통)
 
-  쓰는 쪽에서 active 값을 정해 넘긴다.
-      <c:set var="active" value="event" />
-      <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
+     지금 어느 탭에 있는지는 컨트롤러가 알려 준다.
 
-  active 에 넣는 값 : recommend / workout / event / myPage
+         model.addAttribute("active", "event");
+
+     화면에서 <c:set var="active" .../> 로 정하면 안 된다. 여기까지 오지 않는다.
+     <jsp:include> 는 실행 시점에 끼워 넣는 것이라 이 파일이 자기 page 값을 따로 갖는다.
+     그래서 끼워 넣은 쪽의 page 값은 안 보이고, request 에 실은 것만 보인다.
+     실제로 행사·리포트·종목상세 세 화면이 그 <c:set> 만 믿고 있다가
+     어느 탭도 안 켜진 채로 있었다.
+
+     active 에 넣는 값 : recommend / workout / event / myPage
 --%>
+
 <nav class="tabbar">
     <!-- 1. 추천 탭 -->
     <a href="${pageContext.request.contextPath}/recommend/recommendList" class="tab-item recommend ${active == 'recommend' ? 'is-on' : ''}">

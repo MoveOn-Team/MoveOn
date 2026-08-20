@@ -83,7 +83,6 @@
     <!-- 하단 탭바 공통 인클루드 -->
 </main>
 
-<c:set var="active" value="workout"/>
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 </body>
 </html>

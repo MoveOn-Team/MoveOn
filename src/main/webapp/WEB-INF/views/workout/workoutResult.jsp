@@ -48,12 +48,12 @@
     <!-- 하단 전환 버튼 -->
     <div class="result-action-group">
         <a href="${pageContext.request.contextPath}/recommend/recommendList" class="btn-sub-action">홈으로</a>
-        <a href="${pageContext.request.contextPath}/mypage/workoutReport" class="btn-main-action">내 리포트 보기</a>
+        <%-- 리포트는 내정보 탭 화면이라 /user 아래에 있다. /mypage 는 매핑이 없어 404 였다. --%>
+        <a href="${pageContext.request.contextPath}/user/workoutReport" class="btn-main-action">내 리포트 보기</a>
     </div>
 
 </main>
 
-<c:set var="active" value="workout"/>
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 </body>
 </html>

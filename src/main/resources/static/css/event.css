@@ -12,10 +12,8 @@
    --------------------------------------------------------------------- */
 
 :root {
-    --tabbar-h: 4rem;
     --event-accent: #e08b29;
     --event-accent-bg: #fdf3e7;
-    --event-line: #dedcd5;
     --event-muted: #9ea0a5;
 }
 
@@ -99,16 +97,16 @@
 .event-card-list {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: var(--card-gap);
 }
 
 .event-card {
     display: flex;
     gap: 0.875rem;
-    padding: 1rem;
-    background: #ffffff;
-    border: 1px solid var(--event-line);
-    border-radius: 1.25rem;
+    padding: var(--card-pad-y) var(--card-pad-x);
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
     cursor: pointer;
 }
 
@@ -259,7 +257,7 @@
 .info-table-card {
     margin-bottom: 1rem;
     background: #ffffff;
-    border: 1px solid var(--event-line);
+    border: 1px solid var(--card-line);
     border-radius: 1.25rem;
     overflow: hidden;
 }
@@ -296,17 +294,13 @@
     color: var(--event-accent);
 }
 
-/* ---------- 안내 상자 ---------- */
-.notice-box {
-    margin-bottom: 1.25rem;
-    padding: 0.875rem;
-    background: var(--event-accent-bg);
-    border: 1px solid var(--event-accent);
-    border-radius: 1rem;
-    font-size: 0.75rem;
-    line-height: 1.6;
-    text-align: center;
-    color: var(--event-accent);
+/* ---------- 안내 문구 ---------- */
+.data-notice {
+    margin: 0 0 3rem;
+    color: #a1a5ab;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    text-align: right;
 }
 
 /* ---------- 아래 버튼 ---------- */
@@ -327,7 +321,7 @@
 .btn-location {
     flex: 1;
     background: #ffffff;
-    border: 1px solid var(--event-line);
+    border: 1px solid var(--card-line);
     color: #33363b;
 }
 

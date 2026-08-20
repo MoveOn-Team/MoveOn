@@ -164,7 +164,6 @@
     </div>
 
     <!-- 공통 하단 탭바 -->
-    <c:set var="active" value="myPage" />
     <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 </div>
 
@@ -203,7 +202,5 @@
 </script>
 
 <script src="${pageContext.request.contextPath}/js/auth.js"></script>
-
-<jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 </body>
 </html>
