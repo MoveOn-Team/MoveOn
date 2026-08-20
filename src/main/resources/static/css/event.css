@@ -52,7 +52,7 @@
     flex: none;
     padding: 0.375rem 0.875rem;
     background: #ffffff;
-    border: 1px solid #e2e0da;
+    border: 1px solid var(--card-line);
     border-radius: 1.25rem;
     font-size: var(--fs-cap);
     font-weight: 700;
@@ -72,7 +72,7 @@
     gap: 0.25rem;
     margin-bottom: 1.125rem;
     padding: 0.25rem;
-    background: #eae8e1;
+    background: var(--track-bg);
     border-radius: 0.875rem;
 }
 
@@ -171,7 +171,7 @@
 /* 종목 거리 (5km / 10km / 하프) */
 .tag-spec {
     padding: 0.1875rem 0.5rem;
-    border: 1px solid #e2e0da;
+    border: 1px solid var(--card-line);
     border-radius: 0.75rem;
     font-size: var(--fs-tag);
     color: #55585d;
@@ -259,7 +259,7 @@
     display: flex;
     gap: 0.75rem;
     padding: 0.875rem 1.125rem;
-    border-bottom: 1px solid #f0eee8;
+    border-bottom: 1px solid var(--divider);
 }
 
 .info-row:last-child {

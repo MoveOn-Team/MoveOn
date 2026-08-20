@@ -23,6 +23,12 @@
        모서리도 16px 과 20px 로 달랐다. 값은 추천 탭에 맞췄다. */
     --card-bg: #ffffff;
     --card-line: #e6e9ee;
+    /* 세그먼트 버튼·진행 막대처럼 '무언가가 얹히는 바탕' 색.
+       전에는 #eae8e1 같은 모래색이었는데, 카드 선(#e6e9ee)이 푸른 기가 도는 회색이라
+       한 화면에서 두 계열이 섞여 지저분했다. 같은 계열로 맞춘다. */
+    --track-bg: #f0f2f5;
+    /* 표 안의 가로 구분선. 카드 선보다 한 단 연하다 */
+    --divider: #f1f3f5;
     --card-radius: 1rem;
     --card-pad-y: 1rem;
     --card-pad-x: 1.125rem;
@@ -319,7 +325,7 @@ button {
     padding: 0 1.125rem;
     font-size: 1rem;
     font-weight: 700;
-    border-radius: 12px;
+    border-radius: var(--card-radius);
 }
 
 .primary-button {
@@ -836,7 +842,7 @@ button {
     flex: 1;
     height: 3.25rem;
     border: 1px solid #345f9f;
-    border-radius: 16px;
+    border-radius: var(--card-radius);
     background: #ffffff;
     color: #345f9f;
     font-size: 0.9375rem;
@@ -847,7 +853,7 @@ button {
     flex: 1;
     height: 3.25rem;
     border: none;
-    border-radius: 16px;
+    border-radius: var(--card-radius);
     background: #a8b8d4; /* 입력 미완성 시 색상 */
     color: #ffffff;
     font-size: 0.9375rem;
@@ -921,11 +927,14 @@ button {
     color: #888;
     margin-top: 4px;
 }
+/* 작은 알약 버튼. 추천 탭의 .chip-button 과 같은 모양이다. */
+/* '수정' 같은 작은 버튼은 카드가 아니라 알약이다.
+   추천 탭의 .chip-button 과 같은 모양을 쓴다. */
 .btn-edit-profile {
-    border: 1px solid #E5E7EB;
+    border: 1px solid var(--card-line);
     background: #fff;
     padding: 6px 14px;
-    border-radius: 20px;
+    border-radius: 999px;
     font-size: 13px;
     color: #6B7280;
     cursor: pointer;
@@ -937,13 +946,21 @@ button {
     grid-template-columns: 1fr 1fr 1fr;
     gap: 10px;
 }
+/* 흰 배경 위의 흰 카드라 테두리가 없으면 아무것도 안 보인다.
+   다른 탭 카드와 같은 선·모서리를 쓴다. */
 .stat-card {
-    background: #fff;
-    border-radius: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
     padding: 14px 12px;
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+/* BMI 칸은 보라로 채우므로 선이 겹쳐 보인다. 색만 맞춰 준다. */
+.stat-card.bmi-card {
+    border-color: #6C5CE7;
 }
 .stat-card.bmi-card {
     background: #6C5CE7;
@@ -982,8 +999,8 @@ button {
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
-    border-radius: 14px;
-    border: 1px solid #E5E7EB;
+    border-radius: var(--card-radius);
+    border: 1px solid var(--card-line);
 }
 .workout-item.completed {
     border-color: #6C5CE7;
@@ -1017,8 +1034,8 @@ button {
     margin-top: 10px;
     padding: 10px;
     background: #F9FAFB;
-    border: 1px solid #F3F4F6;
-    border-radius: 12px;
+    border: 1px solid var(--divider);
+    border-radius: var(--card-radius);
     font-size: 13px;
     color: #4B5563;
     display: flex;
@@ -1032,7 +1049,7 @@ button {
     width: 32px;
     height: 32px;
     border-radius: 10px;
-    border: 1px solid #E5E7EB;
+    border: 1px solid var(--card-line);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1052,7 +1069,7 @@ button {
     justify-content: space-between;
     align-items: center;
     padding: 14px 0;
-    border-bottom: 1px solid #F3F4F6;
+    border-bottom: 1px solid var(--divider);
     text-decoration: none;
     color: #111;
     font-size: 14px;
@@ -1128,8 +1145,8 @@ button {
 .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip-group .chip {
     padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    border: 1px solid var(--card-line);
     background: #fff;
     font-size: 13px;
     color: #4B5563;
@@ -1145,7 +1162,7 @@ button {
 .calorie-box {
     background: #F0EEFF;
     border: 1px solid #C6C0F9;
-    border-radius: 16px;
+    border-radius: var(--card-radius);
     padding: 16px;
     text-align: center;
 }
@@ -1155,16 +1172,16 @@ button {
 .input-card input, .input-card textarea {
     width: 100%;
     padding: 12px 14px;
-    border: 1px solid #E5E7EB;
-    border-radius: 12px;
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
     background: #fff;
     font-size: 13px;
     box-sizing: border-box;
 }
 
 .modal-footer { display: flex; gap: 10px; margin-top: 10px; }
-.btn-modal-cancel { flex: 1; padding: 14px; background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; font-weight: 700; }
-.btn-modal-submit { flex: 1.5; padding: 14px; background: #8075F0; color: #fff; border: none; border-radius: 14px; font-weight: 700; }
+.btn-modal-cancel { flex: 1; padding: 14px; background: #fff; border: 1px solid var(--card-line); border-radius: var(--card-radius); font-weight: 700; }
+.btn-modal-submit { flex: 1.5; padding: 14px; background: #8075F0; color: #fff; border: none; border-radius: var(--card-radius); font-weight: 700; }
 
 /* =========================================================
    운동 리포트 전용 스타일
@@ -1182,7 +1199,7 @@ button {
 .report-banner-card {
     background: #6C5CE7;
     color: #fff;
-    border-radius: 20px;
+    border-radius: var(--card-radius);
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -1224,7 +1241,7 @@ button {
 
 /* 많이 한 종목 & 상세 통계 */
 .rank-list { list-style: none; padding: 0; margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
-.rank-list li { display: flex; justify-content: space-between; font-size: 14px; border-bottom: 1px solid #F3F4F6; padding-bottom: 8px; }
+.rank-list li { display: flex; justify-content: space-between; font-size: 14px; border-bottom: 1px solid var(--divider); padding-bottom: 8px; }
 .rank-list li:last-child { border-bottom: none; padding-bottom: 0; }
 .rank-name { font-weight: 600; color: #374151; }
 .rank-value { color: #6B7280; font-size: 13px; }

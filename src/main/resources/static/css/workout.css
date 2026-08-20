@@ -59,7 +59,7 @@
     gap: 0.25rem;
     margin-bottom: 1rem;
     padding: 0.25rem;
-    background: #eae8e1;
+    background: var(--track-bg);
     border-radius: 0.875rem;
 }
 
@@ -248,7 +248,7 @@
     justify-content: space-between;
     gap: 0.75rem;
     padding: 0.75rem 0;
-    border-bottom: 1px solid #f1efe9;
+    border-bottom: 1px solid var(--divider);
     font-size: var(--fs-meta);
 }
 
@@ -300,8 +300,8 @@
     margin-bottom: 0.5rem;
     border-radius: var(--card-radius);
     background: repeating-linear-gradient(45deg,
-            #eaece9, #eaece9 0.625rem,
-            #f2f4f1 0.625rem, #f2f4f1 1.25rem);
+            #eef0f3, #eef0f3 0.625rem,
+            #f7f8f9 0.625rem, #f7f8f9 1.25rem);
 }
 
 .map-pin {
@@ -434,7 +434,7 @@
 .progress-step {
     flex: 1;
     height: 0.5rem;
-    background: #e6e4dd;
+    background: #e2e5ea;
     border-radius: 0.25rem;
 }
 
@@ -451,8 +451,8 @@
     margin-bottom: 1.25rem;
     border-radius: var(--card-radius);
     background: repeating-linear-gradient(45deg,
-            #f2f2ef, #f2f2ef 0.625rem,
-            #e6e4dd 0.625rem, #e6e4dd 1.25rem);
+            #f3f4f6, #f3f4f6 0.625rem,
+            #e2e5ea 0.625rem, #e2e5ea 1.25rem);
 }
 
 .set-tag-badge {
@@ -505,7 +505,7 @@
     justify-content: center;
     width: 1.75rem;
     height: 1.75rem;
-    background: #f2f2ef;
+    background: #f3f4f6;
     border-radius: 0.5rem;
     font-size: var(--fs-cap);
     font-weight: 700;
