@@ -921,184 +921,281 @@ button {
     }
 }
 
-/* =========================================================
-   마이페이지 (내 정보) 스타일
-   ========================================================= */
+/* =====================================================================
+   내 정보 (SC-040)
+
+   목업의 짜임새를 그대로 옮기되, 색과 크기는 다른 세 탭과 같은 것을 쓴다.
+   목업은 회색 바탕에 흰 카드를 얹어 카드를 구분했는데,
+   이 앱은 네 탭 모두 흰 바탕이라 여기서만 바탕을 바꾸면 탭을 옮길 때 눈에 띈다.
+   대신 다른 탭처럼 카드에 선을 둘러 구분한다.
+
+   이 탭의 강조색은 보라다. 전에는 #6C5CE7 과 #8075F0 두 가지가 섞여 있었다.
+   ===================================================================== */
+
+:root {
+    --mypage-accent: #6c5ce7;
+    --mypage-accent-bg: #f4f3ff;
+}
+
+/* 위·아래 여백은 추천·행사·즉시운동 탭과 같은 값을 쓴다 */
 .mypage-shell {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding-bottom: 90px;
+    gap: var(--card-gap);
+    padding-top: 1.75rem;
+    padding-bottom: calc(var(--tabbar-h) + 1.25rem);
 }
 
-.profile-card {
-    padding: 18px 20px;
+/* 제목은 카드가 아니라 화면의 머리라 아래 여백만 따로 준다 */
+.mypage-shell .page-header {
+    margin-bottom: 0.375rem;
 }
+
+/* 화면을 이루는 상자. JSP 가 class="card ..." 로 쓰는데 정의가 없어
+   어느 것도 카드로 보이지 않았다. 다른 탭 카드와 같은 선·모서리를 쓴다. */
+.card {
+    padding: var(--card-pad-y) var(--card-pad-x);
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
+}
+
+/* ---------- 이름 · 메일 ---------- */
 .profile-main {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.75rem;
 }
+
 .user-name {
-    font-size: 20px;
-    font-weight: 700;
-    color: #111;
+    margin: 0;
+    font-size: var(--fs-card);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    color: #17191c;
 }
+
 .user-sub {
-    font-size: 13px;
-    color: #888;
-    margin-top: 4px;
+    margin: 0.25rem 0 0;
+    font-size: var(--fs-cap);
+    color: #9ea0a5;
 }
-/* 작은 알약 버튼. 추천 탭의 .chip-button 과 같은 모양이다. */
-/* '수정' 같은 작은 버튼은 카드가 아니라 알약이다.
-   추천 탭의 .chip-button 과 같은 모양을 쓴다. */
+
+/* '수정' 은 카드가 아니라 알약이다. 추천 탭의 .chip-button 과 같은 모양이다. */
 .btn-edit-profile {
+    flex: none;
+    padding: 0.4375rem 0.875rem;
+    background: #ffffff;
     border: 1px solid var(--card-line);
-    background: #fff;
-    padding: 6px 14px;
     border-radius: 999px;
-    font-size: 13px;
-    color: #6B7280;
+    font-size: var(--fs-cap);
+    font-weight: 700;
+    color: #5c6470;
     cursor: pointer;
 }
 
-/* 신체 정보 카드 3종 */
+/* ---------- 키 · 몸무게 · BMI ---------- */
 .body-stats-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
 }
-/* 흰 배경 위의 흰 카드라 테두리가 없으면 아무것도 안 보인다.
-   다른 탭 카드와 같은 선·모서리를 쓴다. */
+
 .stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.875rem 0.75rem;
     background: var(--card-bg);
     border: 1px solid var(--card-line);
     border-radius: var(--card-radius);
-    padding: 14px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
 }
 
-/* BMI 칸은 보라로 채우므로 선이 겹쳐 보인다. 색만 맞춰 준다. */
+/* BMI 칸만 채워서 눈에 띄게 한다. 목업이 그렇게 잡혀 있다. */
 .stat-card.bmi-card {
-    border-color: #6C5CE7;
+    background: var(--mypage-accent);
+    border-color: var(--mypage-accent);
+    color: #ffffff;
 }
-.stat-card.bmi-card {
-    background: #6C5CE7;
-    color: #fff;
-}
+
 .stat-label {
-    font-size: 12px;
-    color: #888;
-}
-.bmi-card .stat-label {
-    color: rgba(255, 255, 255, 0.8);
-}
-.stat-value {
-    font-size: 18px;
-    font-weight: 700;
-}
-.stat-value strong {
-    font-size: 13px;
-    font-weight: 400;
-    margin-left: 2px;
+    font-size: var(--fs-cap);
+    color: #9ea0a5;
 }
 
-/* 오늘의 운동 */
+.bmi-card .stat-label {
+    color: rgba(255, 255, 255, .8);
+}
+
+.stat-value {
+    font-size: var(--fs-lead);
+    font-weight: 800;
+    /* 숫자 폭을 고정해 세 칸의 자릿수가 달라도 자리가 흔들리지 않게 한다 */
+    font-variant-numeric: tabular-nums;
+}
+
+/* 'cm' 'kg' 은 숫자에 딸린 단위라 작고 흐리게 둔다 */
+.stat-value strong {
+    margin-left: 0.125rem;
+    font-size: var(--fs-cap);
+    font-weight: 400;
+}
+
+/* ---------- 카드 머리 (제목 + 오른쪽 값) ---------- */
 .card-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
 }
-.card-title { font-size: 16px; font-weight: 700; }
-.card-date, .streak-count { font-size: 13px; color: #6C5CE7; font-weight: 600; }
 
-.workout-list { display: flex; flex-direction: column; gap: 8px; }
+.card-title {
+    margin: 0;
+    font-size: var(--fs-card);
+    font-weight: 800;
+    letter-spacing: -.03em;
+}
+
+.card-date,
+.streak-count {
+    font-size: var(--fs-cap);
+    font-weight: 700;
+    color: var(--mypage-accent);
+}
+
+/* ---------- 오늘의 운동 ---------- */
+.workout-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
 .workout-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    border-radius: var(--card-radius);
+    gap: 0.75rem;
+    padding: 0.75rem 0.875rem;
     border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
 }
+
+/* 이미 한 운동 */
 .workout-item.completed {
-    border-color: #6C5CE7;
-    background: #F8F7FF;
+    background: var(--mypage-accent-bg);
+    border-color: var(--mypage-accent);
 }
+
+/* 계획만 있고 아직 안 한 운동.
+   점선으로 두어 '아직 비어 있다' 는 것을 모양으로도 알린다. */
 .workout-item.planned {
     border-style: dashed;
 }
+
 .check-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #6C5CE7;
-    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: var(--mypage-accent);
+    border-radius: 50%;
+    font-size: var(--fs-cap);
+    color: #ffffff;
 }
+
 .check-icon.empty {
-    background: #fff;
-    border: 1px solid #D1D5DB;
+    background: #ffffff;
+    border: 1px solid var(--card-line);
 }
-.workout-info strong { font-size: 14px; display: block; }
-.workout-info p { font-size: 11px; color: #888; margin-top: 2px; }
+
+.workout-info strong {
+    display: block;
+    font-size: var(--fs-body);
+    font-weight: 700;
+}
+
+.workout-info p {
+    margin: 0.125rem 0 0;
+    font-size: var(--fs-cap);
+    color: #9ea0a5;
+}
 
 .btn-add-workout {
-    position: relative;
-    z-index: 10;
-    width: 100%;
-    margin-top: 10px;
-    padding: 10px;
-    background: #F9FAFB;
-    border: 1px solid var(--divider);
-    border-radius: var(--card-radius);
-    font-size: 13px;
-    color: #4B5563;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 0.625rem;
+    padding: 0.625rem 0.875rem;
+    background: #f7f8f9;
+    border: 1px solid var(--divider);
+    border-radius: var(--card-radius);
+    font-size: var(--fs-meta);
+    color: #45484d;
     cursor: pointer;
 }
 
-/* 연속 출석 */
-.week-days { display: flex; justify-content: space-between; }
+/* ---------- 연속 출석 ---------- */
+.week-days {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.25rem;
+}
+
+/* 나온 날은 채우고, 안 나온 날은 테두리만 남긴다.
+   일곱 칸이 한 줄에 들어가야 해서 폭은 고정하지 않고 고르게 나눈다. */
 .day-chip {
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    border: 1px solid var(--card-line);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    color: #6B7280;
-}
-.day-chip.active {
-    background: #8075F0;
-    color: #fff;
-    border-color: #8075F0;
+    flex: 1;
+    min-width: 0;
+    height: 2rem;
+    border: 1px solid var(--card-line);
+    border-radius: 0.625rem;
+    font-size: var(--fs-cap);
+    font-weight: 700;
+    color: #83858a;
 }
 
-/* 하단 메뉴 리스트 */
-.menu-list-card { padding: 4px 16px; }
+.day-chip.active {
+    background: var(--mypage-accent);
+    border-color: var(--mypage-accent);
+    color: #ffffff;
+}
+
+/* ---------- 아래 메뉴 ---------- */
+/* 줄마다 아래쪽에 선이 있어 카드의 좌우 여백을 그대로 쓰면
+   선이 글자 앞에서 끊긴다. 좌우 여백은 카드가 주고 위아래만 줄이 갖는다. */
+.menu-list-card {
+    padding: 0 var(--card-pad-x);
+}
+
 .menu-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 0;
+    gap: 0.75rem;
+    padding: 0.875rem 0;
     border-bottom: 1px solid var(--divider);
-    text-decoration: none;
-    color: #111;
-    font-size: 14px;
+    font-size: var(--fs-body);
+    color: #17191c;
 }
-.menu-item:last-child { border-bottom: none; }
-.menu-item.logout-item { color: #9CA3AF; }
-.menu-item .arrow { color: #D1D5DB; }
+
+.menu-item:last-child {
+    border-bottom: none;
+}
+
+.menu-item.logout-item {
+    color: #9ea0a5;
+}
+
+.menu-item .arrow {
+    color: #c7c7c0;
+}
 
 /* 탭바는 이 파일 맨 아래에 한 번만 정의한다. 여기 있던 것은 그 사본이었다.
    .tab-item svg 에 width/height 24px !important 를 걸어,
@@ -1340,7 +1437,7 @@ button {
 .tabbar .tab-item.recommend.is-on { color: #2e65d8; }
 .tabbar .tab-item.workout.is-on   { color: #4a9a72; }
 .tabbar .tab-item.event.is-on     { color: #d97706; }
-.tabbar .tab-item.mypage.is-on    { color: #7c3aed; }
+.tabbar .tab-item.mypage.is-on    { color: #6c5ce7; }
 
 
 /* =====================================================================
