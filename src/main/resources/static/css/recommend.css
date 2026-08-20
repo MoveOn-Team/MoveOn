@@ -32,10 +32,6 @@
 .page-head h1 {
     flex: 1;
     min-width: 0;
-    margin: 0;
-    font-size: var(--fs-title);
-    font-weight: 900;
-    letter-spacing: -.04em;
 }
 
 /* '다시 진단' 처럼 테두리만 있는 작은 버튼 */

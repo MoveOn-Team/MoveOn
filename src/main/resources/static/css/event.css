@@ -40,11 +40,6 @@
 .event-header h1 {
     flex: 1;
     min-width: 0;
-    margin: 0;
-    font-size: var(--fs-title);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: #17191c;
 }
 
 /* 마지막으로 자료를 넣은 날. 누르면 새로고침한다. */
