@@ -13,11 +13,9 @@
 <main class="auth-shell workout-shell">
     <!-- 상단 뒤로가기 버튼 -->
     <div class="detail-header">
-        <button type="button" class="back-btn" onclick="history.back();">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-        </button>
+        <%-- 추천·행사 탭과 같은 뒤로가기다. auth.css 의 .back-button 을 쓴다. --%>
+        <button type="button" class="back-button" onclick="history.back();"
+                aria-label="뒤로 가기">&#8249;</button>
     </div>
 
     <!-- 제목 및 위치 정보 -->

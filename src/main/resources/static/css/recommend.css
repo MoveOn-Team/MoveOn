@@ -33,7 +33,7 @@
     flex: 1;
     min-width: 0;
     margin: 0;
-    font-size: 1.375rem;
+    font-size: var(--fs-title);
     font-weight: 900;
     letter-spacing: -.04em;
 }
@@ -43,7 +43,7 @@
     flex: 0 0 auto;
     padding: 0.4375rem 0.875rem;
     color: #5c6470;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     font-weight: 700;
     background: #ffffff;
     border: 1px solid #d8dce2;
@@ -60,7 +60,7 @@
 
 .profile-card h2 {
     margin: 0 0 0.875rem;
-    font-size: 1.25rem;
+    font-size: var(--fs-lead);
     line-height: 1.35;
     font-weight: 900;
     letter-spacing: -.04em;
@@ -83,7 +83,7 @@
 .profile-tags span {
     padding: 0.3125rem 0.4375rem;
     color: #ffffff;
-    font-size: 0.6875rem;
+    font-size: var(--fs-tag);
     font-weight: 700;
     /* 카드 배경보다 살짝 밝게 해서 알약이 떠 보이게 한다 */
     background: rgba(255, 255, 255, .18);
@@ -102,14 +102,14 @@
     margin: 0.875rem 0 0;
     padding-top: 0.75rem;
     color: rgba(255, 255, 255, .82);
-    font-size: 0.6875rem;
+    font-size: var(--fs-tag);
     border-top: 1px solid rgba(255, 255, 255, .22);
 }
 
 /* ---------- 구역 제목 ---------- */
 .section-title {
     margin: 1.5rem 0 0.75rem;
-    font-size: 1.0625rem;
+    font-size: var(--fs-card);
     font-weight: 900;
     letter-spacing: -.03em;
 }
@@ -151,7 +151,7 @@
     min-width: 2.125rem;
     padding: 0.3125rem 0;
     color: #9a9ea5;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     font-weight: 800;
     background: #f0f2f5;
     border-radius: 9px;
@@ -181,7 +181,7 @@
 .sport-score b {
     display: block;
     color: #345f9f;
-    font-size: 1.25rem;
+    font-size: var(--fs-lead);
     font-weight: 900;
     line-height: 1.1;
     /* 숫자 폭을 고정해 카드마다 오른쪽 끝이 맞게 한다 */
@@ -192,7 +192,7 @@
     display: block;
     margin-top: 0.125rem;
     color: #a1a5ab;
-    font-size: 0.625rem;
+    font-size: var(--fs-tag);
     font-weight: 700;
 }
 
@@ -201,7 +201,7 @@
     padding: 2.25rem 1.25rem;
     text-align: center;
     color: #9a9ea5;
-    font-size: 0.8125rem;
+    font-size: var(--fs-meta);
     line-height: 1.6;
     background: #f7f8f9;
     border-radius: var(--card-radius);
@@ -229,13 +229,13 @@
 
 .detail-top span {
     color: #a1a5ab;
-    font-size: 0.8125rem;
+    font-size: var(--fs-meta);
     font-weight: 700;
 }
 
 .detail-name {
     margin: 0 0 0.375rem;
-    font-size: 1.875rem;
+    font-size: var(--fs-title);
     font-weight: 900;
     letter-spacing: -.045em;
 }
@@ -243,7 +243,7 @@
 .detail-trait {
     margin: 0 0 1.125rem;
     color: #9a9ea5;
-    font-size: 0.875rem;
+    font-size: var(--fs-sub);
 }
 
 /* ---------- 지표 3개 ---------- */
@@ -266,12 +266,12 @@
     display: block;
     margin-bottom: 0.25rem;
     color: #a1a5ab;
-    font-size: 0.6875rem;
+    font-size: var(--fs-tag);
 }
 
 .stat-box b {
     display: block;
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
     font-weight: 800;
     font-variant-numeric: tabular-nums;
 }
@@ -312,7 +312,7 @@
 
 .facility-name {
     display: block;
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
     font-weight: 800;
     letter-spacing: -.02em;
     overflow: hidden;
@@ -324,7 +324,7 @@
     display: block;
     margin-top: 0.3125rem;
     color: #a1a5ab;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -334,7 +334,7 @@
     flex: 0 0 auto;
     padding: 0.25rem 0.5625rem;
     color: #2f5691;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     background: #eaf1fb;
@@ -358,7 +358,7 @@
 
 .program-name {
     display: block;
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
     font-weight: 800;
     letter-spacing: -.02em;
 }
@@ -367,7 +367,7 @@
     display: block;
     margin-top: 0.3125rem;
     color: #a1a5ab;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     line-height: 1.4;
 }
 
@@ -379,7 +379,7 @@
     overflow: hidden;
     margin-top: 0.3125rem;
     color: #8a6d1f;
-    font-size: 0.6875rem;
+    font-size: var(--fs-tag);
     line-height: 1.45;
     white-space: pre-line;
 }
@@ -387,7 +387,7 @@
 .program-fee {
     flex: 0 0 auto;
     color: #2f5691;
-    font-size: 1rem;
+    font-size: var(--fs-body);
     font-weight: 900;
     font-variant-numeric: tabular-nums;
 }
@@ -405,14 +405,14 @@
 .section-title small {
     margin-left: 0.375rem;
     color: #a1a5ab;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     font-weight: 700;
 }
 
 .data-notice {
     margin: 0.75rem 0 0;
     color: #a1a5ab;
-    font-size: 0.6875rem;
+    font-size: var(--fs-tag);
     line-height: 1.5;
     text-align: right;
 }
@@ -423,7 +423,7 @@
     padding: 0.75rem;
     color: #5c6470;
     font: inherit;
-    font-size: 0.8125rem;
+    font-size: var(--fs-meta);
     font-weight: 700;
     background: #f7f8f9;
     border: 1px solid var(--card-line);

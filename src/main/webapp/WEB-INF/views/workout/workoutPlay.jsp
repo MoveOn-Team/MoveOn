@@ -13,7 +13,7 @@
 <main class="auth-shell workout-shell">
     <!-- 상단 헤더 & 진행 바 -->
     <div class="play-header">
-        <a href="javascript:history.back()" class="btn-back-arrow">＜</a>
+        <a href="javascript:history.back()" class="back-button" aria-label="뒤로 가기">&#8249;</a>
         <span class="play-status-text" id="statusText">동작 3/6 · 남은 14분</span>
         <button type="button" class="btn-pause">일시정지</button>
     </div>
