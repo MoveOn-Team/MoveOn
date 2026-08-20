@@ -4,6 +4,54 @@
     --auth-primary: #345f9f;
     --auth-error: #e2464f;
     --auth-ok: #438f62;
+
+    /* ---------- 화면 폭 ----------
+       안드로이드 WebView 로 감싸면 실제로는 늘 기기 폭(100%)이다.
+       이 값은 PC 브라우저에서 볼 때만 쓰인다. 여기서 더 넓어지면
+       모바일 도안이 한가운데 덩그러니 늘어나서 보기 나쁘다.
+
+       본문과 탭바가 같은 값을 봐야 한다.
+       따로 적어 두면 한쪽만 고치게 되고, 실제로 그래서
+       본문 393px · 탭바 430px 로 어긋나 있었다. */
+    --app-w: 26.875rem;
+    --tabbar-h: 4rem;
+
+    /* ---------- 카드 ----------
+       추천·행사·즉시운동 세 탭이 모두 같은 모양의 카드를 쓴다.
+       탭마다 따로 적어 두면 굵기와 글씨가 조금씩 어긋난다.
+       실제로 테두리색이 세 탭에서 #e6e9ee / #dedcd5 로 갈렸고
+       모서리도 16px 과 20px 로 달랐다. 값은 추천 탭에 맞췄다. */
+    --card-bg: #ffffff;
+    --card-line: #e6e9ee;
+    /* 세그먼트 버튼·진행 막대처럼 '무언가가 얹히는 바탕' 색.
+       전에는 #eae8e1 같은 모래색이었는데, 카드 선(#e6e9ee)이 푸른 기가 도는 회색이라
+       한 화면에서 두 계열이 섞여 지저분했다. 같은 계열로 맞춘다. */
+    --track-bg: #f0f2f5;
+    /* 표 안의 가로 구분선. 카드 선보다 한 단 연하다 */
+    --divider: #f1f3f5;
+    --card-radius: 1rem;
+    --card-pad-y: 1rem;
+    --card-pad-x: 1.125rem;
+    --card-gap: 0.625rem;
+    --card-title: var(--fs-card);
+
+    /* ---------- 글씨 크기 ----------
+       같은 자리에는 같은 크기를 쓴다.
+       탭마다 따로 적어 두면 조금씩 어긋나고, 탭을 옮길 때마다 글씨가 들썩인다.
+       실제로 목록 카드 제목이 행사 탭만 0.9375rem 이었고,
+       상세 제목은 세 탭이 1.875 / 1.25 / 1.375rem 으로 다 달랐다.
+
+       여덟 단이면 충분하다. 더 잘게 나누면 어느 것을 쓸지 매번 고민하게 되고,
+       고민이 길어지면 결국 아무 값이나 적게 된다. */
+    --fs-title: 1.375rem;    /* 화면 맨 위 제목 (목록·상세 모두) */
+    --fs-hero: 1.625rem;     /* 그 화면의 주인공 숫자 하나 */
+    --fs-lead: 1.25rem;      /* 카드 안 큰 제목 */
+    --fs-card: 1.0625rem;    /* 목록 카드 제목, 구역 제목 */
+    --fs-body: 0.9375rem;    /* 본문, 버튼 */
+    --fs-sub: 0.875rem;      /* 탭 버튼, 고르는 버튼 */
+    --fs-meta: 0.8125rem;    /* 정보표 값, 안내 상자 */
+    --fs-cap: 0.75rem;       /* 장소·거리·날짜 같은 곁들이 설명 */
+    --fs-tag: 0.6875rem;     /* 태그, 배지, 꼬리말 */
 }
 
 * {
@@ -48,6 +96,28 @@ button {
 }
 
 /* ---------------------------------------------------------------------
+   화면 맨 위 제목 (네 탭 공통)
+
+   전에는 탭마다 따로 적어 두어 굵기와 자간이 어긋나 있었다.
+       추천     900 / -0.04em
+       행사     800 / -0.02em
+       즉시운동  800 / -0.02em
+       내 정보   규칙 자체가 없어 브라우저 기본값(30px, 700)이 나왔다
+
+   한 곳에서 정하고 각 탭은 자리 잡는 일만 한다.
+   --------------------------------------------------------------------- */
+.page-head h1,
+.event-header h1,
+.workout-header h1,
+.page-title {
+    margin: 0;
+    font-size: var(--fs-title);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #17191c;
+}
+
+/* ---------------------------------------------------------------------
    15. 회원 인증 화면
    Figma 도안(Android 412 x 915)을 옮기되 폭·높이는 기기에 맞춰 늘어나게 했다.
    앱 WebView 로 감쌌을 때 기기마다 다시 맞출 필요가 없도록,
@@ -62,7 +132,7 @@ button {
     display: flex;
     flex-direction: column;
     width: 100%;    /* 화면 꽉차게 */
-    max-width: 30rem;   /* 단, 넓은 화면에서는 여기서 멈춤 */
+    max-width: var(--app-w);   /* 단, 넓은 화면에서는 여기서 멈춤 */
     min-height: 100dvh;
     margin: 0 auto;     /* 가운데 정렬만 남김 */
     padding: 2.625rem 1.5rem 2.125rem;    /* 좌우 여백 padding 이 담당 */
@@ -277,7 +347,7 @@ button {
     padding: 0 1.125rem;
     font-size: 1rem;
     font-weight: 700;
-    border-radius: 12px;
+    border-radius: var(--card-radius);
 }
 
 .primary-button {
@@ -533,15 +603,15 @@ button {
 }
 
 /* ---------------------------------------------------------------------
-   17. 지역 스포츠 행사 (목록 및 상세)
+   17. 앱 셸 (마이페이지 · 운동리포트가 쓴다)
    --------------------------------------------------------------------- */
 
-/* 1. 메인 앱 컨테이너 (고정 휴대폰 틀, 배경 shadow 제거) */
+/* 메인 앱 컨테이너 */
 .app-shell {
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width: 430px; /* PC에서도 너무 퍼지지 않는 모바일 최적 너비 */
+    max-width: var(--app-w); /* 본문·탭바가 같은 값을 본다 */
     min-height: 100vh;
     margin: 0 auto;
     padding: 24px 20px 90px; /* 하단 탭바 여백 확보 */
@@ -566,326 +636,6 @@ button {
 }
 
 /* 상단 헤더 & 필터 */
-.event-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-top: 10px;
-    margin-bottom: 6px;
-}
-
-.event-header h1 {
-    font-size: 26px;
-    font-weight: 900;
-    margin: 0;
-    color: #17191c;
-}
-
-.refresh-badge {
-    padding: 6px 14px;
-    background: #ffffff;
-    border: 1px solid #e2e0da;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #e08b29;
-}
-
-.event-subtext {
-    font-size: 12px;
-    color: #9ea0a5;
-    margin: 0 0 16px 0;
-}
-
-/* Tab Switcher */
-.tab-group {
-    display: flex;
-    background: #eae8e1;
-    border-radius: 14px;
-    padding: 4px;
-    margin-bottom: 16px;
-}
-
-.tab-btn {
-    flex: 1;
-    padding: 10px 0;
-    border: none;
-    background: transparent;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #83858a;
-}
-
-.tab-btn.active {
-    background: #ffffff;
-    color: #e08b29;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-/* 행사 목록 카드 */
-.event-card-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.event-card {
-    display: flex;
-    background: #ffffff;
-    border: 1px solid #dedcd5;
-    border-radius: 20px;
-    padding: 16px;
-    gap: 14px;
-    position: relative;
-}
-
-.event-card.highlight {
-    border: 2px solid #e08b29;
-}
-
-/* 카드 좌측 날짜 영역 */
-.event-date-box {
-    width: 68px;
-    height: 80px;
-    background: #f7f3eb;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.event-date-box .month {
-    font-size: 11px;
-    color: #e08b29;
-    font-weight: 700;
-}
-
-.event-date-box .day {
-    font-size: 22px;
-    color: #e08b29;
-    font-weight: 900;
-    line-height: 1.1;
-}
-
-.event-date-box .weekday {
-    font-size: 11px;
-    color: #e08b29;
-    font-weight: 700;
-}
-
-.event-card.expired .event-date-box {
-    background: #eaeaea;
-}
-.event-card.expired .event-date-box * {
-    color: #a0a0a0;
-}
-
-/* 카드 우측 정보 영역 */
-.event-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.event-title {
-    font-size: 15px;
-    font-weight: 800;
-    color: #17191c;
-    margin: 0 0 4px 0;
-}
-
-.event-location {
-    font-size: 12px;
-    color: #9ea0a5;
-    margin-bottom: 8px;
-}
-
-.event-tags {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.tag-spec {
-    padding: 3px 8px;
-    border: 1px solid #e2e0da;
-    border-radius: 12px;
-    font-size: 11px;
-    color: #55585d;
-}
-
-.tag-status {
-    padding: 3px 8px;
-    background: #fdf3e7;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #e08b29;
-}
-
-.event-price {
-    align-self: flex-end;
-    font-size: 11px;
-    color: #9ea0a5;
-    margin-top: auto;
-}
-
-/* ---------------------------------------------------------------------
-   상세 페이지 (두 번째 이미지)
-   --------------------------------------------------------------------- */
-
-.detail-header-card {
-    background: #fdf3e7;
-    border-radius: 20px;
-    padding: 20px;
-    margin-top: 10px;
-    margin-bottom: 16px;
-}
-
-.detail-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    background: #e08b29;
-    color: #ffffff;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-.detail-title {
-    font-size: 20px;
-    font-weight: 900;
-    color: #17191c;
-    margin: 0 0 6px 0;
-}
-
-.detail-sub {
-    font-size: 12px;
-    color: #9ea0a5;
-    margin: 0;
-}
-
-/* 정보 테이블 스타일 */
-.info-table-card {
-    background: #ffffff;
-    border: 1px solid #dedcd5;
-    border-radius: 20px;
-    overflow: hidden;
-    margin-bottom: 16px;
-}
-
-.info-row {
-    display: flex;
-    padding: 14px 18px;
-    border-bottom: 1px solid #f0eee8;
-    align-items: center;
-}
-
-.info-row:last-child {
-    border-bottom: none;
-}
-
-.info-label {
-    width: 80px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #9ea0a5;
-}
-
-.info-val {
-    flex: 1;
-    font-size: 13px;
-    font-weight: 700;
-    color: #17191c;
-}
-
-.info-val.highlight-text {
-    color: #e08b29;
-}
-
-/* 안내 알림 박스 */
-.notice-box {
-    background: #fdf3e7;
-    border: 1px solid #e08b29;
-    border-radius: 16px;
-    padding: 14px;
-    font-size: 12px;
-    color: #e08b29;
-    font-weight: 700;
-    line-height: 1.4;
-    text-align: center;
-    margin-bottom: 16px;
-}
-
-/* 하단 버튼 그룹 */
-.detail-btn-group {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.btn-location {
-    flex: 1;
-    height: 48px;
-    background: #ffffff;
-    border: 1px solid #dedcd5;
-    border-radius: 14px;
-    font-size: 15px;
-    font-weight: 800;
-    color: #33363b;
-}
-
-.btn-external {
-    flex: 1.2;
-    height: 48px;
-    background: #e08b29;
-    border: none;
-    border-radius: 14px;
-    font-size: 15px;
-    font-weight: 800;
-    color: #ffffff;
-}
-
-/* ---------------------------------------------------------------------
-   하단 고정 네비게이션 바 (공통)
-   --------------------------------------------------------------------- */
-
-.bottom-nav {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    height: 64px;
-    background: #ffffff;
-    border-top: 1px solid #f0eee8;
-    margin: 0 -20px;
-    padding: 0 10px;
-}
-
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    color: #a0a4a8;
-    font-size: 11px;
-    text-decoration: none;
-}
-
-.nav-item.active {
-    color: #e08b29;
-    font-weight: 700;
-}
-
-.nav-item svg {
-    width: 22px;
-    height: 22px;
-    fill: currentColor;
-}
 
 .input-group input {
     border: 0;
@@ -1114,7 +864,7 @@ button {
     flex: 1;
     height: 3.25rem;
     border: 1px solid #345f9f;
-    border-radius: 16px;
+    border-radius: var(--card-radius);
     background: #ffffff;
     color: #345f9f;
     font-size: 0.9375rem;
@@ -1125,7 +875,7 @@ button {
     flex: 1;
     height: 3.25rem;
     border: none;
-    border-radius: 16px;
+    border-radius: var(--card-radius);
     background: #a8b8d4; /* 입력 미완성 시 색상 */
     color: #ffffff;
     font-size: 0.9375rem;
@@ -1199,11 +949,14 @@ button {
     color: #888;
     margin-top: 4px;
 }
+/* 작은 알약 버튼. 추천 탭의 .chip-button 과 같은 모양이다. */
+/* '수정' 같은 작은 버튼은 카드가 아니라 알약이다.
+   추천 탭의 .chip-button 과 같은 모양을 쓴다. */
 .btn-edit-profile {
-    border: 1px solid #E5E7EB;
+    border: 1px solid var(--card-line);
     background: #fff;
     padding: 6px 14px;
-    border-radius: 20px;
+    border-radius: 999px;
     font-size: 13px;
     color: #6B7280;
     cursor: pointer;
@@ -1215,13 +968,21 @@ button {
     grid-template-columns: 1fr 1fr 1fr;
     gap: 10px;
 }
+/* 흰 배경 위의 흰 카드라 테두리가 없으면 아무것도 안 보인다.
+   다른 탭 카드와 같은 선·모서리를 쓴다. */
 .stat-card {
-    background: #fff;
-    border-radius: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
     padding: 14px 12px;
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+/* BMI 칸은 보라로 채우므로 선이 겹쳐 보인다. 색만 맞춰 준다. */
+.stat-card.bmi-card {
+    border-color: #6C5CE7;
 }
 .stat-card.bmi-card {
     background: #6C5CE7;
@@ -1260,8 +1021,8 @@ button {
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
-    border-radius: 14px;
-    border: 1px solid #E5E7EB;
+    border-radius: var(--card-radius);
+    border: 1px solid var(--card-line);
 }
 .workout-item.completed {
     border-color: #6C5CE7;
@@ -1295,8 +1056,8 @@ button {
     margin-top: 10px;
     padding: 10px;
     background: #F9FAFB;
-    border: 1px solid #F3F4F6;
-    border-radius: 12px;
+    border: 1px solid var(--divider);
+    border-radius: var(--card-radius);
     font-size: 13px;
     color: #4B5563;
     display: flex;
@@ -1310,7 +1071,7 @@ button {
     width: 32px;
     height: 32px;
     border-radius: 10px;
-    border: 1px solid #E5E7EB;
+    border: 1px solid var(--card-line);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1330,7 +1091,7 @@ button {
     justify-content: space-between;
     align-items: center;
     padding: 14px 0;
-    border-bottom: 1px solid #F3F4F6;
+    border-bottom: 1px solid var(--divider);
     text-decoration: none;
     color: #111;
     font-size: 14px;
@@ -1339,73 +1100,9 @@ button {
 .menu-item.logout-item { color: #9CA3AF; }
 .menu-item .arrow { color: #D1D5DB; }
 
-/* =========================================================
-   공통 하단 탭바 (tabbar.jsp) 스타일 & SVG 크기 고정
-   ========================================================= */
-/* 2. 하단 공통 탭바 (화면 하단 정렬) */
-.tabbar {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 430px; /* .app-shell과 동일한 너비 지정 */
-    height: 65px;
-    background: #ffffff;
-    border-top: 1px solid #F3F4F6;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 1000;
-    padding-bottom: 5px;
-    box-sizing: border-box;
-}
-
-.tab-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    text-decoration: none;
-    color: #9CA3AF;
-    font-size: 11px;
-    font-weight: 500;
-    cursor: pointer;
-}
-
-/* 활성화된 탭 색상 */
-.tab-item {
-    color: #A5AAA3;
-}
-
-/* SVG 아이콘 및 경로 색상을 글자색(currentColor)과 동기화 */
-.tab-item svg,
-.tab-item svg path {
-    fill: currentColor !important;
-}
-
-/* 탭별 개별 활성화 색상 */
-.tab-item.recommend.is-on { color: #2F5597 !important; font-weight: 700; }
-.tab-item.workout.is-on   { color: #4A9A72 !important; font-weight: 700; }
-.tab-item.event.is-on     { color: #D98F2B !important; font-weight: 700; }
-.tab-item.mypage.is-on    { color: #7C6CE0 !important; font-weight: 700; }
-
-.tab-item.is-todo {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* ★ 거대해진 SVG 아이콘 크기 및 스타일 고정 ★ */
-.tab-item svg {
-    width: 24px !important;
-    height: 24px !important;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
+/* 탭바는 이 파일 맨 아래에 한 번만 정의한다. 여기 있던 것은 그 사본이었다.
+   .tab-item svg 에 width/height 24px !important 를 걸어,
+   세로로 긴 즉시운동 아이콘(viewBox 25x31)을 정사각형으로 찌그러뜨리고 있었다. */
 
 /* =========================================================
    마이페이지 스크롤 및 모달 레이어 스타일
@@ -1442,7 +1139,7 @@ button {
 .modal-content {
     background: #FAFAFD;
     width: 100%;
-    max-width: 430px; /* 탭바 너비와 동일 */
+    max-width: var(--app-w);
     max-height: 85vh;
     border-radius: 24px 24px 0 0;
     padding: 20px;
@@ -1470,8 +1167,8 @@ button {
 .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip-group .chip {
     padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid #E5E7EB;
+    border-radius: 999px;
+    border: 1px solid var(--card-line);
     background: #fff;
     font-size: 13px;
     color: #4B5563;
@@ -1487,7 +1184,7 @@ button {
 .calorie-box {
     background: #F0EEFF;
     border: 1px solid #C6C0F9;
-    border-radius: 16px;
+    border-radius: var(--card-radius);
     padding: 16px;
     text-align: center;
 }
@@ -1497,16 +1194,16 @@ button {
 .input-card input, .input-card textarea {
     width: 100%;
     padding: 12px 14px;
-    border: 1px solid #E5E7EB;
-    border-radius: 12px;
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
     background: #fff;
     font-size: 13px;
     box-sizing: border-box;
 }
 
 .modal-footer { display: flex; gap: 10px; margin-top: 10px; }
-.btn-modal-cancel { flex: 1; padding: 14px; background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; font-weight: 700; }
-.btn-modal-submit { flex: 1.5; padding: 14px; background: #8075F0; color: #fff; border: none; border-radius: 14px; font-weight: 700; }
+.btn-modal-cancel { flex: 1; padding: 14px; background: #fff; border: 1px solid var(--card-line); border-radius: var(--card-radius); font-weight: 700; }
+.btn-modal-submit { flex: 1.5; padding: 14px; background: #8075F0; color: #fff; border: none; border-radius: var(--card-radius); font-weight: 700; }
 
 /* =========================================================
    운동 리포트 전용 스타일
@@ -1524,7 +1221,7 @@ button {
 .report-banner-card {
     background: #6C5CE7;
     color: #fff;
-    border-radius: 20px;
+    border-radius: var(--card-radius);
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -1566,7 +1263,7 @@ button {
 
 /* 많이 한 종목 & 상세 통계 */
 .rank-list { list-style: none; padding: 0; margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
-.rank-list li { display: flex; justify-content: space-between; font-size: 14px; border-bottom: 1px solid #F3F4F6; padding-bottom: 8px; }
+.rank-list li { display: flex; justify-content: space-between; font-size: 14px; border-bottom: 1px solid var(--divider); padding-bottom: 8px; }
 .rank-list li:last-child { border-bottom: none; padding-bottom: 0; }
 .rank-name { font-weight: 600; color: #374151; }
 .rank-value { color: #6B7280; font-size: 13px; }
@@ -1576,366 +1273,86 @@ button {
 .detail-row span { color: #6B7280; }
 .detail-row strong { color: #111; }
 
-/* =========================================================
-   하단 공통 탭바 정렬 & 아이콘 크기 완전 고정
-   ========================================================= */
+/* =====================================================================
+   하단 탭바 (4개 화면 공통)
+
+   전에는 이 아래로 탭바를 다섯 번 다시 정의하고 있었다.
+   "완전 고정", "강제 통일", "완벽 수정" 이라는 제목을 달고
+   앞의 것을 !important 로 덮어쓰는 식이라, 폭이 430 → 393 → 430 으로 오갔다.
+   그 결과 본문은 393px, 탭바는 430px 이 되어 화면을 넓히면 탭바만 삐져나왔다.
+
+   그래서 다섯 덩어리를 이 하나로 합쳤다.
+   덮어쓸 상대가 없으니 !important 도 필요 없다.
+   ===================================================================== */
+
 .tabbar {
     position: fixed;
-    bottom: 0;
     left: 50%;
+    bottom: 0;
     transform: translateX(-50%);
-    width: 100%;
-    max-width: 430px; /* 모든 페이지 공통 너비 */
-    height: 64px;
-    background: #ffffff;
-    border-top: 1px solid #F3F4F6;
-    display: flex;
-    justify-content: space-around; /* 4개 탭 균등 분배 */
-    align-items: center;
     z-index: 1000;
-    padding: 0 10px 4px 10px;
-    box-sizing: border-box;
+
+    display: flex;
+    width: 100%;
+    /* 본문과 같은 값을 쓴다. 따로 적어 두면 한쪽만 고치게 된다. */
+    max-width: var(--app-w);
+    height: var(--tabbar-h);
+
+    background: #ffffff;
+    border-top: 1px solid #ebedf0;
+    /* 아이폰 아래쪽 가로줄에 가리지 않게 그만큼 더 띄운다 */
+    padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
-/* 탭 버튼 개별 아이템 정렬 */
-.tab-item {
-    flex: 1; /* 4개 탭이 정확히 1:1:1:1 비율을 가짐 */
+.tabbar .tab-item {
     display: flex;
+    flex: 1;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    text-decoration: none;
-    color: #9CA3AF;
-    font-size: 11px;
-    font-weight: 500;
-    cursor: pointer;
+    gap: 0.25rem;
     height: 100%;
+    color: #b0b5bc;
+    font-size: 0.6875rem;
+    font-weight: 600;
 }
 
-/* 활성화 탭 색상 */
-.tab-item.is-on {
-    color: #6C5CE7;
-    font-weight: 700;
-}
+/* 아이콘은 파일마다 viewBox 가 달라 그대로 두면 크기가 제각각이다.
+   맞추는 기준은 '높이' 다. 네 아이콘이 한 줄에 나란히 서므로
+   높이가 같아야 줄이 맞아 보인다.
 
-/* 아이콘 SVG 완벽 고정 (페이지 전환 시 커짐/틀어짐 방지) */
-.tab-item svg {
-    width: 22px !important;
-    height: 22px !important;
-    min-width: 22px !important;
-    min-height: 22px !important;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+   폭을 기준으로 잡으면 안 된다. 즉시운동만 세로로 긴 도안(25x31)이라
+   폭을 맞추는 순간 혼자 아래로 삐져나오고, 높이까지 함께 고정하면
+   가로로 눌려 찌그러진다. 전에 그래서 24x24 로 눌려 있었다. */
+.tabbar .tab-item svg {
     display: block;
+    width: auto;
+    height: 1.5rem;
 }
 
-/* =========================================================
-   전체 페이지 레이아웃 및 하단 탭바 규격 강제 통일 (CSS 전용)
-   ========================================================= */
-
-/* 1. 모든 메인 화면 레이아웃 폭 및 여백 통일 */
-.app-shell,
-.auth-shell,
-.mypage-shell,
-.report-shell,
-.app-container {
-    width: 100% !important;
-    max-width: 393px !important; /* 전체 화면 폭 393px로 완전 통일 */
-    margin: 0 auto !important;   /* 화면 중앙 정렬 */
-    box-sizing: border-box !important;
+.tabbar .tab-item svg path {
+    fill: currentColor;
+    stroke: none;
 }
 
-/* 2. 하단 탭바 위치 및 크기 완전 고정 */
-.tabbar,
-.bottom-nav {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important; /* 중앙 정렬 */
-    width: 100% !important;
-    max-width: 393px !important; /* 메인 레이아웃과 동일한 너비 */
-    height: 64px !important;
-    background: #ffffff !important;
-    border-top: 1px solid #F3F4F6 !important;
-    display: flex !important;
-    justify-content: space-around !important;
-    align-items: center !important;
-    z-index: 1000 !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
-}
+/* ---------- 켜진 탭의 색 ----------
+   탭마다 그 화면의 강조색을 쓴다. 지금 어디에 있는지 색으로도 알 수 있다. */
+.tabbar .tab-item.recommend.is-on { color: #2e65d8; }
+.tabbar .tab-item.workout.is-on   { color: #4a9a72; }
+.tabbar .tab-item.event.is-on     { color: #d97706; }
+.tabbar .tab-item.mypage.is-on    { color: #7c3aed; }
 
-/* 3. 탭바 내부 아이템 균등 분배 */
-.tabbar > *,
-.bottom-nav > * {
-    flex: 1 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-align: center !important;
-}
 
-/* 4. 탭바 내 SVG / 이미지 / 아이콘 크기 고정 (일렁임/대형화 방지) */
-.tabbar svg, .bottom-nav svg,
-.tabbar img, .bottom-nav img,
-.tab-item svg, .nav-item svg {
-    width: 22px !important;
-    height: 22px !important;
-    min-width: 22px !important;
-    min-height: 22px !important;
-    max-width: 22px !important;
-    max-height: 22px !important;
-    display: block !important;
-    margin: 0 auto !important;
-}
-
-/* =========================================================
-   하단 탭바 SVG 아이콘 잘림 및 두꺼워짐 현상 완벽 수정
-   ========================================================= */
-
-/* 1. SVG 크기 및 잘림 방지 (세로가 긴 '즉시운동' 아이콘 비율 보존) */
-.tabbar svg,
-.bottom-nav svg,
-.tab-item svg {
-    width: 24px !important;
-    height: auto !important;          /* 고정 높이를 풀어 찌그러짐 방지 */
-    max-height: 26px !important;
-    overflow: visible !important;     /* 사각형 테두리 잘림 현상 방지 */
-    display: block !important;
-    margin: 0 auto !important;
-}
-
-/* 2. 아이콘 두꺼워짐 원인 제거 (외곽선 stroke 제거 및 면 fill 고정) */
-.tab-item svg path {
-    fill: currentColor !important;
-    stroke: none !important;           /* 굵게 만들던 stroke 테두리 강제 제거 */
-}
-
-/* =========================================================
-   전체 페이지 브라우저 스크롤바 숨기기 (스크롤 동작은 유지)
-   ========================================================= */
-html, body {
-    -ms-overflow-style: none;  /* IE, Edge legacy */
-    scrollbar-width: none;     /* Firefox */
+/* =====================================================================
+   브라우저 스크롤 막대 감추기 (스크롤 자체는 그대로)
+   ===================================================================== */
+html,
+body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
-    display: none;             /* Chrome, Safari, Opera */
-}
-
-/* =========================================================
-   하단 탭바 고유 색상 스타일 (강제 적용)
-   ========================================================= */
-.tabbar {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 430px;
-    height: 65px;
-    background-color: #FFFFFF;
-    border-top: 1px solid #E5E5EA;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    z-index: 1000;
-}
-
-.tab-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: #8E8E93 !important; /* 기본 회색 */
-    gap: 4px;
-    flex: 1;
-}
-
-.tab-item svg path {
-    fill: currentColor;
-}
-
-.tab-item span {
-    font-size: 11px;
-    font-weight: 600;
-}
-
-/* --- 탭별 활성화(is-on) 고유 색상 --- */
-
-/* 1. 추천 탭 (파란색) */
-.tab-item.recommend.is-on,
-.tab-item.recommend.is-on span {
-    color: #2E65D8 !important;
-}
-.tab-item.recommend.is-on svg path {
-    fill: #2E65D8 !important;
-}
-
-/* 2. 즉시운동 탭 (초록색) */
-.tab-item.workout.is-on,
-.tab-item.workout.is-on span {
-    color: #4A9A72 !important;
-}
-.tab-item.workout.is-on svg path {
-    fill: #4A9A72 !important;
-}
-
-/* 3. 행사 탭 (주황색) */
-.tab-item.event.is-on,
-.tab-item.event.is-on span {
-    color: #D97706 !important;
-}
-.tab-item.event.is-on svg path {
-    fill: #D97706 !important;
-}
-
-/* 4. 내정보 탭 (보라색) */
-.tab-item.mypage.is-on,
-.tab-item.mypage.is-on span {
-    color: #7C3AED !important;
-}
-.tab-item.mypage.is-on svg path {
-    fill: #7C3AED !important;
-}
-
-
-
-/* =========================================================
-   하단 탭바 통합 정렬 & 탭별 고유 색상
-   ========================================================= */
-.tabbar {
-    position: fixed !important;
-    left: 50% !important;
-    bottom: 0 !important;
-    transform: translateX(-50%) !important;
-    z-index: 1000 !important;
-    display: flex !important;
-    width: 100% !important;
-    max-width: 430px !important;
-    height: 65px !important;
-    background: #ffffff !important;
-    border-top: 1px solid #ebedf0 !important;
-    padding-bottom: env(safe-area-inset-bottom, 0) !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-}
-
-.tabbar .tab-item {
-    display: flex !important;
-    flex: 1 !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 4px !important;
-    height: 100% !important;
-    color: #b0b5bc !important; /* 기본 비활성 회색 */
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    text-decoration: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.tabbar .tab-item svg {
-    width: 25px !important;
-    height: 25px !important;
-    display: block !important;
-}
-
-.tabbar .tab-item span {
-    line-height: 1 !important;
-}
-
-/* --- 탭별 활성화 (is-on) 고유 색상 --- */
-
-/* 1. 추천 탭 (파란색) */
-.tabbar .tab-item.recommend.is-on,
-.tabbar .tab-item.recommend.is-on span {
-    color: #2E65D8 !important;
-}
-.tabbar .tab-item.recommend.is-on svg,
-.tabbar .tab-item.recommend.is-on svg * {
-    fill: #2E65D8 !important;
-}
-
-/* 2. 즉시운동 탭 (초록색) */
-.tabbar .tab-item.workout.is-on,
-.tabbar .tab-item.workout.is-on span {
-    color: #4A9A72 !important;
-}
-.tabbar .tab-item.workout.is-on svg,
-.tabbar .tab-item.workout.is-on svg * {
-    fill: #4A9A72 !important;
-}
-
-/* 3. 행사 탭 (주황색) */
-.tabbar .tab-item.event.is-on,
-.tabbar .tab-item.event.is-on span {
-    color: #D97706 !important;
-}
-.tabbar .tab-item.event.is-on svg,
-.tabbar .tab-item.event.is-on svg * {
-    fill: #D97706 !important;
-}
-
-/* 4. 내정보 탭 (보라색) */
-.tabbar .tab-item.mypage.is-on,
-.tabbar .tab-item.mypage.is-on span {
-    color: #7C3AED !important;
-}
-.tabbar .tab-item.mypage.is-on svg,
-.tabbar .tab-item.mypage.is-on svg * {
-    fill: #7C3AED !important;
-}
-
-/* =========================================================
-   탭별 활성화 (is-on) 고유 색상 강제 적용 (Stroke & Fill 완벽 대응)
-   ========================================================= */
-
-/* 1. 추천 탭 (파란색) */
-.tabbar .tab-item.recommend.is-on,
-.tabbar .tab-item.recommend.is-on span {
-    color: #2E65D8 !important;
-}
-.tabbar .tab-item.recommend.is-on svg,
-.tabbar .tab-item.recommend.is-on svg * {
-    fill: #2E65D8 !important;
-}
-
-/* 2. 즉시운동 탭 (초록색) */
-.tabbar .tab-item.workout.is-on,
-.tabbar .tab-item.workout.is-on span {
-    color: #4A9A72 !important;
-}
-.tabbar .tab-item.workout.is-on svg,
-.tabbar .tab-item.workout.is-on svg * {
-    fill: #4A9A72 !important;
-}
-
-/* 3. 행사 탭 (주황색) */
-.tabbar .tab-item.event.is-on,
-.tabbar .tab-item.event.is-on span {
-    color: #D97706 !important;
-}
-.tabbar .tab-item.event.is-on svg,
-.tabbar .tab-item.event.is-on svg * {
-    fill: #D97706 !important;
-}
-
-/* 4. 내정보 탭 (보라색) */
-.tabbar .tab-item.mypage.is-on,
-.tabbar .tab-item.mypage.is-on span {
-    color: #7C3AED !important;
-}
-.tabbar .tab-item.mypage.is-on svg,
-.tabbar .tab-item.mypage.is-on svg * {
-    fill: #7C3AED !important;
+    display: none;
 }

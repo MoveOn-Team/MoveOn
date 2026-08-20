@@ -1,541 +1,715 @@
-/* =========================================================
-   즉시 운동하기 (시설 / 야외 / 집) & 상세화면 전용 스타일
-   ========================================================= */
+@charset "UTF-8";
 
-/* body 배경색을 흰색(#FFFFFF)으로 변경하여 바깥쪽 경계선 제거 */
-body {
-    background-color: #FFFFFF !important;
-    margin: 0;
-    padding-bottom: 90px;
-}
-/* 상단 헤더 */
-.page-header {
-    padding: 20px 20px 10px 20px;
-}
-.page-title {
-    font-size: 24px;
-    font-weight: 800;
-    color: #111111;
-    margin: 0 0 6px 0;
-}
-.page-subtitle {
-    font-size: 13px;
-    color: #8E8E93;
-    margin: 0;
+/* ---------------------------------------------------------------------
+   즉시 운동하기 (SC-020 목록 / SC-021 상세 / SC-022 진행 / SC-023 완료)
+
+   화면 껍데기(.auth-page / .auth-shell)는 auth.css 를 그대로 쓴다.
+   크기는 recommend.css · event.css 와 같은 규칙으로 rem 을 쓴다.
+   px 로 고정하면 기기 글꼴을 키운 사람에게만 글자가 커지고 상자는 그대로라
+   줄이 넘치거나 잘린다. rem 은 html 의 font-size 를 따라 함께 늘어난다.
+
+   좌우 여백은 .auth-shell 이 한 번만 준다.
+   전에는 블록마다 padding: 0 20px 을 따로 줬는데, 그러면 새 블록을 넣을 때마다
+   같은 값을 다시 적어야 하고 하나만 빠뜨려도 줄이 어긋난다.
+
+   회색·선 색은 추천·행사 탭과 같은 값을 쓴다. 탭마다 다른 것은 강조색뿐이다.
+   즉시운동은 초록이다. 목업이 그렇게 잡혀 있다.
+   --------------------------------------------------------------------- */
+
+:root {
+    --workout-accent: #4a9a72;
+    --workout-accent-dark: #3d805e;
+    --workout-accent-bg: #eaf4ee;
+    --workout-muted: #9ea0a5;
 }
 
-/* 1. 상단 메인 탭 */
+/* 추천 탭의 .recommend-shell 과 같은 위·아래 여백을 쓴다. */
+.workout-shell {
+    padding-top: 1.75rem;
+    padding-bottom: calc(var(--tabbar-h) + 1.25rem);
+}
+
+
+/* =====================================================================
+   목록 화면
+   ===================================================================== */
+
+/* ---------- 맨 위 제목 줄 ---------- */
+.workout-header {
+    margin-bottom: 0.875rem;
+}
+
+.workout-header h1 {
+    margin-bottom: 0.375rem;
+}
+
+.workout-subtext {
+    margin: 0;
+    font-size: var(--fs-cap);
+    color: var(--workout-muted);
+}
+
+/* ---------- 시설 / 야외 / 집 ---------- */
 .main-tab-group {
     display: flex;
-    background: #EBECE8;
-    border-radius: 14px;
-    padding: 4px;
-    margin: 12px 20px;
-}
-.main-tab-btn {
-    flex: 1;
-    text-align: center;
-    padding: 10px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #8E8E93;
-    text-decoration: none;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-}
-.main-tab-btn.is-active {
-    background: #4A9A72;
-    color: #FFFFFF;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    padding: 0.25rem;
+    background: var(--track-bg);
+    border-radius: 0.875rem;
 }
 
-/* 2. 서브 태그 목록 */
+.main-tab-btn {
+    flex: 1;
+    padding: 0.625rem 0;
+    border-radius: 0.625rem;
+    font-size: var(--fs-sub);
+    font-weight: 700;
+    color: #83858a;
+    text-align: center;
+}
+
+.main-tab-btn.is-active {
+    background: #ffffff;
+    color: var(--workout-accent);
+}
+
+/* ---------- 종목 태그 ----------
+   종목이 다섯 개까지 늘어나 한 줄에 안 들어간다.
+   줄바꿈 대신 옆으로 밀리게 두고 스크롤바는 감춘다. */
 .sub-tag-group {
     display: flex;
-    gap: 8px;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
     overflow-x: auto;
-    padding: 4px 20px 16px 20px;
     scrollbar-width: none;
 }
+
 .sub-tag-group::-webkit-scrollbar {
     display: none;
 }
+
 .sub-tag-btn {
+    flex: none;
+    padding: 0.4375rem 0.875rem;
+    background: #ffffff;
+    border: 1px solid var(--card-line);
+    border-radius: 999px;
+    font-size: var(--fs-cap);
+    font-weight: 700;
+    color: #5c6470;
     white-space: nowrap;
-    padding: 7px 16px;
-    border-radius: 20px;
-    border: 1px solid #E5E5EA;
-    background: #FFFFFF;
-    color: #666666;
-    font-size: 13px;
     cursor: pointer;
 }
+
 .sub-tag-btn.is-active {
-    background: #4A9A72;
-    color: #FFFFFF;
-    border-color: #4A9A72;
-    font-weight: 600;
+    background: var(--workout-accent);
+    border-color: var(--workout-accent);
+    font-weight: 700;
+    color: #ffffff;
 }
 
-/* 3. 시설 목록 카드 */
+/* ---------- 시설 카드 ---------- */
 .facility-list {
-    padding: 0 20px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--card-gap);
 }
+
 .facility-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #FFFFFF;
-    border-radius: 16px;
-    padding: 20px;
-    text-decoration: none;
-    border: 1.5px solid transparent;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-}
-.facility-card.is-highlight {
-    border-color: #4A9A72;
-}
-.facility-name {
-    font-size: 16px;
-    font-weight: 700;
-    color: #111111;
-    margin: 0 0 6px 0;
-}
-.facility-address {
-    font-size: 13px;
-    color: #8E8E93;
-    margin: 0;
-}
-.distance-badge {
-    background: #E8F4EE;
-    color: #4A9A72;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 6px 12px;
-    border-radius: 12px;
-}
-
-/* =========================================================
-   상세 페이지 스타일
-   ========================================================= */
-
-.detail-header {
-    padding: 16px 20px 8px 20px;
-}
-.back-btn {
-    background: none;
-    border: none;
-    padding: 0;
+    gap: 0.75rem;
+    padding: var(--card-pad-y) var(--card-pad-x);
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
     cursor: pointer;
 }
 
-.detail-title-area {
-    padding: 0 20px 16px 20px;
-}
-.detail-title {
-    font-size: 22px;
-    font-weight: 800;
-    color: #111111;
-    margin: 0 0 8px 0;
-}
-.detail-subtext {
-    font-size: 13px;
-    color: #8E8E93;
-    margin: 0;
+/* 지금 고른 종목에 가장 잘 맞는 곳 하나를 표시한다.
+   추천 탭의 1위 카드와 같은 방식이다. 테두리를 2px 로 키우고
+   그만큼 안쪽을 줄여 옆 카드와 높이가 어긋나지 않게 한다. */
+.facility-card.is-highlight {
+    border-color: var(--workout-accent);
+    border-width: 2px;
+    padding: calc(var(--card-pad-y) - 1px) calc(var(--card-pad-x) - 1px);
 }
 
-/* 3개 요약 카드 */
+.facility-name {
+    margin: 0 0 0.375rem;
+    font-size: var(--card-title);
+    font-weight: 800;
+    letter-spacing: -.03em;
+    color: #17191c;
+}
+
+.facility-address,
+.trail-info {
+    margin: 0;
+    font-size: var(--fs-cap);
+    color: var(--workout-muted);
+}
+
+.trail-info {
+    margin-bottom: 0.25rem;
+}
+
+.trail-subinfo {
+    margin: 0;
+    font-size: var(--fs-cap);
+    color: #b0b2b6;
+}
+
+.distance-badge {
+    flex: none;
+    padding: 0.375rem 0.75rem;
+    background: var(--workout-accent-bg);
+    border-radius: 0.75rem;
+    font-size: var(--fs-cap);
+    font-weight: 700;
+    color: var(--workout-accent);
+}
+
+
+/* =====================================================================
+   상세 화면
+   ===================================================================== */
+
+.detail-header {
+    margin-bottom: 0.5rem;
+}
+
+
+.detail-title-area {
+    margin-bottom: 1rem;
+}
+
+.detail-title {
+    margin: 0 0 0.5rem;
+    font-size: var(--fs-title);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #17191c;
+}
+
+.detail-subtext {
+    margin: 0;
+    font-size: var(--fs-cap);
+    color: var(--workout-muted);
+}
+
+/* ---------- 요금 · 운영시간 세 칸 ---------- */
 .summary-card-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    padding: 0 20px 16px 20px;
-}
-.summary-card {
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 14px;
-    padding: 12px 8px;
-    text-align: center;
-}
-.summary-card .label {
-    display: block;
-    font-size: 11px;
-    color: #9CA3AF;
-    margin-bottom: 4px;
-}
-.summary-card .value {
-    display: block;
-    font-size: 13px;
-    font-weight: 700;
-    color: #111111;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
-/* 상세 표 */
-.info-table-box {
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 16px;
-    margin: 0 20px 16px 20px;
-    padding: 6px 16px;
+.summary-card {
+    padding: 0.75rem 0.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
+    text-align: center;
 }
+
+.summary-card .label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: var(--fs-tag);
+    color: var(--workout-muted);
+}
+
+.summary-card .value {
+    display: block;
+    font-size: var(--fs-body);
+    font-weight: 700;
+    color: #17191c;
+}
+
+/* ---------- 나머지 안내 ---------- */
+.info-table-box {
+    margin-bottom: 1rem;
+    padding: 0.375rem 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
+}
+
 .info-row {
     display: flex;
     justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid #F3F4F6;
-    font-size: 13px;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--divider);
+    font-size: var(--fs-meta);
 }
+
 .info-row:last-child {
     border-bottom: none;
 }
+
 .info-label {
-    color: #8E8E93;
+    flex: none;
+    color: var(--workout-muted);
 }
+
 .info-value {
-    color: #111111;
     font-weight: 600;
+    color: #17191c;
+    text-align: right;
 }
 
-/* 안내 박스 */
+/* 공공데이터의 요금·운영시간은 갱신이 늦다.
+   틀릴 수 있다는 것을 화면에서 먼저 밝혀야 한다. */
 .notice-alert-box {
-    background: #FFF8EE;
-    border: 1px solid #FFE3C2;
-    border-radius: 14px;
-    margin: 0 20px 20px 20px;
-    padding: 12px 16px;
-}
-.notice-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: #B57218;
-    margin: 0 0 2px 0;
-}
-.notice-desc {
-    font-size: 12px;
-    color: #D98F2B;
-    margin: 0;
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem;
+    background: #fdf3e7;
+    border: 1px solid #f2ddc0;
+    border-radius: 0.875rem;
 }
 
-/* 지도 영역 */
+.notice-title {
+    margin: 0 0 0.125rem;
+    font-size: var(--fs-meta);
+    font-weight: 700;
+    color: #a76c1c;
+}
+
+.notice-desc {
+    margin: 0;
+    font-size: var(--fs-cap);
+    color: #c08a3d;
+}
+
+/* ---------- 지도 자리 ----------
+   지도 API 를 붙이기 전까지 자리만 잡아 둔다. */
 .map-placeholder {
-    height: 120px;
-    background: repeating-linear-gradient(
-            45deg,
-            #EAECE9,
-            #EAECE9 10px,
-            #F2F4F1 10px,
-            #F2F4F1 20px
-    );
-    margin: 0 20px 8px 20px;
-    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 7.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--card-radius);
+    background: repeating-linear-gradient(45deg,
+            #eef0f3, #eef0f3 0.625rem,
+            #f7f8f9 0.625rem, #f7f8f9 1.25rem);
 }
+
 .map-pin {
-    width: 16px;
-    height: 16px;
-    background: #4A9A72;
-    border: 3px solid #FFFFFF;
+    width: 1rem;
+    height: 1rem;
+    background: var(--workout-accent);
+    border: 0.1875rem solid #ffffff;
     border-radius: 50%;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.15);
 }
+
 .map-sub-info {
-    font-size: 12px;
-    color: #8E8E93;
+    margin: 0 0 1.25rem;
+    font-size: var(--fs-cap);
+    color: var(--workout-muted);
     text-align: center;
-    margin: 0 0 20px 0;
 }
 
-/* 하단 버튼 2개 */
-.detail-action-btns {
-    display: flex;
-    gap: 10px;
-    padding: 0 20px 20px 20px;
-}
-.btn-outline {
-    flex: 1;
-    padding: 14px 0;
-    border-radius: 12px;
-    border: 1px solid #E5E7EB;
-    background: #FFFFFF;
-    font-size: 15px;
-    font-weight: 700;
-    color: #374151;
-    cursor: pointer;
-}
-.btn-primary {
-    flex: 1.5;
-    padding: 14px 0;
-    border-radius: 12px;
-    border: none;
-    background: #4A9A72;
-    font-size: 15px;
-    font-weight: 700;
-    color: #FFFFFF;
-    cursor: pointer;
-}
 
-/* 야외 둘레길 전용 텍스트 스타일 */
-.trail-info {
-    font-size: 13px;
-    font-weight: 500;
-    color: #8E8E93;
-    margin: 0 0 4px 0;
-}
-.trail-subinfo {
-    font-size: 12px;
-    color: #A5AAA3;
-    margin: 0;
-}
+/* =====================================================================
+   [집에서] 탭
+   ===================================================================== */
 
-/* 야외 전용: 하단 '지도로 코스 보기' 큰 버튼 */
-.btn-map-view {
-    width: 100%;
-    padding: 16px 0;
-    background-color: #4A9A72;
-    color: #FFFFFF;
-    font-size: 16px;
-    font-weight: 700;
-    border: none;
-    border-radius: 14px;
-    cursor: pointer;
-    margin-top: 8px;
-    margin-bottom: 20px;
-}
-
-.btn-map-view:active {
-    background-color: #3d805e;
-}
-
-/* =========================================================
-   [집에서] 탭 / 운동진행 / 운동결과 전용 스타일
-   ========================================================= */
-
-/* 강도 / 소요시간 선택 옵션 */
 .select-section {
-    margin-bottom: 16px;
+    margin-bottom: 1rem;
 }
+
 .section-label {
-    font-size: 13px;
-    color: #8E8E93;
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
+    font-size: var(--fs-meta);
+    color: var(--workout-muted);
 }
+
 .option-grid {
     display: flex;
-    gap: 8px;
+    gap: 0.5rem;
 }
+
 .option-btn {
     flex: 1;
-    padding: 12px 0;
-    border: 1px solid #E5E5EA;
-    border-radius: 12px;
-    background-color: #FFFFFF;
-    color: #8E8E93;
-    font-size: 14px;
+    padding: 0.75rem 0;
+    background: #ffffff;
+    border: 1px solid var(--card-line);
+    border-radius: 0.75rem;
+    font-size: var(--fs-sub);
     font-weight: 600;
+    color: #83858a;
     cursor: pointer;
 }
+
 .option-btn.is-active {
-    border-color: #4A9A72;
-    background-color: #F0F7F3;
-    color: #4A9A72;
+    background: var(--workout-accent-bg);
+    border-color: var(--workout-accent);
+    color: var(--workout-accent);
 }
 
-/* 운동 계획 만들기 버튼 */
-.btn-make-plan {
-    width: 100%;
-    padding: 14px 0;
-    background-color: #4A9A72;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 14px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-bottom: 20px;
-}
-
-/* 루틴 카드 */
+/* ---------- 만들어진 루틴 ---------- */
 .routine-group {
-    margin-bottom: 16px;
+    margin-bottom: 1rem;
 }
+
 .routine-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: #4A9A72;
-    margin-bottom: 6px;
     display: block;
+    margin-bottom: 0.375rem;
+    font-size: var(--fs-cap);
+    font-weight: 700;
+    color: var(--workout-accent);
 }
+
 .routine-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5EA;
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 8px;
-    font-size: 14px;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    padding: 0.875rem 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
+    font-size: var(--fs-sub);
     font-weight: 600;
-    color: #1C1C1E;
+    color: #17191c;
 }
+
 .count-badge {
-    font-size: 12px;
-    color: #8E8E93;
+    flex: none;
+    font-size: var(--fs-cap);
     font-weight: 500;
+    color: var(--workout-muted);
 }
 
-/* 하단 트윈 액션 버튼 */
-.home-action-group, .play-action-group, .result-action-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
-.btn-sub-action, .btn-skip {
-    flex: 1;
-    padding: 14px 0;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5EA;
-    border-radius: 14px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #1C1C1E;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-}
-.btn-main-action, .btn-complete {
-    flex: 1;
-    padding: 14px 0;
-    background-color: #4A9A72;
-    border: none;
-    border-radius: 14px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #FFFFFF;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-}
-.text-center { display: inline-block; line-height: 20px; }
 
-/* --- 운동 진행 화면 (workoutPlay) --- */
+/* =====================================================================
+   운동 진행 화면
+   ===================================================================== */
+
 .play-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    gap: 0.75rem;
 }
-.btn-back-arrow { font-size: 18px; text-decoration: none; color: #1C1C1E; }
-.play-status-text { font-size: 14px; color: #8E8E93; font-weight: 600; }
-.btn-pause { border: none; background: none; color: #4A9A72; font-weight: 700; font-size: 14px; cursor: pointer; }
 
+
+.play-status-text {
+    font-size: var(--fs-sub);
+    font-weight: 600;
+    color: var(--workout-muted);
+}
+
+.btn-pause {
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: var(--fs-sub);
+    font-weight: 700;
+    color: var(--workout-accent);
+    cursor: pointer;
+}
+
+/* 동작이 여섯 개라 한 칸이 한 동작이다.
+   숫자만 적어 두면 얼마나 남았는지 한눈에 안 들어온다. */
 .progress-bar-group {
     display: flex;
-    gap: 6px;
-    margin: 12px 0 20px 0;
+    gap: 0.375rem;
+    margin: 0.75rem 0 1.25rem;
 }
+
 .progress-step {
     flex: 1;
-    height: 8px;
-    border-radius: 4px;
-    background-color: #E5E5EA;
+    height: 0.5rem;
+    background: #e2e5ea;
+    border-radius: 0.25rem;
 }
-.progress-step.is-active { background-color: #4A9A72; }
+
+.progress-step.is-active {
+    background: var(--workout-accent);
+}
 
 .media-box {
     position: relative;
-    width: 100%;
-    height: 180px;
-    background: repeating-linear-gradient(45deg, #F2F2F7, #F2F2F7 10px, #E5E5EA 10px, #E5E5EA 20px);
-    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    height: 11.25rem;
+    margin-bottom: 1.25rem;
+    border-radius: var(--card-radius);
+    background: repeating-linear-gradient(45deg,
+            #f3f4f6, #f3f4f6 0.625rem,
+            #e2e5ea 0.625rem, #e2e5ea 1.25rem);
 }
+
 .set-tag-badge {
     position: absolute;
-    top: 12px;
-    left: 12px;
-    background-color: #0F5338;
-    color: #FFFFFF;
-    font-size: 11px;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background: #0f5338;
+    border-radius: 0.5rem;
+    font-size: var(--fs-tag);
     font-weight: 700;
-    padding: 4px 8px;
-    border-radius: 8px;
+    color: #ffffff;
 }
-.media-placeholder { color: #A5AAA3; font-weight: 600; font-size: 14px; }
+
+.media-placeholder {
+    font-size: var(--fs-sub);
+    font-weight: 600;
+    color: #a5aaa3;
+}
 
 .exercise-info-section {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
 }
-.exercise-title { font-size: 20px; font-weight: 800; margin: 0 0 6px 0; }
-.exercise-desc { font-size: 12px; color: #8E8E93; margin: 0 0 12px 0; line-height: 1.4; }
 
-.set-check-group { display: flex; gap: 6px; }
+.exercise-title {
+    margin: 0 0 0.375rem;
+    font-size: var(--fs-lead);
+    font-weight: 800;
+    color: #17191c;
+}
+
+.exercise-desc {
+    margin: 0 0 0.75rem;
+    font-size: var(--fs-cap);
+    line-height: 1.4;
+    color: var(--workout-muted);
+}
+
+.set-check-group {
+    display: flex;
+    gap: 0.375rem;
+}
+
 .set-check-item {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    background-color: #F2F2F7;
-    color: #8E8E93;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    width: 1.75rem;
+    height: 1.75rem;
+    background: #f3f4f6;
+    border-radius: 0.5rem;
+    font-size: var(--fs-cap);
     font-weight: 700;
+    color: var(--workout-muted);
 }
-.set-check-item.is-done { background-color: #4A9A72; color: #FFFFFF; }
-.set-check-item.is-current { border: 2px solid #4A9A72; background-color: #FFFFFF; color: #4A9A72; }
 
-.info-right { text-align: right; }
-.set-label { font-size: 11px; color: #8E8E93; display: block; }
-.set-value { font-size: 22px; font-weight: 800; color: #4A9A72; display: block; margin: 2px 0; }
-.rest-label { font-size: 11px; color: #8E8E93; }
+.set-check-item.is-done {
+    background: var(--workout-accent);
+    color: #ffffff;
+}
+
+.set-check-item.is-current {
+    background: #ffffff;
+    border: 0.125rem solid var(--workout-accent);
+    color: var(--workout-accent);
+}
+
+.info-right {
+    flex: none;
+    text-align: right;
+}
+
+.set-label,
+.rest-label {
+    font-size: var(--fs-tag);
+    color: var(--workout-muted);
+}
+
+.set-label {
+    display: block;
+}
+
+.set-value {
+    display: block;
+    margin: 0.125rem 0;
+    font-size: var(--fs-title);
+    font-weight: 800;
+    color: var(--workout-accent);
+}
 
 .next-exercise-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5EA;
-    border-radius: 14px;
-    padding: 14px 16px;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
 }
-.next-title { font-size: 11px; color: #8E8E93; display: block; }
-.next-name { font-size: 13px; font-weight: 700; color: #1C1C1E; }
-.next-arrow { color: #C7C7CC; }
 
-/* --- 운동 완료 화면 (workoutResult) --- */
-.result-date { text-align: center; color: #8E8E93; font-size: 13px; margin: 10px 0; font-weight: 600; }
-.result-summary-banner {
-    background-color: #4A9A72;
-    border-radius: 16px;
-    padding: 24px;
-    color: #FFFFFF;
-    margin-bottom: 16px;
+.next-title {
+    display: block;
+    font-size: var(--fs-tag);
+    color: var(--workout-muted);
 }
-.banner-sub { font-size: 13px; opacity: 0.9; display: block; margin-bottom: 6px; }
-.banner-title { font-size: 26px; font-weight: 800; margin: 0; }
 
-.result-stats-grid { display: flex; gap: 8px; margin-bottom: 16px; }
-.stat-card {
-    flex: 1;
-    background-color: #FFFFFF;
-    border: 1px solid #E5E5EA;
-    border-radius: 14px;
-    padding: 14px 8px;
+.next-name {
+    font-size: var(--fs-meta);
+    font-weight: 700;
+    color: #17191c;
+}
+
+.next-arrow {
+    color: #c7c7c0;
+}
+
+
+/* =====================================================================
+   운동 완료 화면
+   ===================================================================== */
+
+.result-date {
+    margin: 0.625rem 0;
+    font-size: var(--fs-meta);
+    font-weight: 600;
+    color: var(--workout-muted);
     text-align: center;
 }
-.stat-label { font-size: 11px; color: #8E8E93; display: block; margin-bottom: 4px; }
-.stat-value { font-size: 15px; font-weight: 800; color: #1C1C1E; }
 
+.result-summary-banner {
+    margin-bottom: 1rem;
+    padding: 1.5rem;
+    background: var(--workout-accent);
+    border-radius: var(--card-radius);
+    color: #ffffff;
+}
+
+.banner-sub {
+    display: block;
+    margin-bottom: 0.375rem;
+    font-size: var(--fs-meta);
+    opacity: 0.9;
+}
+
+.banner-title {
+    margin: 0;
+    font-size: var(--fs-hero);
+    font-weight: 800;
+}
+
+.result-stats-grid {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.stat-card {
+    flex: 1;
+    padding: 0.875rem 0.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: var(--fs-tag);
+    color: var(--workout-muted);
+}
+
+.stat-value {
+    font-size: var(--fs-body);
+    font-weight: 800;
+    color: #17191c;
+}
+
+
+/* =====================================================================
+   버튼
+   ===================================================================== */
+
+/* 아래쪽에 나란히 놓는 두 개짜리 버튼 줄.
+   세 화면이 같은 모양이라 한 곳에 모아 뒀다. */
+.home-action-group,
+.play-action-group,
+.result-action-group,
+.detail-action-btns {
+    display: flex;
+    gap: 0.625rem;
+    margin-top: 1.25rem;
+}
+
+/* 상세 화면만 '안내페이지로 이동' 쪽을 넓게 잡는다. 그쪽이 주 동작이라서다. */
+.detail-action-btns .btn-primary {
+    flex: 1.5;
+}
+
+.btn-sub-action,
+.btn-skip,
+.btn-outline,
+.btn-main-action,
+.btn-complete,
+.btn-primary,
+.btn-make-plan,
+.btn-map-view {
+    flex: 1;
+    /* flex 항목은 기본값(min-width: auto)이라 글자 길이만큼 최소 너비가 잡힌다.
+       나란히 둔 두 버튼의 글자 수가 다르면 폭이 몇 px 씩 어긋난다. */
+    min-width: 0;
+    padding: 0.875rem 0;
+    border-radius: 0.875rem;
+    font-size: var(--fs-body);
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+}
+
+/* 되돌리는 쪽 · 건너뛰는 쪽 */
+.btn-sub-action,
+.btn-skip,
+.btn-outline {
+    background: #ffffff;
+    border: 1px solid var(--card-line);
+    color: #45484d;
+}
+
+/* 눌러야 다음으로 넘어가는 쪽 */
+.btn-main-action,
+.btn-complete,
+.btn-primary,
+.btn-make-plan,
+.btn-map-view {
+    background: var(--workout-accent);
+    /* border: none 이 아니라 '보이지 않는 1px' 이다.
+       box-sizing 이 border-box 라 flex-basis: 0 은 테두리 두께 밑으로 못 내려간다.
+       한쪽만 테두리가 있으면 그쪽 버튼이 2px 넓어져 나란히 둔 두 버튼이 어긋난다. */
+    border: 1px solid transparent;
+    color: #ffffff;
+}
+
+.btn-main-action:active,
+.btn-complete:active,
+.btn-primary:active,
+.btn-make-plan:active,
+.btn-map-view:active {
+    background: var(--workout-accent-dark);
+}
+
+/* 혼자 한 줄을 다 쓰는 버튼 */
+.btn-make-plan,
+.btn-map-view {
+    width: 100%;
+    margin-bottom: 1.25rem;
+}
+
+.btn-map-view {
+    margin-top: 0.5rem;
+}

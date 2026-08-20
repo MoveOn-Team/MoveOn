@@ -185,6 +185,8 @@ public class RecommendController {
 
         log.info("{}.sportDetail End!", this.getClass().getName());
 
+        model.addAttribute("active", "recommend");
+
         return "recommend/sportDetail";
     }
 

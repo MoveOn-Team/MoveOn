@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.moveon.mapper.IEventMapper">
+
+    <!--
+        화면에 내보낼 수 있는 행사인지 가리는 조건.
+        목록과 상세가 같은 기준을 써야 해서 따로 빼 두었다.
+
+        status = 'PUBLISHED'
+            관리자가 원본 사이트를 열어 확인을 마친 것만 내보낸다.
+            이 줄을 빠뜨리면 아직 채우다 만 초안(PENDING)이 그대로 사용자에게 보인다.
+        end_date >= CURDATE()
+            지나간 대회를 걸러낸다. 없으면 목록 맨 위에 작년 대회가 뜬다.
+        lat IS NOT NULL
+            좌표가 없으면 거리 계산이 안 되니 애초에 목록에서 뺀다.
+    -->
+    <sql id="visible">
+        e.status = 'PUBLISHED'
+        AND e.end_date &gt;= CURDATE()
+        AND e.lat IS NOT NULL
+        AND e.lng IS NOT NULL
+    </sql>
+
+    <!--
+        화면이 쓰는 계산값 두 가지.
+
+        distanceKm
+            ST_Distance_Sphere 는 지구를 구로 보고 두 점 사이 거리를 재는 MariaDB 내장 함수다.
+            삼각함수로 직접 쓰지 않는다. 결과 단위가 '미터' 라 1000 으로 나눈다.
+            POINT 는 (경도, 위도) 순서다. 위도·경도 순으로 넣으면 엉뚱한 값이 나온다.
+        dday
+            접수 마감까지 남은 날. apply_end 가 없으면 NULL 이 그대로 넘어간다.
+    -->
+    <sql id="calc">
+        ST_Distance_Sphere(POINT(#{lng}, #{lat}), POINT(e.lng, e.lat)) / 1000 AS distanceKm,
+        DATEDIFF(e.apply_end, CURDATE()) AS dday,
+        <include refid="applyState"/> AS applyState
+    </sql>
+
+    <!--
+        접수 상태.
+        마라톤은 '선착순 마감' 이 많아 접수 마감일이 없는 대회가 흔하다.
+        마감일만 보면 그런 대회를 '정보 없음' 으로 밀어내게 되어,
+        접수 시작일까지 함께 보고 네 가지로 나눈다.
+    -->
+    <sql id="applyState">
+        CASE
+            WHEN e.apply_end IS NOT NULL AND e.apply_end &lt; CURDATE() THEN 'CLOSED'
+            WHEN e.apply_start IS NOT NULL AND e.apply_start &gt; CURDATE() THEN 'BEFORE'
+            WHEN e.apply_start IS NOT NULL OR e.apply_end IS NOT NULL THEN 'OPEN'
+            ELSE 'UNKNOWN'
+        END
+    </sql>
+
+    <!-- 행사 목록 -->
+    <select id="getEventList" resultType="EventDTO">
+        SELECT e.event_id, e.title, e.event_type, e.sido, e.sigungu, e.place_name,
+               e.lat, e.lng, e.start_date, e.end_date, e.apply_start, e.apply_end,
+               e.target, e.distances, e.fee_text, e.contact, e.homepage_url,
+               e.collected_at,
+               <include refid="calc"/>
+          FROM events e
+         WHERE <include refid="visible"/>
+        <choose>
+            <when test="sort == 'deadline'">
+                -- 마감 임박순.
+                --   1) 접수 중 -> 정보 모름 -> 접수 전 -> 접수 끝남 차례
+                --   2) 접수 중 안에서는 마감일이 빠른 것부터.
+                --      선착순이라 마감일이 없는 대회는 그 뒤에 행사일 순으로 붙인다.
+                ORDER BY CASE <include refid="applyState"/>
+                             WHEN 'OPEN' THEN 0 WHEN 'UNKNOWN' THEN 1
+                             WHEN 'BEFORE' THEN 2 ELSE 3 END,
+                         (e.apply_end IS NULL),
+                         e.apply_end,
+                         e.start_date
+            </when>
+            <otherwise>
+                -- 가까운 순 (기본)
+                -- 가깝더라도 접수가 끝난 대회는 맨 아래로 내린다.
+                -- 신청할 수 없는 것을 위에 두면 헛걸음만 시킨다.
+                ORDER BY (<include refid="applyState"/> = 'CLOSED'),
+                         distanceKm, e.start_date
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 행사 한 건 -->
+    <select id="getEvent" resultType="EventDTO">
+        SELECT e.event_id, e.title, e.event_type, e.sido, e.sigungu, e.place_name,
+               e.lat, e.lng, e.start_date, e.end_date, e.apply_start, e.apply_end,
+               e.target, e.distances, e.fee_text, e.contact, e.homepage_url,
+               e.collected_at,
+               <include refid="calc"/>
+          FROM events e
+         WHERE e.event_id = #{eventId}
+           AND <include refid="visible"/>
+    </select>
+
+</mapper>

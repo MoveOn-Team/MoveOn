@@ -10,10 +10,6 @@
    두 화면 모두 아래에 탭바가 깔리므로 본문 아래쪽을 그만큼 비워둔다.
    --------------------------------------------------------------------- */
 
-:root {
-    --tabbar-h: 4rem;
-}
-
 .recommend-shell,
 .detail-shell {
     padding-top: 1.75rem;
@@ -36,10 +32,6 @@
 .page-head h1 {
     flex: 1;
     min-width: 0;
-    margin: 0;
-    font-size: 1.375rem;
-    font-weight: 900;
-    letter-spacing: -.04em;
 }
 
 /* '다시 진단' 처럼 테두리만 있는 작은 버튼 */
@@ -47,7 +39,7 @@
     flex: 0 0 auto;
     padding: 0.4375rem 0.875rem;
     color: #5c6470;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     font-weight: 700;
     background: #ffffff;
     border: 1px solid #d8dce2;
@@ -59,45 +51,61 @@
     padding: 1.25rem 1.25rem 1.125rem;
     color: #ffffff;
     background: #345f9f;
-    border-radius: 20px;
+    border-radius: var(--card-radius);
 }
 
 .profile-card h2 {
     margin: 0 0 0.875rem;
-    font-size: 1.25rem;
+    font-size: var(--fs-lead);
     line-height: 1.35;
     font-weight: 900;
     letter-spacing: -.04em;
 }
 
+/* 네 개가 한 줄에 들어가야 한다.
+   전에는 iPhone XR(414px) 에서 329px 이 필요한데 쓸 수 있는 폭이 326px 이라,
+   딱 3px 이 모자라 '강도' 만 아래로 떨어졌다.
+   안쪽 여백과 사이 간격을 줄여 271px 로 낮췄다.
+   360px 짜리 작은 안드로이드 폰까지 한 줄에 들어간다.
+
+   그래도 wrap 은 남겨 둔다. 글꼴을 크게 키운 사람에게는 넘칠 수 있고,
+   그때는 잘리는 것보다 줄이 바뀌는 편이 낫다. */
 .profile-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.375rem;
+    gap: 0.1875rem;
 }
 
 .profile-tags span {
-    padding: 0.3125rem 0.6875rem;
+    padding: 0.3125rem 0.4375rem;
     color: #ffffff;
-    font-size: 0.6875rem;
+    font-size: var(--fs-tag);
     font-weight: 700;
     /* 카드 배경보다 살짝 밝게 해서 알약이 떠 보이게 한다 */
     background: rgba(255, 255, 255, .18);
     border-radius: 999px;
 }
 
+/* 앞의 '동반자·승부욕·장소·강도' 는 이름표라 흐리게 둔다.
+   가운뎃점을 지우고도 값과 구분된다. 점 하나가 알약마다 6px 씩 먹었다. */
+.profile-tags b {
+    margin-right: 0.25rem;
+    font-weight: 700;
+    opacity: 0.65;
+}
+
 .profile-foot {
     margin: 0.875rem 0 0;
     padding-top: 0.75rem;
     color: rgba(255, 255, 255, .82);
-    font-size: 0.6875rem;
+    font-size: var(--fs-tag);
     border-top: 1px solid rgba(255, 255, 255, .22);
 }
 
 /* ---------- 구역 제목 ---------- */
 .section-title {
     margin: 1.5rem 0 0.75rem;
-    font-size: 1.0625rem;
+    font-size: var(--fs-card);
     font-weight: 900;
     letter-spacing: -.03em;
 }
@@ -106,7 +114,7 @@
 .sport-list {
     display: flex;
     flex-direction: column;
-    gap: 0.625rem;
+    gap: var(--card-gap);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -116,11 +124,11 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 1rem 1.125rem;
+    padding: var(--card-pad-y) var(--card-pad-x);
     color: inherit;
-    background: #ffffff;
-    border: 1px solid #e6e9ee;
-    border-radius: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
 }
 
 /* 1 위만 눈에 띄게 한다 */
@@ -128,7 +136,7 @@
     border-color: #345f9f;
     border-width: 2px;
     /* 테두리가 두꺼워진 만큼 안쪽을 줄여 카드 높이를 맞춘다 */
-    padding: calc(1rem - 1px) calc(1.125rem - 1px);
+    padding: calc(var(--card-pad-y) - 1px) calc(var(--card-pad-x) - 1px);
 }
 
 .rank-badge {
@@ -139,7 +147,7 @@
     min-width: 2.125rem;
     padding: 0.3125rem 0;
     color: #9a9ea5;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     font-weight: 800;
     background: #f0f2f5;
     border-radius: 9px;
@@ -153,7 +161,7 @@
 .sport-name {
     flex: 1;
     min-width: 0;
-    font-size: 1.0625rem;
+    font-size: var(--card-title);
     font-weight: 800;
     letter-spacing: -.03em;
     overflow: hidden;
@@ -169,7 +177,7 @@
 .sport-score b {
     display: block;
     color: #345f9f;
-    font-size: 1.25rem;
+    font-size: var(--fs-lead);
     font-weight: 900;
     line-height: 1.1;
     /* 숫자 폭을 고정해 카드마다 오른쪽 끝이 맞게 한다 */
@@ -180,7 +188,7 @@
     display: block;
     margin-top: 0.125rem;
     color: #a1a5ab;
-    font-size: 0.625rem;
+    font-size: var(--fs-tag);
     font-weight: 700;
 }
 
@@ -189,10 +197,10 @@
     padding: 2.25rem 1.25rem;
     text-align: center;
     color: #9a9ea5;
-    font-size: 0.8125rem;
+    font-size: var(--fs-meta);
     line-height: 1.6;
     background: #f7f8f9;
-    border-radius: 16px;
+    border-radius: var(--card-radius);
 }
 
 
@@ -217,13 +225,13 @@
 
 .detail-top span {
     color: #a1a5ab;
-    font-size: 0.8125rem;
+    font-size: var(--fs-meta);
     font-weight: 700;
 }
 
 .detail-name {
     margin: 0 0 0.375rem;
-    font-size: 1.875rem;
+    font-size: var(--fs-title);
     font-weight: 900;
     letter-spacing: -.045em;
 }
@@ -231,7 +239,7 @@
 .detail-trait {
     margin: 0 0 1.125rem;
     color: #9a9ea5;
-    font-size: 0.875rem;
+    font-size: var(--fs-sub);
 }
 
 /* ---------- 지표 3개 ---------- */
@@ -246,7 +254,7 @@
     min-width: 0;
     padding: 0.75rem 0.5rem;
     text-align: center;
-    border: 1px solid #e6e9ee;
+    border: 1px solid var(--card-line);
     border-radius: 14px;
 }
 
@@ -254,12 +262,12 @@
     display: block;
     margin-bottom: 0.25rem;
     color: #a1a5ab;
-    font-size: 0.6875rem;
+    font-size: var(--fs-tag);
 }
 
 .stat-box b {
     display: block;
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
     font-weight: 800;
     font-variant-numeric: tabular-nums;
 }
@@ -282,8 +290,8 @@
     padding: 0.9375rem 1.0625rem;
     color: inherit;
     background: #ffffff;
-    border: 1px solid #e6e9ee;
-    border-radius: 16px;
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
 }
 
 /* 지금 보고 있는 시설 */
@@ -300,7 +308,7 @@
 
 .facility-name {
     display: block;
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
     font-weight: 800;
     letter-spacing: -.02em;
     overflow: hidden;
@@ -312,7 +320,7 @@
     display: block;
     margin-top: 0.3125rem;
     color: #a1a5ab;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -322,7 +330,7 @@
     flex: 0 0 auto;
     padding: 0.25rem 0.5625rem;
     color: #2f5691;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     background: #eaf1fb;
@@ -336,7 +344,7 @@
     gap: 0.75rem;
     padding: 0.9375rem 1.0625rem;
     border: 1px solid #eceff3;
-    border-radius: 16px;
+    border-radius: var(--card-radius);
 }
 
 .program-body {
@@ -346,7 +354,7 @@
 
 .program-name {
     display: block;
-    font-size: 0.9375rem;
+    font-size: var(--fs-body);
     font-weight: 800;
     letter-spacing: -.02em;
 }
@@ -355,7 +363,7 @@
     display: block;
     margin-top: 0.3125rem;
     color: #a1a5ab;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     line-height: 1.4;
 }
 
@@ -367,7 +375,7 @@
     overflow: hidden;
     margin-top: 0.3125rem;
     color: #8a6d1f;
-    font-size: 0.6875rem;
+    font-size: var(--fs-tag);
     line-height: 1.45;
     white-space: pre-line;
 }
@@ -375,7 +383,7 @@
 .program-fee {
     flex: 0 0 auto;
     color: #2f5691;
-    font-size: 1rem;
+    font-size: var(--fs-body);
     font-weight: 900;
     font-variant-numeric: tabular-nums;
 }
@@ -393,16 +401,16 @@
 .section-title small {
     margin-left: 0.375rem;
     color: #a1a5ab;
-    font-size: 0.75rem;
+    font-size: var(--fs-cap);
     font-weight: 700;
 }
 
 .data-notice {
     margin: 0.75rem 0 0;
     color: #a1a5ab;
-    font-size: 0.6875rem;
+    font-size: var(--fs-tag);
     line-height: 1.5;
-    text-align: center;
+    text-align: right;
 }
 
 .more-button {
@@ -411,10 +419,10 @@
     padding: 0.75rem;
     color: #5c6470;
     font: inherit;
-    font-size: 0.8125rem;
+    font-size: var(--fs-meta);
     font-weight: 700;
     background: #f7f8f9;
-    border: 1px solid #e6e9ee;
+    border: 1px solid var(--card-line);
     border-radius: 14px;
 }
 

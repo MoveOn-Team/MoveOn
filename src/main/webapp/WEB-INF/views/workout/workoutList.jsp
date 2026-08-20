@@ -1,19 +1,19 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>즉시 운동하기</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.2">
 </head>
-<body>
-<div class="app-shell">
-    <header class="page-header">
-        <h1 class="page-title">즉시 운동하기</h1>
-        <p class="page-subtitle">지금 갈 수 있는 곳만 골라드려요 · 강서구 화곡동</p>
+<body class="auth-page">
+<main class="auth-shell workout-shell">
+    <header class="workout-header">
+        <h1>즉시 운동하기</h1>
+        <p class="workout-subtext">지금 갈 수 있는 곳만 골라드려요 · 강서구 화곡동</p>
     </header>
 
     <!-- 메인 탭 -->
@@ -142,8 +142,9 @@
         </c:otherwise>
     </c:choose>
 
-    <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
-</div>
+</main>
+
+<jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
 <script src="${pageContext.request.contextPath}/js/workout.js"></script>
 </body>

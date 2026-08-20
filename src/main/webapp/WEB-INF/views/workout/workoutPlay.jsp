@@ -1,18 +1,19 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>운동 진행 중</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.2">
 </head>
-<body>
-<div class="app-shell">
+<body class="auth-page">
+<main class="auth-shell workout-shell">
     <!-- 상단 헤더 & 진행 바 -->
     <div class="play-header">
-        <a href="javascript:history.back()" class="btn-back-arrow">＜</a>
+        <a href="javascript:history.back()" class="back-button" aria-label="뒤로 가기">&#8249;</a>
         <span class="play-status-text" id="statusText">동작 3/6 · 남은 14분</span>
         <button type="button" class="btn-pause">일시정지</button>
     </div>
@@ -66,8 +67,9 @@
         <button type="button" class="btn-complete" id="btnComplete">세트 완료</button>
     </div>
 
-    <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
-</div>
+</main>
+
+<jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

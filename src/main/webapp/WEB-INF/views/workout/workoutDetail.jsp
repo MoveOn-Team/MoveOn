@@ -1,23 +1,21 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>${detail.name}</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.2">
 </head>
-<body>
-<div class="app-shell">
+<body class="auth-page">
+<main class="auth-shell workout-shell">
     <!-- 상단 뒤로가기 버튼 -->
     <div class="detail-header">
-        <button type="button" class="back-btn" onclick="history.back();">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-        </button>
+        <%-- 추천·행사 탭과 같은 뒤로가기다. auth.css 의 .back-button 을 쓴다. --%>
+        <button type="button" class="back-button" onclick="history.back();"
+                aria-label="뒤로 가기">&#8249;</button>
     </div>
 
     <!-- 제목 및 위치 정보 -->
@@ -81,7 +79,8 @@
     </div>
 
     <!-- 하단 탭바 공통 인클루드 -->
-    <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
-</div>
+</main>
+
+<jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 </body>
 </html>
