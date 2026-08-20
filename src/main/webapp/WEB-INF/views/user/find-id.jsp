@@ -142,7 +142,5 @@
 
     }());
 </script>
-
-<jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 </body>
 </html>
