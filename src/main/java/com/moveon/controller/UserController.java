@@ -156,6 +156,29 @@ public class UserController {
         return "user/workoutReport";
     }
 
+    // 회원 정보 수정 화면 이동
+    @GetMapping("/profileEdit")
+    public String profileEdit(ModelMap model) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("name", "김백호");
+        user.put("email", "moveon@gmail.com");
+        user.put("region", "강서구 화곡동");
+        user.put("height", 170);
+        user.put("weight", 65);
+
+        model.addAttribute("user", user);
+        model.addAttribute("active", "myPage"); // 내정보 탭 활성화 유지
+
+        return "user/profileEdit";
+    }
+
+    // 회원 정보 수정 처리 후 내 정보 메인으로 이동
+    @PostMapping("/profileEdit")
+    public String updateProfile(@RequestParam Map<String, Object> paramMap) {
+        // DB 업데이트 처리 영역
+        return "redirect:/user/myPage";
+    }
+
 
     /** 회원가입 아이디 중복 체크 */
     @ResponseBody

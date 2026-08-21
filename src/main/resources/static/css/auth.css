@@ -1453,3 +1453,223 @@ html::-webkit-scrollbar,
 body::-webkit-scrollbar {
     display: none;
 }
+
+
+/* =========================================================
+   공통 모바일 쉘 & 컨테이너
+   ========================================================= */
+.auth-shell,
+.container {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background-color: #ffffff;
+    position: relative;
+    box-sizing: border-box;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.myPage-shell,
+.detail-shell {
+    padding-top: 1.75rem;
+    padding-bottom: calc(var(--tabbar-h, 60px) + 1.25rem);
+}
+
+/* =========================================================
+   내 정보 메인 - 수정 버튼 스타일 (테두리 적용)
+   ========================================================= */
+.btn-edit-profile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #636366;
+    background-color: #ffffff;
+    border: 1px solid #e5e5ea;
+    border-radius: 20px;
+    text-decoration: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* =========================================================
+   회원 정보 수정 화면 (profileEdit) 스타일
+   ========================================================= */
+
+/* 상단 헤더 */
+.edit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 16px;
+    background-color: transparent;
+}
+
+.edit-header .header-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #8e8e93;
+    margin: 0;
+}
+
+.edit-header .header-empty {
+    width: 20px;
+}
+
+.edit-content-form {
+    padding: 12px 20px 100px 20px;
+}
+
+/* 섹션 타이틀 */
+.section-group {
+    margin-bottom: 20px;
+}
+
+.group-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1c1c1e;
+    margin: 0 0 10px 4px;
+}
+
+/* 카드형 Input Box */
+.edit-input-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e5ea;
+    border-radius: 16px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.edit-input-card.mt-12 {
+    margin-top: 10px;
+}
+
+.card-label {
+    font-size: 12px;
+    color: #8e8e93;
+    margin-bottom: 4px;
+}
+
+.card-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1c1c1e;
+    background: transparent;
+    padding: 0;
+}
+
+/* BMI 결과 카드 (#6c5ce7 적용) */
+.bmi-result-card {
+    background-color: #fafafe;
+    border: 1.5px solid #6c5ce7;
+    border-radius: 20px;
+    padding: 18px 20px;
+    margin-top: 20px;
+    margin-bottom: 28px;
+}
+
+.bmi-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bmi-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #6c5ce7;
+}
+
+.bmi-status-badge {
+    background-color: #6c5ce7;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.bmi-value-text {
+    font-size: 28px;
+    font-weight: 800;
+    color: #6c5ce7;
+    margin: 6px 0 16px 0;
+}
+
+/* BMI 게이지 바 (기존에 맞춘 그라데이션) */
+.bmi-gauge-container {
+    width: 100%;
+}
+
+.bmi-gauge-bar {
+    position: relative;
+    width: 100%;
+    height: 0.5rem;
+    border-radius: 4px;
+    background: linear-gradient(to right, #8cb3dd 0%, #7dbd92 35%, #e1b96f 70%, #e07272 100%);
+    margin-bottom: 8px;
+}
+
+.bmi-pointer {
+    position: absolute;
+    top: 50%;
+    left: 35%;
+    transform: translate(-50%, -50%);
+    width: 14px;
+    height: 14px;
+    background-color: #ffffff;
+    border: 3px solid #3b82f6;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: left 0.3s ease;
+}
+
+.bmi-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #8e8e93;
+}
+
+/* 하단 버튼 (취소 / 저장) */
+.edit-bottom-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.btn-cancel {
+    flex: 1;
+    height: 52px;
+    background-color: #ffffff;
+    border: 1px solid #e5e5ea;
+    border-radius: 16px;
+    color: #1c1c1e;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.btn-save {
+    flex: 1;
+    height: 52px;
+    background-color: #6c5ce7;
+    border: none;
+    border-radius: 16px;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
