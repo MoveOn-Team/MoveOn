@@ -3,6 +3,25 @@
 
 <mapper namespace="com.moveon.mapper.IFacilityMapper">
 
+    <!-- 시설 하나
+
+         거리를 함께 계산하므로 현위치도 받는다.
+         목록에서 본 거리와 상세에서 본 거리가 다르면 안 되기 때문이다. -->
+    <select id="getFacility" resultType="FacilityDTO">
+        SELECT f.facility_id, f.name, f.gu_name, f.road_addr, f.lot_addr,
+               f.lat, f.lng, f.phone, f.homepage_url, f.capacity,
+               fs.reserve_url,
+               ds.site_url AS district_url,
+               ST_Distance_Sphere(POINT(#{lng}, #{lat}),
+                                  POINT(f.lng, f.lat)) / 1000 AS distance_km
+          FROM facilities f
+          JOIN facility_sports fs ON fs.facility_id = f.facility_id
+                                 AND fs.sport_id = #{sportId}
+          LEFT JOIN district_sites ds ON ds.gu_name = f.gu_name
+         WHERE f.facility_id = #{facilityId}
+           AND f.is_active = 1
+    </select>
+
     <!-- 해당 종목을 할 수 있는 가까운 시설 -->
     <select id="getNearbyFacilities" resultType="FacilityDTO">
         SELECT f.facility_id, f.name, f.gu_name, f.road_addr, f.lot_addr,

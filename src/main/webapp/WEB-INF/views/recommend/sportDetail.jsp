@@ -230,7 +230,7 @@
 
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 
-<script src="${pageContext.request.contextPath}/js/recommend.js"></script>
+<script src="${pageContext.request.contextPath}/js/geo.js"></script>
 <script>
     // 강좌 더보기 : 숨겨둔 항목의 표시만 걷어낸다. 서버를 다시 부르지 않는다.
     (function () {

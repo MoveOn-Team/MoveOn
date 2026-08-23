@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.moveon.mapper.ICourseMapper">
+
+    <!-- 목록과 상세가 같은 칸을 쓰므로 한 곳에 모아 둔다 -->
+    <sql id="cols">
+        c.course_id, c.name, c.course_type, c.gu_name,
+        c.distance_km, c.duration_min, c.difficulty, c.features,
+        c.loop_type, c.subway_info, c.start_lat, c.start_lng,
+        c.guide_url, c.source
+    </sql>
+
+    <!-- 현위치에서 가까운 야외 코스
+
+         평지와 산길을 한 목록에 섞지 않는다.
+         같은 3km 라도 오르막이 있으면 걸리는 시간과 힘이 다르다.
+
+         거리는 코스 시작점 기준이다.
+         코스는 선이라 중간 지점이 더 가까울 수 있지만, 실제로 가야 하는 곳은 시작점이다.
+         ST_Distance_Sphere 는 두 좌표 사이 거리를 미터로 준다. POINT 는 (경도, 위도) 순서다. -->
+    <select id="getNearbyCourses" resultType="CourseDTO">
+        SELECT <include refid="cols"/>,
+               ST_Distance_Sphere(POINT(#{lng}, #{lat}),
+                                  POINT(c.start_lng, c.start_lat)) / 1000 AS distance_from_me
+          FROM courses c
+         WHERE c.is_active = 1
+        <if test="courseType != null and courseType != ''">
+           AND c.course_type = #{courseType}
+        </if>
+         ORDER BY distance_from_me
+         LIMIT #{limit}
+    </select>
+
+    <!-- 코스 하나 -->
+    <select id="getCourse" resultType="CourseDTO">
+        SELECT <include refid="cols"/>,
+               ST_Distance_Sphere(POINT(#{lng}, #{lat}),
+                                  POINT(c.start_lng, c.start_lat)) / 1000 AS distance_from_me
+          FROM courses c
+         WHERE c.course_id = #{courseId}
+           AND c.is_active = 1
+    </select>
+
+    <!-- 코스를 이루는 지점들. 그림을 그리는 데 쓴다. -->
+    <select id="getCoursePoints" resultType="CoursePointDTO">
+        SELECT course_id, seq, lat, lng, point_name
+          FROM course_points
+         WHERE course_id = #{courseId}
+         ORDER BY seq
+    </select>
+
+</mapper>

@@ -16,6 +16,17 @@ import java.util.List;
 public interface IFacilityMapper {
 
     /**
+     * 시설 하나
+     *
+     * 종목번호도 함께 받는다. 예약 링크가 '시설 x 종목' 단위라서다.
+     * 같은 복합시설이라도 테니스장만 예약 대상인 경우가 있다.
+     */
+    FacilityDTO getFacility(@Param("facilityId") int facilityId,
+                            @Param("sportId") int sportId,
+                            @Param("lat") double lat,
+                            @Param("lng") double lng) throws Exception;
+
+    /**
      * 해당 종목을 할 수 있는 가장 가까운 시설 목록
      *
      * @param sportId 종목번호

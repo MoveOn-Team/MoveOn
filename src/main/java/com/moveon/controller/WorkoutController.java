@@ -1,122 +1,191 @@
 package com.moveon.controller;
 
+import com.moveon.dto.CourseDTO;
+import com.moveon.dto.FacilityDTO;
+import com.moveon.dto.SportDTO;
+import com.moveon.service.IWorkoutService;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
-import java.util.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-@Controller
+import java.util.List;
+
+/**
+ * 현위치는 안드로이드에서 GPS 로 받아 넘겨준다.
+ * 좌표를 못 받으면(권한 거부·실내) 서울시청 좌표로 대체하고 화면은 그대로 보여준다.
+ * 추천·행사 탭과 같은 방식이다.
+ */
+@Slf4j
+@RequiredArgsConstructor
 @RequestMapping("/workout")
+@Controller
 public class WorkoutController {
 
+    private final IWorkoutService workoutService;
+
+    /**
+     * 카카오 지도 JavaScript 키.
+     *
+     * REST 키와 다른 키다. 지도를 화면에 띄우는 데는 이쪽이 필요하다.
+     * 이 키는 HTML 에 그대로 실려 나가지만 그래도 된다.
+     * 카카오가 '등록된 도메인에서 온 요청' 만 받아 주기 때문이다.
+     *
+     * 없으면 빈 문자열이 된다. 그때는 지도 자리에 안내 글만 나온다.
+     */
+    @Value("${kakao.javascript.key:}")
+    private String kakaoMapKey;
+
+    /** GPS 를 못 받았을 때 쓸 기본 좌표 (서울시청) */
+    private static final double DEFAULT_LAT = 37.5665;
+    private static final double DEFAULT_LNG = 126.9780;
+
     @GetMapping("/workoutList")
-    public String workoutList(@RequestParam(value = "tab", defaultValue = "facility") String tab, ModelMap model) {
+    public String workoutList(@RequestParam(value = "tab", defaultValue = "facility") String tab,
+                              @RequestParam(value = "sportId", required = false) Integer sportId,
+                              @RequestParam(value = "type", required = false) String type,
+                              @RequestParam(value = "lat", required = false) Double lat,
+                              @RequestParam(value = "lng", required = false) Double lng,
+                              ModelMap model) throws Exception {
+
+        log.info("{}.workoutList Start! tab : {}", this.getClass().getName(), tab);
+
+        double myLat = (lat != null) ? lat : DEFAULT_LAT;
+        double myLng = (lng != null) ? lng : DEFAULT_LNG;
 
         if ("outdoor".equals(tab)) {
-            List<Map<String, Object>> outdoorList = new ArrayList<>();
-            Map<String, Object> o1 = new HashMap<>();
-            o1.put("id", 101); o1.put("name", "봉제산 둘레길"); o1.put("distance", "0.8km");
-            o1.put("info1", "3.2km · 약 60분 · 보통"); o1.put("info2", "순환형 · 5호선 까치산역"); o1.put("isSelected", true);
-            outdoorList.add(o1);
 
-            Map<String, Object> o2 = new HashMap<>();
-            o2.put("id", 102); o2.put("name", "우장산 근린공원 산책로"); o2.put("distance", "1.0km");
-            o2.put("info1", "1.8km · 약 30분 · 쉬움"); o2.put("info2", "무장애 구간 · 5호선 우장산역");
-            outdoorList.add(o2);
+            // 평지와 산길을 한 목록에 섞지 않는다.
+            // 같은 3km 라도 오르막이 있으면 걸리는 시간과 힘이 다르다.
+            String courseType = "HIKE".equals(type) ? "HIKE" : "WALK";
+            List<CourseDTO> courses = workoutService.getCourses(courseType, myLat, myLng);
 
-            Map<String, Object> o3 = new HashMap<>();
-            o3.put("id", 103); o3.put("name", "강서둘레길 3코스 · 강서한강길"); o3.put("distance", "4.8km");
-            o3.put("info1", "6.5km · 약 100분 · 쉬움"); o3.put("info2", "평지 · 9호선 양천향교역");
-            outdoorList.add(o3);
+            model.addAttribute("courses", courses);
+            model.addAttribute("courseType", courseType);
 
-            Map<String, Object> o4 = new HashMap<>();
-            o4.put("id", 104); o4.put("name", "강서둘레길 1코스 · 개화산숲길"); o4.put("distance", "5.4km");
-            o4.put("info1", "4.0km · 약 70분 · 보통"); o4.put("info2", "순환형 · 5호선 개화산역");
-            outdoorList.add(o4);
-
-            model.addAttribute("outdoorList", outdoorList);
         } else if ("home".equals(tab)) {
-            // [집에서] 탭 루틴 데이터
-            List<Map<String, Object>> prepList = new ArrayList<>();
-            prepList.add(Map.of("name", "목 돌리기", "count", "10회 x 2세트"));
-            prepList.add(Map.of("name", "어깨 스트레칭", "count", "30초 x 2세트"));
 
-            List<Map<String, Object>> mainList = new ArrayList<>();
-            mainList.add(Map.of("name", "윗몸일으키기", "count", "10회 x 3세트"));
-            mainList.add(Map.of("name", "스쿼트", "count", "15회 x 3세트"));
-            mainList.add(Map.of("name", "플랭크", "count", "30초 x 2세트"));
+            // 집에서 탭은 아직 자료가 없다.
+            // home_exercises 표는 만들어져 있으나 비어 있어, 계획을 만들 재료가 없다.
+            // 없는 것을 있는 척 보여주지 않고 화면이 그대로 알리게 둔다.
+            model.addAttribute("homeReady", false);
 
-            List<Map<String, Object>> coolList = new ArrayList<>();
-            coolList.add(Map.of("name", "햄스트링 스트레칭", "count", "30초 x 2세트"));
-
-            model.addAttribute("prepList", prepList);
-            model.addAttribute("mainList", mainList);
-            model.addAttribute("coolList", coolList);
         } else {
-            List<Map<String, Object>> facilityList = new ArrayList<>();
-            Map<String, Object> f1 = new HashMap<>();
-            f1.put("id", 1); f1.put("name", "강서구민올림픽체육센터 수영장"); f1.put("address", "강서구 등촌동 707-3"); f1.put("distance", "2.2km"); f1.put("isSelected", true);
-            facilityList.add(f1);
 
-            Map<String, Object> f2 = new HashMap<>();
-            f2.put("id", 2); f2.put("name", "공항동문화체육센터 수영장"); f2.put("address", "강서구 송정로 45"); f2.put("distance", "3.3km");
-            facilityList.add(f2);
+            // 종목 단추는 표에서 가져온다. 화면에 이름을 박아 두면 종목이 늘어도 화면이 모른다.
+            List<SportDTO> sports = workoutService.getSports("FACILITY");
+            model.addAttribute("sports", sports);
 
-            Map<String, Object> f3 = new HashMap<>();
-            f3.put("id", 3); f3.put("name", "목동청소년수련관 수영장"); f3.put("address", "양천구 목동서로 143"); f3.put("distance", "3.3km");
-            facilityList.add(f3);
+            // 고른 종목이 없으면 첫 번째 종목을 본다. 빈 화면으로 시작하지 않게 한다.
+            int pickId = (sportId != null) ? sportId
+                       : (sports.isEmpty() ? 0 : sports.get(0).getSportId());
 
-            Map<String, Object> f4 = new HashMap<>();
-            f4.put("id", 4); f4.put("name", "마곡레포츠센터 수영장"); f4.put("address", "강서구 양천로 251"); f4.put("distance", "3.6km");
-            facilityList.add(f4);
-
-            model.addAttribute("facilityList", facilityList);
+            if (pickId > 0) {
+                List<FacilityDTO> facilities = workoutService.getFacilities(pickId, myLat, myLng);
+                model.addAttribute("facilities", facilities);
+            }
+            model.addAttribute("sportId", pickId);
         }
 
         model.addAttribute("currentTab", tab);
+        model.addAttribute("lat", myLat);
+        model.addAttribute("lng", myLng);
+
+        // 현위치를 받아 쓴 것인지, 기본 좌표로 계산한 것인지 화면에 알려준다
+        model.addAttribute("usingGps", lat != null && lng != null);
         model.addAttribute("active", "workout");
+
+        log.info("{}.workoutList End!", this.getClass().getName());
 
         return "workout/workoutList";
     }
 
     /**
-     * 운동 진행 화면 (두 번째 사진)
+     * 시설 상세
+     *
+     * 종목번호를 함께 받는다. 같은 시설에서 여러 종목을 하므로
+     * 어떤 종목으로 들어왔는지 알아야 그 종목 강좌만 보여줄 수 있다.
      */
+    @GetMapping("/workoutDetail/{facilityId}")
+    public String workoutDetail(@PathVariable("facilityId") int facilityId,
+                                @RequestParam(value = "sportId", defaultValue = "0") int sportId,
+                                @RequestParam(value = "lat", required = false) Double lat,
+                                @RequestParam(value = "lng", required = false) Double lng,
+                                HttpSession session,
+                                ModelMap model) throws Exception {
+
+        double myLat = (lat != null) ? lat : DEFAULT_LAT;
+        double myLng = (lng != null) ? lng : DEFAULT_LNG;
+
+        FacilityDTO facility = workoutService.getFacility(facilityId, sportId, myLat, myLng);
+
+        // 없는 번호로 들어오면 목록으로 돌려보낸다. 빈 상세 화면을 보여줄 이유가 없다.
+        if (facility == null) {
+            return "redirect:/workout/workoutList";
+        }
+
+        // 로그인하지 않아도 시설은 볼 수 있게 둔다.
+        // 회원번호는 나이에 맞는 강좌를 위로 올리는 데만 쓰므로, 없으면 순서만 기본값이 된다.
+        Object userNo = session.getAttribute("SS_USER_NO");
+        int userId = (userNo instanceof Number) ? ((Number) userNo).intValue() : 0;
+
+        model.addAttribute("facility", facility);
+        model.addAttribute("programs", workoutService.getPrograms(userId, facilityId, sportId));
+        model.addAttribute("sportId", sportId);
+        model.addAttribute("lat", myLat);
+        model.addAttribute("lng", myLng);
+        model.addAttribute("usingGps", lat != null && lng != null);
+        model.addAttribute("active", "workout");
+
+        return "workout/workoutDetail";
+    }
+
+    /** 야외 코스 상세 */
+    @GetMapping("/courseDetail/{courseId}")
+    public String courseDetail(@PathVariable("courseId") int courseId,
+                               @RequestParam(value = "lat", required = false) Double lat,
+                               @RequestParam(value = "lng", required = false) Double lng,
+                               ModelMap model) throws Exception {
+
+        double myLat = (lat != null) ? lat : DEFAULT_LAT;
+        double myLng = (lng != null) ? lng : DEFAULT_LNG;
+
+        CourseDTO course = workoutService.getCourse(courseId, myLat, myLng);
+
+        // 없는 번호로 들어오면 목록으로 돌려보낸다. 빈 상세 화면을 보여줄 이유가 없다.
+        if (course == null) {
+            return "redirect:/workout/workoutList?tab=outdoor";
+        }
+
+        model.addAttribute("course", course);
+        model.addAttribute("points", workoutService.getCoursePoints(courseId));
+        model.addAttribute("kakaoMapKey", kakaoMapKey);
+        model.addAttribute("lat", myLat);
+        model.addAttribute("lng", myLng);
+        model.addAttribute("usingGps", lat != null && lng != null);
+        model.addAttribute("active", "workout");
+
+        return "workout/courseDetail";
+    }
+
+    /** 운동 진행 화면 */
     @GetMapping("/workoutPlay")
     public String workoutPlay(ModelMap model) {
         model.addAttribute("active", "workout");
         return "workout/workoutPlay";
     }
 
-    /**
-     * 운동 완료 화면 (세 번째 사진)
-     */
+    /** 운동 완료 화면 */
     @GetMapping("/workoutResult")
     public String workoutResult(ModelMap model) {
         model.addAttribute("active", "workout");
         return "workout/workoutResult";
     }
 
-    @GetMapping("/workoutDetail/{id}")
-    public String workoutDetail(@PathVariable("id") Long id, ModelMap model) {
-        Map<String, Object> detail = new HashMap<>();
-        detail.put("id", id);
-        detail.put("name", "강서구민올림픽체육센터 수영장");
-        detail.put("category", "수영");
-        detail.put("address", "서울 강서구 등촌동 707-3");
-        detail.put("distance", "2.2km");
-        detail.put("price", "2,000원");
-        detail.put("weekdayTime", "06:00~22:00");
-        detail.put("weekendTime", "09:00~18:00");
-        detail.put("closedDay", "매주 월요일, 1월 1일");
-        detail.put("priceStandard", "2시간 / 성인 1인");
-        detail.put("capacity", "60명");
-        detail.put("phone", "02-880-0000");
-        detail.put("subwayInfo", "강서구 등촌동 707-3 · 9호선 등촌역 인근");
-
-        model.addAttribute("detail", detail);
-        model.addAttribute("active", "workout");
-
-        return "workout/workoutDetail";
-    }
 }

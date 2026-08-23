@@ -68,4 +68,23 @@
          ORDER BY s.sport_id
     </select>
 
+    <!-- 갈래별 종목 목록
+
+         즉시운동 탭의 종목 단추를 만드는 데 쓴다.
+         화면에 종목 이름을 박아 두면 표에 종목이 늘어도 화면이 모른다.
+         실제로 지금 표에는 당구·골프가 있는데 화면에는 없다.
+
+         시설이 하나도 없는 종목은 뺀다. 눌러도 빈 목록만 나온다. -->
+    <select id="getSportsByCategory" resultType="SportDTO">
+        SELECT s.sport_id, s.name, s.category, s.min_people, s.met_value
+          FROM sports s
+         WHERE s.is_active = 1
+           AND s.category = #{category}
+        <if test="category == 'FACILITY'">
+           AND EXISTS (SELECT 1 FROM facility_sports fs
+                        WHERE fs.sport_id = s.sport_id)
+        </if>
+         ORDER BY s.sport_id
+    </select>
+
 </mapper>

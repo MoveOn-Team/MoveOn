@@ -68,16 +68,20 @@
             const result = await moveOnAuth.post(contextPath + "/user/loginProc", {loginId, password});
             const success = (result.msg || "").includes("로그인되었습니다");
 
-            // 성공은 팝업으로 알리고 바로 넘어가므로 입력칸 아래에는 남기지 않는다.
-            // 남겨두면 뒤로가기로 돌아왔을 때 초록 줄과 문구가 그대로 보인다.
+            // 실패했을 때만 입력칸 아래에 남긴다.
+            // 성공은 다음 화면으로 넘어가므로 남겨두면 뒤로가기로 돌아왔을 때
+            // 초록 줄과 문구가 그대로 보인다.
             moveOnAuth.setFieldMessage(message, success ? "" : result.msg, success ? "" : "error");
 
             if (success) {
+                // 성공은 알리지 않고 바로 넘어간다.
+                // '로그인되었습니다' 를 눌러서 지워야 다음 화면이 나오면
+                // 화면이 하나 더 끼어든 것과 같다. 넘어간 화면이 곧 성공 신호다.
+                //
                 // 성향조사를 안 했으면 온보딩부터, 마쳤으면 맞춤 추천으로 보낸다.
-                const next = result.onboardingCompleted
+                location.href = result.onboardingCompleted
                     ? contextPath + "/recommend/recommendList"
                     : contextPath + "/user/onboarding-page";
-                moveOnAuth.showMessage(result.msg, function () { location.href = next; });
             } else {
                 moveOnAuth.showMessage(result.msg);
             }

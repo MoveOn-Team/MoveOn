@@ -405,14 +405,6 @@
     font-weight: 700;
 }
 
-.data-notice {
-    margin: 0.75rem 0 0;
-    color: #a1a5ab;
-    font-size: var(--fs-tag);
-    line-height: 1.5;
-    text-align: right;
-}
-
 .more-button {
     width: 100%;
     margin-top: 0.5rem;
