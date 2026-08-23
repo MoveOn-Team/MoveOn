@@ -22,7 +22,7 @@
                     <h2 class="user-name">${userInfo.userName}</h2>
                     <p class="user-sub">${userInfo.email} · ${userInfo.region}</p>
                 </div>
-                <button type="button" class="btn-edit-profile" id="btnEditProfile">수정</button>
+                <a href="${pageContext.request.contextPath}/user/profileEdit" class="btn-edit-profile">수정</a>
             </div>
         </section>
 
