@@ -38,4 +38,11 @@ public interface ISportMapper {
                                          @Param("ageGroup") String ageGroup,
                                          @Param("lat") double lat,
                                          @Param("lng") double lng) throws Exception;
+
+    /**
+     * 갈래별 종목 목록. 즉시운동 탭의 종목 단추를 만드는 데 씀.
+     *
+     * @param category FACILITY 시설에서 / OUTDOOR 야외에서 / HOME 집에서
+     */
+    List<SportDTO> getSportsByCategory(@Param("category") String category) throws Exception;
 }

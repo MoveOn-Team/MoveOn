@@ -83,6 +83,6 @@
 
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
-<script src="${pageContext.request.contextPath}/js/recommend.js"></script>
+<script src="${pageContext.request.contextPath}/js/geo.js"></script>
 </body>
 </html>

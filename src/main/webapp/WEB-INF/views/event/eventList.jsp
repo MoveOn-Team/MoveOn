@@ -142,6 +142,8 @@
 
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
+<%-- 현위치를 받아 좌표를 달고 같은 주소를 다시 연다. 거리 표시가 여기에 달려 있다. --%>
+<script src="${pageContext.request.contextPath}/js/geo.js"></script>
 <script src="${pageContext.request.contextPath}/js/event.js"></script>
 </body>
 </html>
