@@ -135,8 +135,21 @@ public class WorkoutController {
         Object userNo = session.getAttribute("SS_USER_NO");
         int userId = (userNo instanceof Number) ? ((Number) userNo).intValue() : 0;
 
+        // 즉시운동 탭은 '오늘 가서 쓰는' 화면이다.
+        // 그래서 강습 수강신청이 아니라 빌리고 이용하는 창구로 보낸다.
+        //   1순위 그 시설의 대관 페이지        facilities.rental_url
+        //   2순위 서울시 공공서비스예약        facility_sports.reserve_url
+        //   3순위 자치구 대관                district_sites.rental_url
+        //   4순위 그 시설 홈페이지            facilities.homepage_url
+        // 추천 탭(RecommendController)은 반대로 수강신청 쪽을 먼저 본다.
+        String useUrl = firstUsable(facility.getRentalUrl(),
+                                    facility.getReserveUrl(),
+                                    facility.getDistrictRentalUrl(),
+                                    facility.getHomepageUrl());
+
         model.addAttribute("facility", facility);
-        model.addAttribute("programs", workoutService.getPrograms(userId, facilityId, sportId));
+        model.addAttribute("useUrl", useUrl);
+        model.addAttribute("kakaoMapKey", kakaoMapKey);
         model.addAttribute("sportId", sportId);
         model.addAttribute("lat", myLat);
         model.addAttribute("lng", myLng);
@@ -186,6 +199,28 @@ public class WorkoutController {
     public String workoutResult(ModelMap model) {
         model.addAttribute("active", "workout");
         return "workout/workoutResult";
+    }
+
+    /**
+     * 앞에서부터 쓸 만한 주소를 고른다.
+     *
+     * 공공데이터에는 값이 비었다는 뜻으로 "null" 이라는 글자가 그대로 들어온 행이 많다.
+     * 자바의 null 검사로는 걸러지지 않아 그대로 두면 깨진 주소로 연결된다.
+     */
+    private String firstUsable(String... urls) {
+        for (String u : urls) {
+            if (u == null) {
+                continue;
+            }
+            String v = u.trim();
+            if (v.isEmpty() || "null".equalsIgnoreCase(v) || "-".equals(v)) {
+                continue;
+            }
+            if (v.startsWith("http://") || v.startsWith("https://")) {
+                return v;
+            }
+        }
+        return null;
     }
 
 }

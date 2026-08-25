@@ -4,8 +4,14 @@
     {
       "name": "moveon",
       "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "mvnw.cmd", "spring-boot:run"],
-      "port": 8080
+      "runtimeArgs": [
+        "/c",
+        "mvnw.cmd",
+        "-o",
+        "spring-boot:run",
+        "-Dspring-boot.run.jvmArguments=-Dserver.port=8088"
+      ],
+      "port": 8088
     }
   ]
 }

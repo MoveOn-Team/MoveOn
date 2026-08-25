@@ -61,36 +61,50 @@
                 <span class="info-value">${facility.capacity}명</span>
             </div>
         </c:if>
-        <div class="info-row">
-            <span class="info-label">여는 강좌</span>
-            <span class="info-value">
-                <c:choose>
-                    <c:when test="${empty programs}">등록된 강좌가 없어요</c:when>
-                    <c:otherwise>${fn:length(programs)}개</c:otherwise>
-                </c:choose>
-            </span>
-        </div>
     </div>
 
+    <%-- 강좌 수도 적지 않는다.
+         원본이 2025년 9월 자료라 개수마저 지금과 어긋난다.
+         '여는 강좌 26개' 라고 적어 놓고 실제로는 다른 강좌가 열려 있으면
+         숫자만 정확해 보여서 오히려 잘못 믿게 된다. --%>
     <div class="notice-alert-box">
         <p class="notice-title">요금·운영시간은 상시 변경될 수 있습니다</p>
         <p class="notice-desc">방문 전 안내 페이지에서 꼭 확인해 주세요</p>
     </div>
 
-    <div class="map-placeholder">
-        <div class="map-pin"></div>
-    </div>
-    <p class="map-sub-info">${facility.guName} · 지도는 준비 중이에요</p>
+    <%-- 시설 위치. 좌표는 모든 시설에 다 있어서 코스와 달리 빠지는 곳이 없다.
+         키가 없거나 도메인 등록이 안 됐으면 kakao 가 아예 없으므로 자리표시만 남는다. --%>
+    <c:choose>
+        <c:when test="${not empty kakaoMapKey}">
+            <div id="facilityMap" class="kakao-map"
+                 data-lat="${facility.lat}" data-lng="${facility.lng}"
+                 data-name="${fn:escapeXml(facility.name)}"></div>
+            <%-- 지도 라이브러리.
+                 https 를 그대로 적는다. '//' 로 시작하면 페이지가 http 일 때
+                 http://dapi.kakao.com 을 부르는데 카카오는 https 만 받아 준다. --%>
+            <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapKey}"></script>
+        </c:when>
+        <c:otherwise>
+            <div class="map-placeholder"><div class="map-pin"></div></div>
+        </c:otherwise>
+    </c:choose>
+    <p class="map-sub-info">
+        ${facility.guName}<c:if test="${not empty facility.roadAddr}"> · ${facility.roadAddr}</c:if>
+    </p>
 
     <div class="detail-action-btns">
         <button type="button" id="btnFacilityMap" class="btn-outline"
                 data-map-url="https://map.kakao.com/link/map/${facility.name},${facility.lat},${facility.lng}">
             길찾기
         </button>
-        <button type="button" id="btnFacilitySite" class="btn-primary"
-                data-target-url="${not empty facility.homepageUrl ? facility.homepageUrl : facility.districtUrl}">
-            안내페이지로 이동
-        </button>
+        <%-- 즉시운동은 오늘 가서 쓰는 화면이라 대관·이용 창구로 보낸다.
+             수강신청은 추천 탭이 맡는다. --%>
+        <c:if test="${not empty useUrl}">
+            <button type="button" id="btnFacilitySite" class="btn-primary"
+                    data-target-url="${useUrl}">
+                이용 안내 보기
+            </button>
+        </c:if>
     </div>
 </main>
 

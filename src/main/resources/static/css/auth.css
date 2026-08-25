@@ -1483,16 +1483,19 @@ body::-webkit-scrollbar {
 
 /* =========================================================
    공통 모바일 쉘 & 컨테이너
+
+   .auth-shell 은 위(157줄)에서 이미 잡았다. 여기서 다시 잡으면
+   --app-w 대신 430px 이 박히고 box-shadow 까지 얹혀서
+   넓은 화면에서 앱 양옆에 회색 테두리가 생긴다. 그래서 뺐다.
+   .container 는 온보딩·내 정보 수정·리포트 세 화면이 쓴다.
    ========================================================= */
-.auth-shell,
 .container {
-    max-width: 430px;
+    max-width: var(--app-w);
     margin: 0 auto;
-    min-height: 100vh;
+    min-height: 100dvh;
     background-color: #ffffff;
     position: relative;
     box-sizing: border-box;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
 
 .myPage-shell,
