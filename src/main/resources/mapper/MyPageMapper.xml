@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.moveon.mapper.IMyPageMapper">
+
+    <!-- 내 정보 조회 -->
+    <select id="selectUserProfileById" parameterType="int" resultType="com.moveon.dto.UserProfileDTO">
+        SELECT
+            user_id AS userId,
+            login_id AS loginId,
+            name,
+            email,
+            birth_date AS birthDate,
+            gender,
+            height_cm AS heightCm,
+            weight_kg AS weightKg,
+            bmi,
+            trait_companion AS traitCompanion,
+            trait_competition AS traitCompetition,
+            trait_place AS traitPlace,
+            trait_intensity AS traitIntensity
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 회원 정보 수정 -->
+    <update id="updateUserProfile" parameterType="com.moveon.dto.UserProfileDTO">
+        UPDATE users
+        SET
+            name = #{name},
+            height_cm = #{heightCm},
+            weight_kg = #{weightKg}
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 운동 기록 추가 -->
+    <insert id="insertWorkoutLog" parameterType="com.moveon.dto.WorkoutLogDTO">
+        INSERT INTO workout_logs (
+            user_id,
+            sport_id,
+            exercise_date,
+            duration_min,
+            intensity,
+            calories_kcal,
+            memo,
+            source,
+            created_at
+        ) VALUES (
+                     #{userId},
+                     (SELECT sport_id FROM sports WHERE name = #{sportName} LIMIT 1),
+            STR_TO_DATE(#{workoutDate}, '%Y-%m-%d'),
+            #{durationMin},
+            CASE
+                WHEN #{intensity} = '가볍게' THEN 'LIGHT'
+                WHEN #{intensity} = '숨차게' THEN 'HARD'
+                ELSE 'MODERATE'
+                END,
+            #{caloriesBurned},
+            #{memo},
+            'MANUAL',
+            NOW()
+            )
+    </insert>
+
+    <select id="selectTodayWorkoutList" parameterType="int" resultType="com.moveon.dto.WorkoutLogDTO">
+        SELECT
+            w.log_id AS logId,
+            w.user_id AS userId,
+            w.sport_id AS sportId,
+            s.name AS sportName,
+            w.duration_min AS durationMin,
+            w.intensity AS intensity,
+            w.calories_kcal AS caloriesBurned,
+            w.exercise_date AS workoutDate,
+            w.memo AS memo,
+            w.source AS source
+        FROM workout_logs w
+                 LEFT JOIN sports s ON w.sport_id = s.sport_id
+        WHERE w.user_id = #{userId}
+          AND w.exercise_date = CURDATE()
+        ORDER BY w.created_at DESC
+    </select>
+
+
+
+    <!-- 이번 주 운동 요약 (월요일~일요일) -->
+    <select id="selectThisWeekSummary" resultType="map">
+        SELECT
+            IFNULL(COUNT(*), 0) AS weekCount,
+            IFNULL(SUM(duration_min), 0) AS weekDuration
+        FROM workout_logs
+        WHERE user_id = #{userId}
+          AND exercise_date BETWEEN DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+            AND DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY)
+    </select>
+
+    <!-- 지난 주 운동 횟수 -->
+    <select id="selectLastWeekCount" resultType="int">
+        SELECT IFNULL(COUNT(*), 0)
+        FROM workout_logs
+        WHERE user_id = #{userId}
+          AND exercise_date BETWEEN DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
+            AND DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 1 DAY)
+    </select>
+
+    <!-- 이번 주 소모 칼로리 -->
+    <select id="selectThisWeekCalories" resultType="int">
+        SELECT IFNULL(SUM(calories_kcal), 0)
+        FROM workout_logs
+        WHERE user_id = #{userId}
+          AND exercise_date BETWEEN DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+            AND DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY)
+    </select>
+
+    <!-- 전체 누적 운동 횟수 -->
+    <select id="selectTotalWorkoutCount" resultType="int">
+        SELECT IFNULL(COUNT(*), 0)
+        FROM workout_logs
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 많이 한 종목 Top 4 -->
+    <select id="selectTopSports" resultType="com.moveon.dto.WorkoutReportDTO$SportStatDTO">
+        SELECT
+            s.name AS sportName,
+            COUNT(*) AS count
+        FROM workout_logs w
+            JOIN sports s ON w.sport_id = s.sport_id
+        WHERE w.user_id = #{userId}
+        GROUP BY w.sport_id, s.name
+        ORDER BY count DESC
+    </select>
+
+    <!-- 가장 오래 한 운동 1건 -->
+    <select id="selectMaxDurationWorkout" resultType="map">
+        SELECT
+            s.name AS sportName,
+            w.duration_min AS maxDuration
+        FROM workout_logs w
+                 JOIN sports s ON w.sport_id = s.sport_id
+        WHERE w.user_id = #{userId}
+        ORDER BY w.duration_min DESC, w.created_at DESC
+            LIMIT 1
+    </select>
+
+    <!-- 첫 기록 날짜 -->
+    <select id="selectFirstRecordDate" resultType="string">
+        SELECT DATE_FORMAT(MIN(exercise_date), '%Y년 %c월 %e일')
+        FROM workout_logs
+        WHERE user_id = #{userId}
+    </select>
+
+</mapper>
