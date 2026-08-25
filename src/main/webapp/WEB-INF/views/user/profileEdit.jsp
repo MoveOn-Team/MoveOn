@@ -33,7 +33,7 @@
             <h2 class="group-title">기본 정보</h2>
             <div class="edit-input-card">
                 <label class="card-label">이름</label>
-                <input type="text" name="userName" id="userName" class="card-input" value="${user.name}" placeholder="이름 입력">
+                <input type="text" name="name" id="userName" class="card-input" value="${user.name}" placeholder="이름 입력" required>
             </div>
         </div>
 
@@ -42,12 +42,12 @@
             <h2 class="group-title">신체 정보</h2>
             <div class="edit-input-card">
                 <label class="card-label">키 (cm)</label>
-                <input type="number" name="height" id="height" class="card-input" value="${user.height}" placeholder="170">
+                <input type="number" step="0.1" name="heightCm" id="height" class="card-input" value="${user.heightCm}" placeholder="170" required>
             </div>
 
             <div class="edit-input-card mt-12">
                 <label class="card-label">몸무게 (kg)</label>
-                <input type="number" name="weight" id="weight" class="card-input" value="${user.weight}" placeholder="65">
+                <input type="number" step="0.1" name="weightKg" id="weight" class="card-input" value="${user.weightKg}" placeholder="65" required>
             </div>
         </div>
 
@@ -57,7 +57,7 @@
                 <span class="bmi-title">산출된 BMI</span>
                 <span class="bmi-status-badge" id="bmiStatusBadge">정상 체중</span>
             </div>
-            <div class="bmi-value-text" id="bmiValueText">22.5</div>
+            <div class="bmi-value-text" id="bmiValueText">${user.calculatedBmi}</div>
 
             <!-- BMI 게이지 바 -->
             <div class="bmi-gauge-container">
