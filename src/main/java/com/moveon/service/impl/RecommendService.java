@@ -243,11 +243,8 @@ public class RecommendService implements IRecommendService {
             double body = bodyScore(dto, me);
             double access = accessScore(dto.getNearestKm());
 
-            dto.setTraitPoint((int) Math.round(trait * W_TRAIT));
-            dto.setStatPoint((int) Math.round(stat * W_STAT));
-            dto.setBodyPoint((int) Math.round(body * W_BODY));
-            dto.setAccessPoint((int) Math.round(access * W_ACCESS));
-
+            // 네 항목을 따로 담아 두지 않는다.
+            // 화면은 합계만 쓰고, 어떻게 나온 점수인지는 이 코드로 설명한다.
             dto.setTotalScore((int) Math.round(
                     trait * W_TRAIT + stat * W_STAT + body * W_BODY + access * W_ACCESS));
 

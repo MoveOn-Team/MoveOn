@@ -88,8 +88,12 @@ public class RecommendController {
     /**
      * SC-011 종목 상세
      *
-     * 가까운 공공체육시설 3곳과, 그중 첫 번째 시설의 운영 강좌를 함께 내려준다.
-     * 다른 시설을 눌렀을 때 강좌만 바꿔 끼우는 건 화면에서 비동기로 처리한다.
+     * 가까운 공공체육시설 3곳과, 고른 시설의 신청 창구를 내려준다.
+     *
+     * 강좌 목록은 화면에 내지 않는다. 원본이 2025년 9월 자료라
+     * 지금 열리는 강좌·요금과 어긋나서, 틀린 목록을 보여 주느니
+     * 신청 페이지로 보내는 편이 낫다고 보았다.
+     * programs 는 그래도 읽는다. 강습이 있는 곳인지 빌리는 곳인지 갈라야 해서다.
      */
     @GetMapping(value = "/sportDetail/{sportId}")
     public String sportDetail(@PathVariable("sportId") int sportId,
@@ -111,6 +115,16 @@ public class RecommendController {
         double myLng = (lng == null) ? DEFAULT_LNG : lng;
 
         SportDTO sport = recommendService.getSportScore(userId, sportId, myLat, myLng);
+
+        // 추천 대상이 아닌 종목번호로 들어온 경우.
+        // 홈트(category='HOME')는 갈 시설이 없어 추천 계산에서 빠지고, 없는 번호도 마찬가지다.
+        // 화면에서 눌러 올 수 있는 길은 없지만 주소를 직접 치면 닿는다.
+        // 그대로 두면 예외 대신 제목도 점수도 빈 화면이 떠서 고장으로 보인다.
+        if (sport == null) {
+            log.info("{}.sportDetail End! 추천 대상이 아닌 종목 : {}", this.getClass().getName(), sportId);
+            return "redirect:/recommend/recommendList";
+        }
+
         List<FacilityDTO> facilities = recommendService.getNearbyFacilities(sportId, myLat, myLng, 3);
 
         // 시설을 고르지 않았으면 가장 가까운 곳의 강좌를 보여준다
@@ -121,60 +135,128 @@ public class RecommendController {
                 ? Collections.emptyList()
                 : recommendService.getPrograms(userId, pickId, sportId);
 
-        // 강좌가 없으면 대관 가능한 곳을 대신 보여준다.
-        // 축구·풋살처럼 '강좌 수강' 이 아니라 '구장 대관' 이 정상인 종목이 있다.
-        List<RentalDTO> rentals = programs.isEmpty()
+        // 이 종목을 할 시설이 하나도 안 잡혔을 때만 서울시 공공서비스예약을 뒤진다.
+        //
+        // 예전에는 '강좌가 없으면' 이것을 함께 보여줬는데,
+        // 그러면 0m 앞에 시설을 세 곳 띄워 놓고 그 아래에 4.6km 짜리 목록을 또 붙이는 꼴이었다.
+        // 위 목록의 시설들도 저마다 빌리는 창구로 이어지므로, 두 벌을 둘 이유가 없다.
+        List<RentalDTO> rentals = facilities.isEmpty()
                 ? recommendService.getNearbyRentals(sportId, myLat, myLng, 3)
                 : Collections.emptyList();
 
-        // 외부로 보낼 링크를 정한다
-        //   1순위 강좌 예약 페이지        programs.reservation_url
-        //   2순위 서울시 공공서비스예약   facility_sports.reserve_url
-        //   3순위 시설 홈페이지          facilities.homepage_url
-        //
-        // facilities.guide_url 은 쓰지 않는다.
-        // 좌표를 맞출 때 저장한 카카오맵 장소 주소라, 옆의 '길찾기' 버튼과 같은 곳으로 간다.
-        // 셋 다 없으면 버튼을 만들지 않는다. 실제로 그런 시설이 대부분이다.
         final int selected = pickId;
         FacilityDTO pick = facilities.stream()
                 .filter(f -> f.getFacilityId() == selected)
                 .findFirst().orElse(null);
 
-        String linkUrl = null;
-        String linkLabel = null;
+        // 외부로 보낼 링크를 정한다.
+        //
+        // 갈 곳이 두 갈래다. 배우러 가는 곳(수강신청)과 빌리러 가는 곳(대관)은
+        // 같은 시설이라도 신청 창구가 다르다.
+        // 그래서 이 시설이 무엇을 가졌는지 먼저 보고 그쪽 창구로 보낸다.
+        //
+        //   강습이 있으면   강좌 예약 → 시설 홈페이지 → 자치구 수강신청
+        //   이용권·대관뿐이면 공공서비스예약 → 시설 대관 → 자치구 대관 → 시설 홈페이지
+        //
+        // homepage_url 은 한 번 걸러 놓은 값이다.
+        // 원본에는 'gwanakgongdan.or.kr' 처럼 여러 시설이 나눠 쓰는 기관 대문이 대부분이었고,
+        // 그리로 보내면 회원이 거기서 시설을 다시 찾아 들어가야 했다.
+        // 그런 것은 비워서 자치구 창구로 내려보냈다.
+        //
+        // facilities.guide_url 은 쓰지 않는다.
+        // 좌표를 맞출 때 저장한 카카오맵 장소 주소라, 옆의 '길찾기' 버튼과 같은 곳으로 간다.
+        boolean hasCourse = programs.stream()
+                .anyMatch(p -> "COURSE".equals(p.getProgramType()));
 
-        for (ProgramDTO p : programs) {
-            if (isUsableUrl(p.getReservationUrl())) {
-                linkUrl = p.getReservationUrl();
-                linkLabel = "예약페이지로 이동";
-                break;
+        String linkUrl = null;
+        boolean toRental = false;
+
+        if (hasCourse) {
+            for (ProgramDTO p : programs) {
+                if (isUsableUrl(p.getReservationUrl())) {
+                    linkUrl = p.getReservationUrl();
+                    break;
+                }
+            }
+            if (linkUrl == null && pick != null && isUsableUrl(pick.getHomepageUrl())) {
+                linkUrl = pick.getHomepageUrl();
+            }
+            if (linkUrl == null && pick != null && isUsableUrl(pick.getDistrictUrl())) {
+                linkUrl = pick.getDistrictUrl();
+            }
+        } else if (!programs.isEmpty()) {
+            // 강습은 없고 이용권·대관만 있는 시설.
+            // 오금공원테니스장처럼 '평일 4,000원 / 월회원 38,500원' 만 있는 곳이다.
+            toRental = true;
+            if (pick != null && isUsableUrl(pick.getReserveUrl())) {
+                linkUrl = pick.getReserveUrl();          // 서울시 공공서비스예약
+            }
+            if (linkUrl == null && pick != null && isUsableUrl(pick.getRentalUrl())) {
+                linkUrl = pick.getRentalUrl();
+            }
+            if (linkUrl == null && pick != null && isUsableUrl(pick.getDistrictRentalUrl())) {
+                linkUrl = pick.getDistrictRentalUrl();
+            }
+            if (linkUrl == null && pick != null && isUsableUrl(pick.getHomepageUrl())) {
+                linkUrl = pick.getHomepageUrl();
+                toRental = false;
+            }
+        } else if (pick != null) {
+            // 강좌 자료가 아예 없는 시설.
+            // 그래도 갈 곳이 확인된 곳이면 보낸다.
+            // 송파테니스장처럼 우리 자료엔 강좌가 없지만 대관은 받는 곳,
+            // 올림픽공원 테니스경기장처럼 운영기관 안내 페이지가 있는 곳이 여기 해당한다.
+            // 자치구 창구까지는 쓰지 않는다. 그 목록에 이 시설이 있는지 확인된 바 없어서다.
+            if (isUsableUrl(pick.getReserveUrl())) {
+                linkUrl = pick.getReserveUrl();
+                toRental = true;
+            } else if (isUsableUrl(pick.getRentalUrl())) {
+                linkUrl = pick.getRentalUrl();
+                toRental = true;
+            } else if (isUsableUrl(pick.getHomepageUrl())) {
+                linkUrl = pick.getHomepageUrl();
             }
         }
-        if (linkUrl == null && pick != null && isUsableUrl(pick.getReserveUrl())) {
-            linkUrl = pick.getReserveUrl();
-            linkLabel = "예약페이지로 이동";
+
+        // 단추에 쓸 말. 어디로 가느냐가 아니라 무엇을 하러 가느냐로 적는다.
+        // 'OO구 체육시설 강좌' 처럼 목적지를 밝히는 문구도 써 봤는데,
+        // 구 이름이 들어가면 길어지기만 하고 화면이 지저분해졌다.
+        String linkLabel = null;
+        if (linkUrl != null) {
+            linkLabel = toRental ? "대관 신청하기" : "예약페이지로 이동";
         }
-        if (linkUrl == null && pick != null && isUsableUrl(pick.getHomepageUrl())) {
-            linkUrl = pick.getHomepageUrl();
-            linkLabel = "예약페이지로 이동";
-        }
-        // 시설 홈페이지가 없으면 그 시설이 속한 자치구 시설관리공단으로 보낸다.
+
+        // 고른 시설이 '그냥 가서 쓰는 곳' 인지.
         //
-        // 이 시설의 페이지가 아니라는 점이 중요하다.
-        // 청소년수련관·복지관은 청소년재단·복지재단이 따로 운영해서
-        // 시설관리공단 목록에 없는 경우가 많다.
-        // 그래서 'OO구 수강신청' 처럼 이 시설 것으로 읽히는 문구를 쓰지 않고,
-        // 'OO구 체육시설 강좌' 로 지역 전체를 가리킨다는 걸 드러낸다.
-        if (linkUrl == null && pick != null && isUsableUrl(pick.getDistrictUrl())) {
-            linkUrl = pick.getDistrictUrl();
-            linkLabel = "예약페이지로 이동";
-        }
+        // 근린공원 농구장·풋살장이 여기 해당한다. 자료를 세 군데서 찾아봐도 없다.
+        //   강좌 없음 / 자치구 예약 사이트에 없음 / 서울시 공공서비스예약에도 없음
+        // 빠뜨린 게 아니라 예약이라는 절차 자체가 없는 개방형 코트다.
+        //
+        // 아래 '지금 빌릴 수 있는 곳' 이 비었는지는 보지 않는다.
+        // 그건 이 시설이 아니라 근처 다른 곳의 이야기라서,
+        // 5km 떨어진 유료 구장이 하나 잡혔다고 눈앞의 무료 코트가 유료가 되지는 않는다.
+        boolean openAccess = programs.isEmpty() && linkUrl == null;
+        model.addAttribute("openAccess", openAccess);
+
+        // 빌리러 가는 시설인지. 화면은 이걸 보고 '강좌가 없어요' 안내를 접는다.
+        // 대관하러 온 사람에게 강좌가 없다고 알릴 이유가 없다.
+        model.addAttribute("toRental", toRental);
+
+        // 이 동네에서 이 종목이 '배우는 것' 인지 '빌리는 것' 인지.
+        //
+        // 가까운 세 곳 중 강습이 하나도 없으면 배우러 갈 곳이 아니다.
+        // 그때는 목록 제목부터 '지금 빌릴 수 있는 3곳' 으로 바꾼다.
+        // 같은 테니스라도 강남에는 강습이 있고 오금동에는 대관뿐이라 동네마다 갈린다.
+        model.addAttribute("rentalMode",
+                !facilities.isEmpty() && facilities.stream().allMatch(f -> f.getCourseCount() == 0));
 
         model.addAttribute("sport", sport);
         model.addAttribute("profile", recommendService.getProfile(userId, myLat, myLng));
         model.addAttribute("facilities", facilities);
         model.addAttribute("pickId", pickId);
-        model.addAttribute("programs", programs);
+        // 고른 시설 자체도 넘긴다.
+        // 안 넘기면 화면이 pickId 와 같은 것을 찾으려고 facilities 를 다시 훑어야 한다.
+        model.addAttribute("pick", pick);
         model.addAttribute("rentals", rentals);
         model.addAttribute("linkUrl", linkUrl);
         model.addAttribute("linkLabel", linkLabel);
@@ -207,6 +289,7 @@ public class RecommendController {
         }
         return v.startsWith("http://") || v.startsWith("https://");
     }
+
 
     /**
      * 세션에서 로그인한 회원 번호를 가져온다. 로그인 전이면 null.

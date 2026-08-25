@@ -52,6 +52,22 @@
             drawCourseMap(mapBox);
         }
 
+        // ---------- 시설 지도 ----------
+        // 코스와 달리 점 하나뿐이라 선을 그을 것이 없다.
+        // 좌표는 시설 1,280곳 모두 갖고 있어 빠지는 곳이 없다.
+        var facBox = document.getElementById("facilityMap");
+        if (facBox && window.kakao && kakao.maps) {
+            var at = new kakao.maps.LatLng(
+                parseFloat(facBox.dataset.lat), parseFloat(facBox.dataset.lng));
+            var facMap = new kakao.maps.Map(facBox, {center: at, level: 4});
+            addMark(facMap, at, facBox.dataset.name || "");
+            // 지도가 크기 0 으로 그려질 때가 있어 한 번 더 맞춘다
+            setTimeout(function () {
+                facMap.relayout();
+                facMap.setCenter(at);
+            }, 200);
+        }
+
         function drawCourseMap(box) {
             var pts;
             try {

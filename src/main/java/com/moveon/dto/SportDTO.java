@@ -37,14 +37,6 @@ public class SportDTO {
 
     /** 최종 결과 - 점수와 순위 */
 
-    private int traitPoint;  // 성향   (40점 만점)
-
-    private int statPoint;   // 통계   (25점 만점)
-
-    private int bodyPoint;   // 신체   (15점 만점)
-
-    private int accessPoint; // 접근성 (20점 만점)
-
     private int totalScore;  // 지속 적합도 (성향 40% + 통계 25% + 신체 15% + 접근성 20%)
 
     private int rank;        // 전체 종목 중 순위. 상세 화면에서는 Top3까지 나타냄.

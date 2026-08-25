@@ -10,8 +10,10 @@
     <select id="getFacility" resultType="FacilityDTO">
         SELECT f.facility_id, f.name, f.gu_name, f.road_addr, f.lot_addr,
                f.lat, f.lng, f.phone, f.homepage_url, f.capacity,
+               f.rental_url,
                fs.reserve_url,
-               ds.site_url AS district_url,
+               ds.site_url   AS district_url,
+               ds.rental_url AS district_rental_url,
                ST_Distance_Sphere(POINT(#{lng}, #{lat}),
                                   POINT(f.lng, f.lat)) / 1000 AS distance_km
           FROM facilities f
@@ -26,11 +28,21 @@
     <select id="getNearbyFacilities" resultType="FacilityDTO">
         SELECT f.facility_id, f.name, f.gu_name, f.road_addr, f.lot_addr,
                f.lat, f.lng, f.phone, f.homepage_url, f.capacity,
+               f.rental_url,
+               -- 이 시설이 이 종목을 '가르치는 곳' 인지 '빌려주는 곳' 인지.
+               -- 목록에서 바로 보여 줘야 눌러 보기 전에 무엇을 하러 가는지 안다.
+               (SELECT COUNT(*) FROM programs p
+                 WHERE p.facility_id = f.facility_id AND p.sport_id = fs.sport_id
+                   AND p.program_type = 'COURSE')  AS course_count,
+               (SELECT COUNT(*) FROM programs p
+                 WHERE p.facility_id = f.facility_id AND p.sport_id = fs.sport_id
+                   AND p.program_type &lt;&gt; 'COURSE') AS rental_count,
                -- 예약 링크는 시설이 아니라 '시설 x 종목' 단위.
                -- 같은 복합시설이라도 테니스장만 예약 대상인 경우가 있음.
                fs.reserve_url,
-               -- 시설 홈페이지가 없을 때 강좌를 확인할 자치구 대표 사이트
-               ds.site_url AS district_url,
+               -- 시설 주소가 없을 때 쓸 자치구 창구. 강습과 대관을 따로 둔다
+               ds.site_url   AS district_url,
+               ds.rental_url AS district_rental_url,
                -- 두 좌표 사이 실제 거리를 미터로 주는 내장 함수. 1000 으로 나눠 km 로 쓴다.
                -- POINT 는 (경도, 위도) 순서다.
                ST_Distance_Sphere(POINT(#{lng}, #{lat}),
@@ -59,11 +71,23 @@
          target 은 '성인', '어린이,청소년', '성인,(여성)' 처럼 자유 문장이라 REGEXP 로 본다.
          대상이 안 적힌 강좌(NULL)는 판단할 수 없으므로 남긴다. -->
     <select id="getPrograms" resultType="ProgramDTO">
-        SELECT p.program_id, p.facility_id, p.sport_id, p.name, p.target,
-               p.day_of_week,
-               TIME_FORMAT(p.start_time, '%H:%i') AS start_time,
-               TIME_FORMAT(p.end_time,   '%H:%i') AS end_time,
-               p.fee, p.capacity, p.reservation_url
+        <!-- 요금·요일·시간·정원은 뽑지 않는다.
+             원본이 2025-09-23 자 자료라 그 값들은 이미 실제와 어긋난다.
+             체육 강좌는 분기마다 개편되고 요금도 조정되기 때문이다.
+             (예: 강남주민편익시설 라인댄스 우리 자료 40,000원 / 지금 홈페이지 61,000원)
+             바뀌는 값을 지우고 나면 같은 강좌가 요금만 달라 여러 줄로 나오던 것도 합쳐진다.
+             12,910건 -> 5,451건. 화면이 짧아지고, 틀린 값을 보여줄 일도 없어진다.
+
+             남기는 것은 '무엇을 배우는지'(name)와 '누가 들을 수 있는지'(target)뿐이다.
+             이 둘은 분기가 바뀌어도 잘 안 바뀐다.
+             정확한 요금과 일정은 아래 신청 페이지에서 확인하게 한다. -->
+        SELECT MIN(p.program_id)      AS program_id,
+               p.facility_id, p.sport_id, p.name, p.target,
+               MIN(p.reservation_url) AS reservation_url,
+               p.program_type,
+               <!-- COURSE 강습 / PASS 이용권(일일·자유) / RENTAL 대관.
+                    원본이 셋을 한 표에 담아 놔서 화면에서 구분이 안 됐다. -->
+               COUNT(*)               AS class_count
           FROM programs p
          WHERE p.facility_id = #{facilityId}
            AND p.sport_id = #{sportId}
@@ -74,7 +98,11 @@
               OR (#{ageBand} = 'CHILD'  AND p.target REGEXP '어린이|유아|초등')
               -- 어르신도 성인 대상 강좌를 신청할 수 있어 함께 남긴다
               OR (#{ageBand} = 'SENIOR' AND p.target REGEXP '노인|어르신|경로|성인') )
-         ORDER BY p.fee IS NULL, p.fee, p.program_id
+         GROUP BY p.facility_id, p.sport_id, p.name, p.target, p.program_type
+         <!-- 강습을 위로. 이용권·대관은 '오늘 그냥 가서 쓰는' 쪽이라 뒤로 보낸다.
+              그다음은 반이 많은 것부터. 여러 시간대로 열리는 강좌가 그 시설의 주력이다. -->
+         ORDER BY p.program_type = 'COURSE' DESC,
+                  class_count DESC, p.name
     </select>
 
     <!-- 대관 가능한 곳 (서울시 공공서비스예약)

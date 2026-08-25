@@ -45,19 +45,15 @@
 
     <%-- ---------- 가까운 시설 ----------
          시설을 누르면 facilityId 를 달고 같은 화면을 다시 부른다.
-         강좌 목록만 바뀌므로 JS 없이 링크로 처리한다.
+         고른 시설에 따라 아래 안내와 버튼이 바뀌므로 JS 없이 링크로 처리한다.
 
-         단, 강좌가 없고 대관만 있는 종목(축구·풋살 등)은 시설 목록을 통째로 감춘다.
-         시설을 눌러 봐야 어디도 강좌가 없어 헛걸음만 시키기 때문이다.
-         그때는 아래 '지금 빌릴 수 있는 곳' 만 보여준다. --%>
-    <c:set var="rentalOnly" value="${empty programs and not empty rentals}"/>
-
+         강좌가 없는 종목이라고 목록을 감추지는 않는다.
+         '이 종목을 어디서 할 수 있나' 가 이 화면의 첫 번째 답이라,
+         빌리러 가든 배우러 가든 가까운 곳은 알려 줘야 한다. --%>
     <c:choose>
-        <c:when test="${rentalOnly}">
-            <%-- 시설 목록을 건너뛴다 --%>
-        </c:when>
-
-        <c:when test="${empty facilities}">
+        <%-- 우리 시설 자료에 없을 때만 서울시 공공서비스예약을 뒤져 대신 보여준다.
+             그것도 없으면 그때 못 찾았다고 말한다. --%>
+        <c:when test="${empty facilities and empty rentals}">
             <h2 class="section-title">가까운 시설</h2>
             <div class="empty-box">
                 현위치 주변에 ${sport.name} 을(를) 할 수 있는<br>
@@ -65,8 +61,39 @@
             </div>
         </c:when>
 
+        <c:when test="${empty facilities}">
+            <h2 class="section-title">지금 빌릴 수 있는 곳 <small>가까운 순</small></h2>
+            <ul class="facility-list">
+                <c:forEach var="r" items="${rentals}">
+                    <li>
+                        <a class="facility-item" href="${r.svcUrl}" target="_blank" rel="noopener">
+                            <span class="facility-body">
+                                <span class="facility-name">${r.placeName}</span>
+                                <span class="facility-addr">
+                                    ${r.minClass}<c:if test="${not empty r.payYn}"> · ${r.payYn}</c:if>
+                                </span>
+                            </span>
+                            <span class="facility-km">
+                                <fmt:formatNumber value="${r.distanceKm}" minFractionDigits="1"
+                                                  maxFractionDigits="1"/>km
+                            </span>
+                        </a>
+                    </li>
+                </c:forEach>
+            </ul>
+            <p class="data-notice">누르면 서울시 공공서비스예약으로 이동해요.</p>
+        </c:when>
+
         <c:otherwise>
-            <h2 class="section-title">가까운 시설 ${facilities.size()}곳</h2>
+            <%-- 제목이 이 목록의 성격을 말한다.
+                 이 동네에서 이 종목에 강습이 하나도 없으면 배우러 갈 곳이 아니라
+                 빌리러 갈 곳들이므로, 제목부터 그렇게 적는다. --%>
+            <h2 class="section-title">
+                <c:choose>
+                    <c:when test="${rentalMode}">지금 빌릴 수 있는 ${facilities.size()}곳</c:when>
+                    <c:otherwise>가까운 시설 ${facilities.size()}곳</c:otherwise>
+                </c:choose>
+            </h2>
 
             <ul class="facility-list">
                 <c:forEach var="f" items="${facilities}">
@@ -99,150 +126,71 @@
                 </c:forEach>
             </ul>
 
-            <%-- ---------- 선택한 시설의 강좌 ----------
-                 공공데이터라 비어 있는 값이 많다. 시작시간 22%, 정원 11%, 요일 14% 가 없다.
-                 정원은 0 으로 들어오는 것도 '모름' 이라 함께 걸러낸다. --%>
-            <%-- 강좌가 없으면 제목도 빈 상자도 만들지 않는다.
-                 아래 '지금 빌릴 수 있는 곳' 이 그 자리를 대신한다. --%>
-            <c:if test="${not empty programs}">
-                <c:forEach var="f" items="${facilities}">
-                    <c:if test="${f.facilityId == pickId}">
-                        <h2 class="section-title">
-                            ${f.name} 운영 강좌 <small>${programs.size()}개</small>
-                        </h2>
-                    </c:if>
-                </c:forEach>
-            </c:if>
+            <%-- ---------- 강좌 목록은 두지 않는다 ----------
+                 원본이 2025년 9월 자료라 지금 열리는 강좌와 너무 어긋났다.
+                 요금이 40,000원으로 실려 있는데 홈페이지는 61,000원이고,
+                 강좌 이름 자체가 다른 곳도 많았다. 체육 강좌는 분기마다 개편되기 때문이다.
 
+                 요금·시간을 지우고 이름만 남겨 봤지만 이름도 맞지 않았다.
+                 틀린 목록을 보여 주느니, 여기서는 '어디로 가면 되는지' 만 말하고
+                 실제 강좌는 아래 버튼 너머 신청 페이지에서 보게 한다. --%>
             <c:choose>
-                <c:when test="${empty programs}">
-                    <%-- 강좌도 대관도 없을 때만 안내한다. 화면이 통째로 비면 고장으로 보인다.
-                         대관이 있으면 아래 '지금 빌릴 수 있는 곳' 이 그 자리를 대신한다. --%>
-                    <c:if test="${empty rentals}">
-                        <div class="empty-box">
-                            <c:if test="${not empty profile}">만 ${profile.age}세가 </c:if>신청할 수 있는
-                            ${sport.name} 강좌가 없어요.<br>
-                            다른 시설을 눌러 보세요.
-                        </div>
-                    </c:if>
+                <%-- 예약이라는 절차가 없어서 그냥 가면 되는 곳.
+                     '없다' 고만 하면 자료가 빠진 것처럼 읽힌다. --%>
+                <c:when test="${openAccess}">
+                    <div class="empty-box">
+                        예약 없이 바로 쓸 수 있는 곳이에요.<br>
+                        가서 비어 있으면 이용하시면 됩니다.
+                    </div>
                 </c:when>
-
-                <c:otherwise>
-                    <%-- 강좌가 수십 개인 시설이 있어 처음에는 3개만 보여준다.
-                         4번째부터는 is-more 를 달아 숨기고, 더보기 버튼이 그 표시를 걷어낸다. --%>
-                    <ul class="program-list" id="programList">
-                        <c:forEach var="p" items="${programs}" varStatus="loop">
-                            <li class="program-item ${loop.index >= 3 ? 'is-more' : ''}">
-                                <span class="program-body">
-                                    <span class="program-name">${p.name}</span>
-                                    <span class="program-meta">
-                                        <c:set var="parts" value="${false}"/>
-                                        <c:if test="${not empty p.target}">${p.target}<c:set var="parts" value="${true}"/></c:if>
-                                        <c:if test="${not empty p.dayOfWeek}"><c:if test="${parts}"> · </c:if>${p.dayOfWeek}<c:set var="parts" value="${true}"/></c:if>
-                                        <c:if test="${not empty p.startTime}"><c:if test="${parts}"> · </c:if>${p.startTime}<c:if test="${not empty p.endTime}">~${p.endTime}</c:if><c:set var="parts" value="${true}"/></c:if>
-                                        <c:if test="${not empty p.capacity and p.capacity > 0}"><c:if test="${parts}"> · </c:if>정원 ${p.capacity}명</c:if>
-                                    </span>
-                                </span>
-                                <span class="program-fee ${p.fee == 0 ? 'free' : ''}">
-                                    <c:choose>
-                                        <c:when test="${empty p.fee}">문의</c:when>
-                                        <c:when test="${p.fee == 0}">무료</c:when>
-                                        <c:otherwise><fmt:formatNumber value="${p.fee}" type="number"/>원</c:otherwise>
-                                    </c:choose>
-                                </span>
-                            </li>
-                        </c:forEach>
-                    </ul>
-
-                    <c:if test="${programs.size() > 3}">
-                        <button type="button" class="more-button" id="programMore"
-                                data-rest="${programs.size() - 3}">
-                            강좌 ${programs.size() - 3}개 더 보기
-                        </button>
-                    </c:if>
-
-                    <%-- 공공데이터를 모아 온 것이라 지금도 열리는 강좌인지는 보장할 수 없다.
-                         아래 안내 버튼으로 원본을 확인하도록 유도한다. --%>
+                <c:when test="${empty linkUrl and empty rentals}">
+                    <div class="empty-box">
+                        이 시설의 신청 창구를 아직 못 찾았어요.<br>
+                        아래 지도로 위치만 확인해 주세요.
+                    </div>
+                </c:when>
+                <%-- 안내 문구도 버튼과 같은 이야기를 해야 한다.
+                     빌리러 가는 곳에 '여는 강좌' 를 말하면 앞뒤가 어긋난다. --%>
+                <c:when test="${not empty linkUrl and toRental}">
                     <p class="data-notice">
-                        수집 시점 기준이라 지금과 다를 수 있어요. 신청 전 아래에서 확인해 주세요.
+                        여기는 빌려서 쓰는 곳이에요.
+                        요금과 빈 시간은 아래에서 확인해 주세요.
                     </p>
-                </c:otherwise>
+                </c:when>
+                <c:when test="${not empty linkUrl}">
+                    <p class="data-notice">
+                        여는 강좌와 요금은 자주 바뀌어요.
+                        아래에서 지금 열리는 것을 확인해 주세요.
+                    </p>
+                </c:when>
             </c:choose>
 
             <%-- ---------- 아래 버튼 ----------
-                 길찾기는 선택한 시설 좌표로 카카오맵을 연다.
-                 예약·안내 링크는 컨트롤러가 정한다.
-                   1순위 강좌 예약 페이지 → 2순위 시설 홈페이지
-                 둘 다 없으면 버튼을 만들지 않는다. 실제로 그런 시설이 대부분이다. --%>
-            <c:forEach var="f" items="${facilities}">
-                <c:if test="${f.facilityId == pickId}">
-                    <div class="detail-actions">
-                        <%-- 카카오맵 검색 탭으로 보내되 '이름' 이 아니라 '주소' 로 찾는다.
-                             시설명은 지자체 관리대장 기준이라 지도 검색과 어긋난다.
-                             예) '반월공원' 으로 검색하면 26km 떨어진 안산 반월공원이 나온다.
-                             주소는 표본 4곳 모두 제자리를 찾았다. --%>
-                        <a class="outline-button"
-                           href="https://map.kakao.com/link/search/${not empty f.roadAddr ? f.roadAddr : f.lotAddr}"
-                           target="_blank" rel="noopener">지도에서 보기</a>
+                 지도에서 보기는 고른 시설 주소로 카카오맵을 연다.
+                 예약·안내 링크는 컨트롤러가 네 순위로 정해 linkUrl 에 담아 준다. --%>
+            <c:if test="${not empty pick}">
+                <div class="detail-actions">
+                    <%-- 카카오맵 검색 탭으로 보내되 '이름' 이 아니라 '주소' 로 찾는다.
+                         시설명은 지자체 관리대장 기준이라 지도 검색과 어긋난다.
+                         예) '반월공원' 으로 검색하면 26km 떨어진 안산 반월공원이 나온다.
+                         주소는 표본 4곳 모두 제자리를 찾았다. --%>
+                    <a class="outline-button"
+                       href="https://map.kakao.com/link/search/${not empty pick.roadAddr ? pick.roadAddr : pick.lotAddr}"
+                       target="_blank" rel="noopener">지도에서 보기</a>
 
-                        <c:if test="${not empty linkUrl}">
-                            <a class="primary-button" href="${linkUrl}" target="_blank" rel="noopener">${linkLabel}</a>
-                        </c:if>
-                    </div>
-                </c:if>
-            </c:forEach>
+                    <c:if test="${not empty linkUrl}">
+                        <a class="primary-button" href="${linkUrl}" target="_blank" rel="noopener">${linkLabel}</a>
+                    </c:if>
+                </div>
+            </c:if>
         </c:otherwise>
     </c:choose>
-
-    <%-- ---------- 대관 가능한 곳 ----------
-         강좌가 없을 때 대신 보여준다.
-         축구·풋살은 강좌 185개 중 성인 대상이 30개뿐이고,
-         원래 '수강' 이 아니라 '구장 대관' 으로 하는 종목이기 때문이다.
-
-         시설 목록 바깥에 둔다. 강좌가 없어 시설 목록을 감춘 경우에도 이건 보여야 한다.
-         서울시 공공서비스예약 자료이고 누르면 그 예약 페이지로 바로 간다. --%>
-    <c:if test="${empty programs and not empty rentals}">
-        <h2 class="section-title">지금 빌릴 수 있는 곳 <small>가까운 순</small></h2>
-
-        <ul class="facility-list">
-            <c:forEach var="r" items="${rentals}">
-                <li>
-                    <a class="facility-item" href="${r.svcUrl}" target="_blank" rel="noopener">
-                        <span class="facility-body">
-                            <span class="facility-name">${r.placeName}</span>
-                            <span class="facility-addr">
-                                ${r.minClass}<c:if test="${not empty r.payYn}"> · ${r.payYn}</c:if>
-                            </span>
-                        </span>
-                        <span class="facility-km">
-                            <fmt:formatNumber value="${r.distanceKm}" minFractionDigits="1"
-                                              maxFractionDigits="1"/>km
-                        </span>
-                    </a>
-                </li>
-            </c:forEach>
-        </ul>
-
-        <p class="data-notice">누르면 서울시 공공서비스예약으로 이동해요.</p>
-    </c:if>
 
 </main>
 
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp" />
 
 <script src="${pageContext.request.contextPath}/js/geo.js"></script>
-<script>
-    // 강좌 더보기 : 숨겨둔 항목의 표시만 걷어낸다. 서버를 다시 부르지 않는다.
-    (function () {
-        var button = document.getElementById("programMore");
-        if (!button) return;
 
-        button.addEventListener("click", function () {
-            document.querySelectorAll("#programList .is-more")
-                .forEach(function (li) { li.classList.remove("is-more"); });
-            button.remove();
-        });
-    })();
-</script>
 </body>
 </html>
