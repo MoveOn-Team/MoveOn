@@ -43,6 +43,8 @@ public class MyPageController {
         List<WorkoutLogDTO> todayWorkoutList = myPageService.getTodayWorkoutList(loginUserId);
         model.addAttribute("todayWorkoutList", todayWorkoutList);
 
+        model.addAttribute("active", "myPage");
+
         return "user/myPage";
     }
 

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.moveon.mapper.IHomeWorkoutMapper">
+
+    <select id="getRuleExercises" resultType="HomeExerciseDTO">
+        SELECT e.exercise_id,
+               e.name,
+               e.body_part,
+               e.met_value,
+               e.default_sets,
+               e.default_reps,
+               e.default_sec,
+               e.instruction,
+               e.media_type,
+               e.media_url,
+               r.phase,
+               r.sort_order,
+               e.default_sets AS sets,
+               e.default_reps AS reps,
+               e.default_sec AS duration_sec
+          FROM home_workout_rules r
+          JOIN home_exercises e ON e.exercise_id = r.exercise_id
+         WHERE e.is_active = 1
+           AND r.intensity = #{intensity}
+           AND r.age_group IN (#{ageGroup}, #{ageBand}, '&#xC804;&#xCCB4;', 'ALL')
+           AND r.bmi_grade IN (#{bmiGrade}, '&#xC804;&#xCCB4;', 'ALL')
+           AND r.gender IN (#{gender}, 'ALL')
+         ORDER BY CASE r.phase
+                    WHEN 'WARMUP' THEN 1
+                    WHEN 'MAIN' THEN 2
+                    ELSE 3
+                  END,
+                  CASE WHEN r.age_group = #{ageGroup} THEN 0
+                       WHEN r.age_group = #{ageBand} THEN 1
+                       ELSE 2
+                  END,
+                  CASE WHEN r.bmi_grade = #{bmiGrade} THEN 0 ELSE 1 END,
+                  CASE WHEN r.gender = #{gender} THEN 0 ELSE 1 END,
+                  r.sort_order,
+                  e.exercise_id
+    </select>
+
+</mapper>

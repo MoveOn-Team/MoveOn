@@ -1,10 +1,6 @@
 package com.moveon.service;
 
-import com.moveon.dto.CourseDTO;
-import com.moveon.dto.CoursePointDTO;
-import com.moveon.dto.FacilityDTO;
-import com.moveon.dto.ProgramDTO;
-import com.moveon.dto.SportDTO;
+import com.moveon.dto.*;
 
 import java.util.List;
 
@@ -60,5 +56,7 @@ public interface IWorkoutService {
      * @param category FACILITY 시설에서 / OUTDOOR 야외에서 / HOME 집에서
      */
     List<SportDTO> getSports(String category) throws Exception;
+
+    HomeWorkoutPlanDTO getHomeWorkoutPlan(int userId, String intensity, int targetMin) throws Exception;
 
 }

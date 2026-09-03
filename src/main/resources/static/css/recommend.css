@@ -456,3 +456,197 @@
     white-space: nowrap;
 }
 
+/* 파란 카드 내부를 좌우 배치가 가능하도록 Flex로 설정 */
+.profile-card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* 상단 정렬 */
+}
+
+/* 왼쪽 문구 영역 */
+.card-left {
+    flex: 1;
+}
+
+/* 오른쪽 날씨 위젯 영역 */
+.weather-widget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-left: 12px; /* 문구와의 최소 간격 */
+}
+
+/* 상단 타이틀 + 날씨 행 */
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* 위쪽 정렬 */
+    margin-bottom: 12px;     /* 칩 그룹과의 간격 */
+}
+
+/* 타이틀 여백 조정 */
+.card-header-row .card-title {
+    margin: 0;
+}
+
+.profile-card {
+    position: relative !important;
+}
+
+/* 우측 상단 날씨 위젯 컨테이너 */
+.weather-widget-box {
+    position: absolute !important;
+    top: 16px !important;
+    right: 16px !important;
+    width: 110px !important;
+    height: 100px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* CodePen SVG 위젯 내부 스케일링 */
+.weather-widget-box #card {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    overflow: visible;
+}
+
+.weather-widget-box #inner {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto;
+    display: block;
+}
+
+/* 온도 및 텍스트 폰트 조절 (파란 배경 대비 흰색) */
+.weather-widget-box .details {
+    color: #ffffff;
+    text-align: center;
+    margin-top: 4px;
+}
+
+.weather-widget-box .temp {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.weather-widget-box .temp span {
+    font-size: 11px;
+}
+
+.weather-widget-box #summary {
+    font-size: 10px;
+    opacity: 0.9;
+    white-space: nowrap;
+}
+
+/* 카드를 기준점으로 지정 */
+.profile-card {
+    position: relative !important;
+}
+
+/* 우측 상단 날씨 위젯 박스 위치 및 크기 */
+.weather-widget {
+    position: absolute !important;
+    top: 15px !important;
+    right: 15px !important;
+    width: 80px !important;
+    height: 90px !important;
+    overflow: hidden;
+}
+
+#card.weather {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    position: relative;
+}
+
+#inner {
+    width: 100%;
+    height: 50px;
+    display: block;
+}
+
+.weather .details {
+    text-align: center;
+    color: #ffffff;
+    margin-top: 2px;
+}
+
+.weather .details .temp {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.weather .details .temp span {
+    font-size: 10px;
+    margin-left: 1px;
+}
+
+.weather #summary {
+    font-size: 10px;
+    margin-top: 2px;
+    opacity: 0.9;
+    white-space: nowrap;
+}
+
+/* 구름 애니메이션 색상 */
+#cloud1 { fill: #efefef; }
+#cloud2 { fill: #E6E6E6; }
+#cloud3 { fill: #D5D5D5; }
+
+.profile-card {
+    position: relative !important;
+}
+
+.weather-widget {
+    position: absolute !important;
+    top: 10px !important;       /* 여백 확보를 위해 위치 살짝 올림 */
+    right: 10px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 75px;                /* 아이콘이 커진 만큼 영역 확대 */
+}
+
+.weather-icon-box {
+    width: 100px;                /* 기존 42px -> 58px로 크기 확대 */
+    height: 100px;
+}
+
+.weather-icon-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.weather-widget .details {
+    text-align: center;
+    color: #ffffff;
+    margin-top: -18px;           /* 아이콘과 텍스트 간격 미세 조정 */
+}
+
+.weather-widget .temp {
+    font-size: 20px;            /* 기온 폰트도 살짝 가독성 개선 */
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.weather-widget .temp span:last-child {
+    font-size: 14px;
+    margin-left: 2px;
+    position:relative;
+    top: -3px;
+}
+
+.weather-widget #summary {
+    font-size: 11px;
+    margin-top: 2px;
+    opacity: 0.95;
+    white-space: nowrap;
+}

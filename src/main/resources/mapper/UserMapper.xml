@@ -40,7 +40,13 @@
 
     <!-- 로그인 정보 조회 -->
     <select id="getLoginUser" parameterType="UserDTO" resultType="UserDTO">
-        SELECT user_id, login_id, password, salt, name, email
+        SELECT user_id,
+        login_id,
+        password,
+        salt,
+        name,
+        email,
+        weight_kg AS weightKg
         FROM users
         WHERE login_id = #{loginId}
         LIMIT 1
@@ -118,7 +124,7 @@
   
     <!-- 맞춤 추천의 신체 점수 계산용 -->
     <select id="getUserBody" parameterType="UserDTO" resultType="UserDTO">
-        SELECT user_id, name, gender, bmi,
+        SELECT user_id, name, gender, weight_kg AS weight_kg, bmi,
                TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) AS age
         FROM users
         WHERE user_id = #{userId}

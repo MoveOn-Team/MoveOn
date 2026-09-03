@@ -8,7 +8,9 @@ import com.moveon.service.IRecommendService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +43,9 @@ public class RecommendController {
     /** GPS 를 못 받았을 때 쓸 기본 좌표 (서울시청) */
     private static final double DEFAULT_LAT = 37.5665;
     private static final double DEFAULT_LNG = 126.9780;
+
+    @Value("${weather.api.key:}")
+    private String weatherApiKey;
 
     /**
      * 맞춤 운동 추천 화면
@@ -79,6 +84,9 @@ public class RecommendController {
         // 현위치를 받아 쓴 것인지, 기본 좌표로 계산한 것인지 화면에 알려준다
         model.addAttribute("usingGps", lat != null && lng != null);
         model.addAttribute("active", "recommend");
+
+            // 2. JSP로 API Key 넘겨주기
+        model.addAttribute("weatherApiKey", weatherApiKey);
 
         log.info("{}.recommend End!", this.getClass().getName());
 

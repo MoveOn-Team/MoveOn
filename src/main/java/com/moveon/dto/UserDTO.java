@@ -33,5 +33,6 @@ public class UserDTO {
     // 맞춤 추천의 신체 점수 계산에 쓰는 값 (getUserBody 로 조회)
     private String gender; // 성별 M / F
     private double bmi; // 키·몸무게로 자동 계산되는 가상컬럼
+    private double weightKg; // 몸무게 kg
     private int age; // 만 나이. birth_date 로 계산해서 받음
 }
