@@ -9,6 +9,7 @@ import com.moveon.service.IRecommendService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +43,10 @@ public class RecommendController {
 
     /** 목록 하나에 보여줄 개수. 시설·코스·대관 모두 이 값을 쓴다. */
     private static final int LIST_SIZE = 3;
+
+    /** 추천 목록 위에 오늘 날씨를 띄우는 데 쓴다. 화면(JS)이 직접 부른다 */
+    @Value("${weather.api.key:}")
+    private String weatherApiKey;
 
     /**
      * 우리 시설을 '빌리는 곳' 줄로 바꾼다.
@@ -108,6 +113,9 @@ public class RecommendController {
 
         // 현위치를 받아 쓴 것인지, 기본 좌표로 계산한 것인지 화면에 알려줌
         model.addAttribute("usingGps", lat != null && lng != null);
+
+        // 날씨는 화면에서 직접 불러오므로 키만 넘겨준다
+        model.addAttribute("weatherApiKey", weatherApiKey);
 
         log.info("{}.recommend End!", this.getClass().getName());
 

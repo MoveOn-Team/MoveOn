@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:set var="active" value="myPage" scope="request" />
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -8,6 +9,12 @@
     <title>내 정보 - MOVE:ON</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
     <style>
+        /* 로그아웃 버튼 포인트 컬러 (붉은색 계열) */
+        .menu-list-card .logout-item span {
+            color: #000000 !important;
+            font-weight: 600;
+        }
+
         .btn-more-today {
             width: 100%;
             padding: 12px 0;
@@ -24,9 +31,19 @@
         .btn-more-today:active {
             background-color: #e9ecef;
         }
+
+        .tab-item.active {
+            color: #6c5ce7; /* 또는 메인 브랜드 컬러 */
+        }
+        .tab-item.active svg,
+        .tab-item.active i {
+            fill: #6c5ce7;
+            stroke: #6c5ce7;
+        }
+
     </style>
 </head>
-<body class="auth-page" data-context-path="${pageContext.request.contextPath}">
+<body class="auth-page" data-context-path="${pageContext.request.contextPath}" data-user-weight="${user.weightKg != null ? user.weightKg : 65}">
 <main class="auth-shell mypage-shell">
 
         <header class="page-header">
@@ -64,7 +81,7 @@
     <section class="card workout-today-card">
         <div class="card-header-row">
             <h3 class="card-title">오늘의 운동 완료</h3>
-            <span class="card-date">8월 5일 (수)</span>
+            <span class="card-date" id="todayCardDate"></span>
         </div>
 
         <!-- id="todayWorkoutList" 속성 추가 -->
@@ -191,11 +208,11 @@
 
             <div class="calorie-box">
                 <span>예상 소모 칼로리</span>
-                <strong>341 kcal</strong>
+                <strong id="modalCalorieText">0 kcal</strong>
             </div>
 
             <div class="input-card">
-                <input type="text" value="2026년 8월 5일 (수)" readonly />
+                <input type="text" id="modalWorkoutDate" readonly />
             </div>
 
             <div class="input-card">
@@ -213,8 +230,7 @@
 
 <!-- 모달 제어 -->
 <script>
-
-    let visibleTodayCount = 3; // 기본 4개 노출
+    let visibleTodayCount = 3;
 
     function showMoreTodayWorkouts() {
         const btn = document.getElementById('btnMoreTodayWorkouts');
@@ -224,7 +240,6 @@
 
         if (!btn || totalCount <= 4) return;
 
-        // 1. 이미 전부 펼쳐진 경우 -> 다시 4개만 보여주고 버튼을 '더보기'로 변경
         if (visibleTodayCount >= totalCount) {
             visibleTodayCount = 3;
             items.forEach((item, idx) => {
@@ -234,7 +249,6 @@
             return;
         }
 
-        // 2. 3개씩 더 보여주기
         visibleTodayCount += step;
         items.forEach((item, idx) => {
             if (idx < visibleTodayCount) {
@@ -242,17 +256,76 @@
             }
         });
 
-        // 3. 더 이상 보여줄 항목이 없으면 '접기 ∧', 남아있으면 '더보기' 유지
         if (visibleTodayCount >= totalCount) {
             btn.textContent = '접기 ∧';
         } else {
             btn.textContent = '더보기';
         }
     }
+
+    // 운동 MET 정의
+    const SPORT_MET = {
+        '헬스': 5.0,
+        '배드민턴': 5.5,
+        '수영': 7.0,
+        '걷기': 3.5,
+        '테니스': 6.0,
+        '농구': 6.5,
+        '골프': 3.5
+    };
+
+    // 강도 가중치
+    const INTENSITY_FACTOR = {
+        '가볍게': 0.8,
+        '적당히': 1.0,
+        '숨차게': 1.25
+    };
+
+    // 실시간 칼로리 계산
+    function calculateModalCalories() {
+        var userWeight = parseFloat(document.body.dataset.userWeight) || 65.0;
+
+        var sportName = document.querySelector(".sport-chips .chip.active") ? document.querySelector(".sport-chips .chip.active").innerText.trim() : "헬스";
+        var timeText = document.querySelector(".time-chips .chip.active") ? document.querySelector(".time-chips .chip.active").innerText.trim() : "60분";
+        var intensity = document.querySelector(".intensity-chips .chip.active") ? document.querySelector(".intensity-chips .chip.active").innerText.trim() : "적당히";
+
+        var durationMin = parseInt(timeText.replace(/[^0-9]/g, "")) || 60;
+        var met = SPORT_MET[sportName] || 5.0;
+        var factor = INTENSITY_FACTOR[intensity] || 1.0;
+
+        var calculatedKcal = Math.round((met * 3.5 * userWeight / 200) * durationMin * factor);
+
+        var calElement = document.getElementById("modalCalorieText");
+        if (calElement) {
+            calElement.innerText = calculatedKcal + " kcal";
+        }
+    }
+
+    // 오늘 날짜 포맷팅 (2026년 8월 27일 (목))
+    function setTodayDate() {
+        var today = new Date();
+        var year = today.getFullYear();
+        var month = today.getMonth() + 1;
+        var date = today.getDate();
+        var dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+        var dayOfWeek = dayNames[today.getDay()];
+
+        var dateStr = year + "년 " + month + "월 " + date + "일 (" + dayOfWeek + ")";
+        var dateInput = document.getElementById("modalWorkoutDate");
+
+        if (dateInput) {
+            dateInput.value = dateStr;
+        }
+    }
+
     // 모달 열기/닫기
     function openWorkoutModal() {
         var modal = document.getElementById("workoutModal");
-        if (modal) modal.classList.add("show");
+        if (modal) {
+            modal.classList.add("show");
+            setTodayDate();
+            calculateModalCalories();
+        }
     }
 
     function closeWorkoutModal() {
@@ -261,60 +334,72 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        // 1. 칩 버튼 선택 이벤트
+        // 1. 하단 탭바 활성화 (추가된 코드)
+        const currentPath = window.location.pathname;
+        const navItems = document.querySelectorAll('.tab-bar .tab-item');
+
+        navItems.forEach(item => {
+            const href = item.getAttribute('href');
+            if (href && currentPath.includes(href)) {
+                item.classList.add('active');
+            }
+        });
+
+        // 메인 카드 헤더 날짜 세팅
+        var todayCardDate = document.getElementById("todayCardDate");
+        if (todayCardDate) {
+            todayCardDate.innerText = (new Date().getMonth() + 1) + "월 " + new Date().getDate() + "일";
+        }
+
+        // 칩 선택 이벤트
         var chips = document.querySelectorAll(".chip-group .chip");
         chips.forEach(function (chip) {
             chip.addEventListener("click", function () {
                 var parent = this.parentElement;
-                parent.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+                parent.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
                 this.classList.add("active");
+                calculateModalCalories();
             });
         });
 
-        // 2. [기록하기] 버튼 클릭 시 AJAX(fetch) 전송
+        // [기록하기] 버튼 이벤트
         var submitBtn = document.querySelector(".btn-modal-submit");
         if (submitBtn) {
             submitBtn.onclick = function () {
-                // 선택된 데이터 수집
-                var sportName = document.querySelector(".sport-chips .chip.active")?.innerText || "헬스";
-                var timeText = document.querySelector(".time-chips .chip.active")?.innerText || "60분";
-                var intensity = document.querySelector(".intensity-chips .chip.active")?.innerText || "적당히";
-
-                // 숫자만 추출 (예: "60분" -> 60)
+                var sportName = document.querySelector(".sport-chips .chip.active") ? document.querySelector(".sport-chips .chip.active").innerText.trim() : "헬스";
+                var timeText = document.querySelector(".time-chips .chip.active") ? document.querySelector(".time-chips .chip.active").innerText.trim() : "60분";
+                var intensity = document.querySelector(".intensity-chips .chip.active") ? document.querySelector(".intensity-chips .chip.active").innerText.trim() : "적당히";
                 var durationMin = parseInt(timeText.replace(/[^0-9]/g, "")) || 60;
 
-                // 칼로리 숫자만 추출 (예: "341 kcal" -> 341)
-                var calText = document.querySelector(".calorie-box strong")?.innerText || "0";
+                var calText = document.getElementById("modalCalorieText") ? document.getElementById("modalCalorieText").innerText : "0";
                 var caloriesBurned = parseInt(calText.replace(/[^0-9]/g, "")) || 0;
+                var memo = document.querySelector("#workoutModal textarea") ? document.querySelector("#workoutModal textarea").value : "";
 
-                // 메모
-                var memo = document.querySelector("#workoutModal textarea")?.value || "";
+                var now = new Date();
+                var offset = now.getTimezoneOffset() * 60000;
+                var todayIso = new Date(now.getTime() - offset).toISOString().substring(0, 10);
 
-                // 데이터 객체 생성
                 var requestData = {
                     sportName: sportName,
                     durationMin: durationMin,
                     intensity: intensity,
                     caloriesBurned: caloriesBurned,
-                    workoutDate: new Date().toISOString().substring(0, 10), // 오늘 날짜 (YYYY-MM-DD)
+                    workoutDate: todayIso,
                     memo: memo
                 };
 
-                // 서버로 AJAX 요청 전송
                 fetch("${pageContext.request.contextPath}/user/recordWorkout", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(requestData)
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        alert(data.msg);
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        alert(data.msg || "운동 기록이 저장되었습니다.");
                         closeWorkoutModal();
-                        location.reload(); // 화면 새로고침하여 반영
+                        location.reload();
                     })
-                    .catch(error => {
+                    .catch(function (error) {
                         console.error("Error:", error);
                         alert("운동 기록 저장 중 오류가 발생했습니다.");
                     });

@@ -1,94 +1,83 @@
 package com.moveon.controller;
 
-import com.moveon.dto.CourseDTO;
-import com.moveon.dto.FacilityDTO;
-import com.moveon.dto.SportDTO;
+import com.moveon.dto.*;
+import com.moveon.mapper.IUserMapper;
+import com.moveon.service.IUserService;
 import com.moveon.service.IWorkoutService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * 현위치는 안드로이드에서 GPS 로 받아 넘겨준다.
- * 좌표를 못 받으면(권한 거부·실내) 서울시청 좌표로 대체하고 화면은 그대로 보여준다.
- * 추천·행사 탭과 같은 방식이다.
- */
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/workout")
 @Controller
 public class WorkoutController {
 
+    @Autowired
+    private IUserMapper userMapper;
+
     private final IWorkoutService workoutService;
 
-    /**
-     * 카카오 지도 JavaScript 키.
-     *
-     * REST 키와 다른 키다. 지도를 화면에 띄우는 데는 이쪽이 필요하다.
-     * 이 키는 HTML 에 그대로 실려 나가지만 그래도 된다.
-     * 카카오가 '등록된 도메인에서 온 요청' 만 받아 주기 때문이다.
-     *
-     * 없으면 빈 문자열이 된다. 그때는 지도 자리에 안내 글만 나온다.
-     */
     @Value("${kakao.javascript.key:}")
     private String kakaoMapKey;
 
-    /** GPS 를 못 받았을 때 쓸 기본 좌표 (서울시청) */
     private static final double DEFAULT_LAT = 37.5665;
     private static final double DEFAULT_LNG = 126.9780;
+    private static final String HOME_PLAN_SESSION = "HOME_WORKOUT_PLAN";
+    private static final String HOME_RESULT_SESSION = "HOME_WORKOUT_RESULT";
 
     @GetMapping("/workoutList")
     public String workoutList(@RequestParam(value = "tab", defaultValue = "facility") String tab,
                               @RequestParam(value = "sportId", required = false) Integer sportId,
                               @RequestParam(value = "type", required = false) String type,
+                              @RequestParam(value = "intensity", defaultValue = "MODERATE") String intensity,
+                              @RequestParam(value = "targetMin", defaultValue = "20") int targetMin,
                               @RequestParam(value = "lat", required = false) Double lat,
                               @RequestParam(value = "lng", required = false) Double lng,
+                              HttpSession session,
                               ModelMap model) throws Exception {
 
-        log.info("{}.workoutList Start! tab : {}", this.getClass().getName(), tab);
-
-        double myLat = (lat != null) ? lat : DEFAULT_LAT;
-        double myLng = (lng != null) ? lng : DEFAULT_LNG;
+        double myLat = lat != null ? lat : DEFAULT_LAT;
+        double myLng = lng != null ? lng : DEFAULT_LNG;
 
         if ("outdoor".equals(tab)) {
-
-            // 평지와 산길을 한 목록에 섞지 않는다.
-            // 같은 3km 라도 오르막이 있으면 걸리는 시간과 힘이 다르다.
             String courseType = "HIKE".equals(type) ? "HIKE" : "WALK";
             List<CourseDTO> courses = workoutService.getCourses(courseType, myLat, myLng);
-
             model.addAttribute("courses", courses);
             model.addAttribute("courseType", courseType);
 
         } else if ("home".equals(tab)) {
-
-            // 집에서 탭은 아직 자료가 없다.
-            // home_exercises 표는 만들어져 있으나 비어 있어, 계획을 만들 재료가 없다.
-            // 없는 것을 있는 척 보여주지 않고 화면이 그대로 알리게 둔다.
-            model.addAttribute("homeReady", false);
+            if (getSessionUserId(session) == null) {
+                return "redirect:/user/login";
+            }
+            model.addAttribute("intensity", normalizeIntensityParam(intensity));
+            model.addAttribute("targetMin", normalizeTargetMin(targetMin));
 
         } else {
-
-            // 종목 단추는 표에서 가져온다. 화면에 이름을 박아 두면 종목이 늘어도 화면이 모른다.
             List<SportDTO> sports = workoutService.getSports("FACILITY");
             model.addAttribute("sports", sports);
 
-            // 고른 종목이 없으면 첫 번째 종목을 본다. 빈 화면으로 시작하지 않게 한다.
-            int pickId = (sportId != null) ? sportId
-                       : (sports.isEmpty() ? 0 : sports.get(0).getSportId());
-
+            int pickId = sportId != null ? sportId : (sports.isEmpty() ? 0 : sports.get(0).getSportId());
             if (pickId > 0) {
-                List<FacilityDTO> facilities = workoutService.getFacilities(pickId, myLat, myLng);
-                model.addAttribute("facilities", facilities);
+                model.addAttribute("facilities", workoutService.getFacilities(pickId, myLat, myLng));
             }
             model.addAttribute("sportId", pickId);
         }
@@ -96,56 +85,30 @@ public class WorkoutController {
         model.addAttribute("currentTab", tab);
         model.addAttribute("lat", myLat);
         model.addAttribute("lng", myLng);
-
-        // 현위치를 받아 쓴 것인지, 기본 좌표로 계산한 것인지 화면에 알려준다
         model.addAttribute("usingGps", lat != null && lng != null);
         model.addAttribute("active", "workout");
-
-        log.info("{}.workoutList End!", this.getClass().getName());
 
         return "workout/workoutList";
     }
 
-    /**
-     * 시설 상세
-     *
-     * 종목번호를 함께 받는다. 같은 시설에서 여러 종목을 하므로
-     * 어떤 종목으로 들어왔는지 알아야 그 종목 강좌만 보여줄 수 있다.
-     */
     @GetMapping("/workoutDetail/{facilityId}")
     public String workoutDetail(@PathVariable("facilityId") int facilityId,
                                 @RequestParam(value = "sportId", defaultValue = "0") int sportId,
                                 @RequestParam(value = "lat", required = false) Double lat,
                                 @RequestParam(value = "lng", required = false) Double lng,
-                                HttpSession session,
                                 ModelMap model) throws Exception {
 
-        double myLat = (lat != null) ? lat : DEFAULT_LAT;
-        double myLng = (lng != null) ? lng : DEFAULT_LNG;
-
+        double myLat = lat != null ? lat : DEFAULT_LAT;
+        double myLng = lng != null ? lng : DEFAULT_LNG;
         FacilityDTO facility = workoutService.getFacility(facilityId, sportId, myLat, myLng);
-
-        // 없는 번호로 들어오면 목록으로 돌려보낸다. 빈 상세 화면을 보여줄 이유가 없다.
         if (facility == null) {
             return "redirect:/workout/workoutList";
         }
 
-        // 로그인하지 않아도 시설은 볼 수 있게 둔다.
-        // 회원번호는 나이에 맞는 강좌를 위로 올리는 데만 쓰므로, 없으면 순서만 기본값이 된다.
-        Object userNo = session.getAttribute("SS_USER_NO");
-        int userId = (userNo instanceof Number) ? ((Number) userNo).intValue() : 0;
-
-        // 즉시운동 탭은 '오늘 가서 쓰는' 화면이다.
-        // 그래서 강습 수강신청이 아니라 빌리고 이용하는 창구로 보낸다.
-        //   1순위 그 시설의 대관 페이지        facilities.rental_url
-        //   2순위 서울시 공공서비스예약        facility_sports.reserve_url
-        //   3순위 자치구 대관                district_sites.rental_url
-        //   4순위 그 시설 홈페이지            facilities.homepage_url
-        // 추천 탭(RecommendController)은 반대로 수강신청 쪽을 먼저 본다.
         String useUrl = firstUsable(facility.getRentalUrl(),
-                                    facility.getReserveUrl(),
-                                    facility.getDistrictRentalUrl(),
-                                    facility.getHomepageUrl());
+                facility.getReserveUrl(),
+                facility.getDistrictRentalUrl(),
+                facility.getHomepageUrl());
 
         model.addAttribute("facility", facility);
         model.addAttribute("useUrl", useUrl);
@@ -174,12 +137,9 @@ public class WorkoutController {
                                @RequestParam(value = "sportId", defaultValue = "0") int sportId,
                                ModelMap model) throws Exception {
 
-        double myLat = (lat != null) ? lat : DEFAULT_LAT;
-        double myLng = (lng != null) ? lng : DEFAULT_LNG;
-
+        double myLat = lat != null ? lat : DEFAULT_LAT;
+        double myLng = lng != null ? lng : DEFAULT_LNG;
         CourseDTO course = workoutService.getCourse(courseId, myLat, myLng);
-
-        // 없는 번호로 들어오면 목록으로 돌려보낸다. 빈 상세 화면을 보여줄 이유가 없다.
         if (course == null) {
             return "redirect:/workout/workoutList?tab=outdoor";
         }
@@ -201,26 +161,146 @@ public class WorkoutController {
         return "workout/courseDetail";
     }
 
-    /** 운동 진행 화면 */
     @GetMapping("/workoutPlay")
-    public String workoutPlay(ModelMap model) {
+    public String workoutPlay(HttpSession session, ModelMap model) throws Exception {
+        HomeWorkoutPlanDTO plan = (HomeWorkoutPlanDTO) session.getAttribute(HOME_PLAN_SESSION);
+        if (plan == null || plan.isEmpty()) {
+            return "redirect:/workout/workoutList?tab=home";
+        }
+
+        // 1. 세션에서 로그인 정보 가져오기
+        Object userNoObj = session.getAttribute("SS_USER_NO");
+        String loginId = (String) session.getAttribute("SS_USER_ID");
+
+        double userWeight = 65.0;
+
+        // 2. DB에서 유저 최신 체중 조회 (IUserMapper 직접 호출)
+        if (userNoObj != null || loginId != null) {
+            UserDTO pDTO = new UserDTO();
+
+            if (userNoObj instanceof Integer) {
+                pDTO.setUserId((Integer) userNoObj);
+            } else if (userNoObj instanceof Long) {
+                pDTO.setUserId(((Long) userNoObj).intValue());
+            }
+
+            if (loginId != null) {
+                pDTO.setLoginId(loginId);
+            }
+
+            // Mapper의 getLoginUser 직접 실행
+            UserDTO userDTO = userMapper.getLoginUser(pDTO);
+
+            if (userDTO != null && userDTO.getWeightKg() > 0) {
+                userWeight = userDTO.getWeightKg();
+            }
+        }
+
+        System.out.println("최종 적용된 체중: " + userWeight + " kg");
+
+        model.addAttribute("userWeight", userWeight);
+        model.addAttribute("homePlan", plan);
         model.addAttribute("active", "workout");
         return "workout/workoutPlay";
     }
 
-    /** 운동 완료 화면 */
     @GetMapping("/workoutResult")
-    public String workoutResult(ModelMap model) {
+    public String workoutResult(HttpSession session, ModelMap model) throws Exception {
+        HomeWorkoutPlanDTO result = (HomeWorkoutPlanDTO) session.getAttribute(HOME_RESULT_SESSION);
+        HomeWorkoutPlanDTO plan = result != null
+                ? result
+                : (HomeWorkoutPlanDTO) session.getAttribute(HOME_PLAN_SESSION);
+
+        if (plan == null || plan.isEmpty()) {
+            return "redirect:/workout/workoutList?tab=home";
+        }
+
+        // 1. 세션에서 로그인 정보 가져와 최신 체중 조회
+        Object userNoObj = session.getAttribute("SS_USER_NO");
+        String loginId = (String) session.getAttribute("SS_USER_ID");
+        double userWeight = 65.0;
+
+        if (userNoObj != null || loginId != null) {
+            UserDTO pDTO = new UserDTO();
+            if (userNoObj instanceof Integer) pDTO.setUserId((Integer) userNoObj);
+            else if (userNoObj instanceof Long) pDTO.setUserId(((Long) userNoObj).intValue());
+            if (loginId != null) pDTO.setLoginId(loginId);
+
+            UserDTO userDTO = userMapper.getLoginUser(pDTO);
+            if (userDTO != null && userDTO.getWeightKg() > 0) {
+                userWeight = userDTO.getWeightKg();
+            }
+        }
+
+        // 2. 세션 칼로리 값 반영
+        Object burnedCalObj = session.getAttribute("burnedCalories");
+        if (burnedCalObj != null) {
+            int actualCalories = (Integer) burnedCalObj;
+            plan.setTotalKcal(actualCalories);
+        }
+
+        // 3. 모델에 userWeight 전달 (★ 핵심!)
+        model.addAttribute("userWeight", userWeight);
+        model.addAttribute("homePlan", plan);
         model.addAttribute("active", "workout");
         return "workout/workoutResult";
     }
 
-    /**
-     * 앞에서부터 쓸 만한 주소를 고른다.
-     *
-     * 공공데이터에는 값이 비었다는 뜻으로 "null" 이라는 글자가 그대로 들어온 행이 많다.
-     * 자바의 null 검사로는 걸러지지 않아 그대로 두면 깨진 주소로 연결된다.
-     */
+    @ResponseBody
+    @PostMapping("/api/home-plan")
+    public HomeWorkoutPlanDTO makeHomePlan(@RequestParam(value = "intensity", defaultValue = "MODERATE") String intensity,
+                                           @RequestParam(value = "targetMin", defaultValue = "20") int targetMin,
+                                           HttpSession session) throws Exception {
+
+        Integer userId = getSessionUserId(session);
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "LOGIN_REQUIRED");
+        }
+
+        HomeWorkoutPlanDTO plan = workoutService.getHomeWorkoutPlan(
+                userId, normalizeIntensityParam(intensity), normalizeTargetMin(targetMin));
+        session.setAttribute(HOME_PLAN_SESSION, plan);
+        session.removeAttribute(HOME_RESULT_SESSION);
+        return plan;
+    }
+
+    @ResponseBody
+    @GetMapping("/api/home-plan")
+    public HomeWorkoutPlanDTO getHomePlan(HttpSession session) {
+        HomeWorkoutPlanDTO plan = (HomeWorkoutPlanDTO) session.getAttribute(HOME_PLAN_SESSION);
+        return plan != null ? plan : new HomeWorkoutPlanDTO();
+    }
+
+    @ResponseBody
+    @PostMapping("/api/home-result")
+    public Map<String, Object> saveHomeResult(@RequestBody Map<String, Object> body,
+                                              HttpSession session) {
+        HomeWorkoutPlanDTO plan = (HomeWorkoutPlanDTO) session.getAttribute(HOME_PLAN_SESSION);
+        if (plan == null || plan.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PLAN_REQUIRED");
+        }
+
+        // 1. 기존 카운트 데이터 수집
+        plan.setCompletedExerciseCount(intValue(body.get("completedExerciseCount")));
+        plan.setCompletedSetCount(intValue(body.get("completedSetCount")));
+        plan.setSkippedSetCount(intValue(body.get("skippedSetCount")));
+
+        // 2. JS에서 실시간 계산하여 보낸 칼로리 값 추출
+        int burnedCalories = intValue(body.get("burnedCalories"));
+
+        // HomeWorkoutPlanDTO에 burnedCalories 필드가 있다면 set, 없다면 세션에 별도 저장
+        plan.setTotalKcal(burnedCalories);
+        session.setAttribute("burnedCalories", burnedCalories);
+
+        // 3. 업데이트된 plan 세션 재저장
+        session.setAttribute(HOME_RESULT_SESSION, plan);
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("ok", true);
+        res.put("redirectUrl", "/workout/workoutResult");
+        return res;
+    }
+
     private String firstUsable(String... urls) {
         for (String u : urls) {
             if (u == null) {
@@ -236,5 +316,35 @@ public class WorkoutController {
         }
         return null;
     }
+
+    private Integer getSessionUserId(HttpSession session) {
+        Object userId = session.getAttribute("SS_USER_NO");
+        return userId instanceof Number ? ((Number) userId).intValue() : null;
+    }
+
+    private String normalizeIntensityParam(String intensity) {
+        if ("LIGHT".equals(intensity) || "HARD".equals(intensity)) {
+            return intensity;
+        }
+        return "MODERATE";
+    }
+
+    private int normalizeTargetMin(int targetMin) {
+        if (targetMin == 10 || targetMin == 30) {
+            return targetMin;
+        }
+        return 20;
+    }
+
+    private int intValue(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+        if (value instanceof String s && !s.isBlank()) {
+            return Integer.parseInt(s);
+        }
+        return 0;
+    }
+
 
 }

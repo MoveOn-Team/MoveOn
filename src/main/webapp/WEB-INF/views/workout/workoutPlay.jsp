@@ -1,5 +1,5 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -9,111 +9,63 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.4">
 </head>
-<body class="auth-page">
-<main class="auth-shell workout-shell">
-    <!-- 상단 헤더 & 진행 바 -->
+<body class="auth-page"
+      data-context-path="${pageContext.request.contextPath}"
+      data-user-weight="${userWeight}">
+<main class="auth-shell workout-shell workout-play-shell" id="homeWorkoutPlay">
     <div class="play-header">
-        <a href="javascript:history.back()" class="back-button" aria-label="뒤로 가기">&#8249;</a>
-        <span class="play-status-text" id="statusText">동작 3/6 · 남은 14분</span>
-        <button type="button" class="btn-pause">일시정지</button>
+        <a href="${pageContext.request.contextPath}/workout/workoutList?tab=home" class="back-button" aria-label="뒤로 가기">&#8249;</a>
+        <!-- 개선 1: 초기 진입 시 서버 데이터(homePlan)가 없을 때 null 표기 방지 및 accessibility 향상 -->
+        <span class="play-status-text" id="statusText">
+            <c:choose>
+                <c:when test="${not empty homePlan}">동작 1/6 · 남은 ${homePlan.totalMin}분</c:when>
+                <c:otherwise>운동 준비 중...</c:otherwise>
+            </c:choose>
+        </span>
+        <!-- 개선 2: 일시정지/재생 상태 변경을 위한 data 속성 부여 -->
+        <button type="button" class="btn-pause" id="btnPause" data-state="paused">일시정지</button>
     </div>
 
-    <!-- 6칸 진행 세그먼트 바 -->
-    <div class="progress-bar-group">
-        <div class="progress-step is-active"></div>
-        <div class="progress-step is-active"></div>
-        <div class="progress-step is-active"></div>
-        <div class="progress-step"></div>
-        <div class="progress-step"></div>
-        <div class="progress-step"></div>
+    <div class="progress-bar-group" id="progressBarGroup" role="progressbar" aria-label="전체 운동 진행률"></div>
+
+    <div class="media-box" id="exerciseMedia">
+        <span class="set-tag-badge" id="setTagBadge">-세트 / -세트</span>
+        <!-- 개선 3: 이미지/비디오를 동적으로 넣어줄 컨테이너 명확화 -->
+        <div class="media-placeholder" id="mediaPlaceholder">
+            <span class="placeholder-text">동작 이미지</span>
+        </div>
     </div>
 
-    <!-- 미디어 비디오/이미지 영역 -->
-    <div class="media-box">
-        <span class="set-tag-badge">2세트 / 3세트</span>
-        <div class="media-placeholder">스쿼트 동작 이미지</div>
-    </div>
-
-    <!-- 동작 타이틀 & 정보 -->
     <div class="exercise-info-section">
         <div class="info-left">
-            <h2 class="exercise-title" id="exerciseTitle">스쿼트</h2>
-            <p class="exercise-desc" id="exerciseDesc">무릎이 발끝을 넘지 않게,<br>천천히 앉았다가 일어나기</p>
-            <div class="set-check-group">
-                <span class="set-check-item is-done">✓</span>
-                <span class="set-check-item is-current">2</span>
-                <span class="set-check-item">3</span>
-            </div>
+            <h2 class="exercise-title" id="exerciseTitle">운동 준비</h2>
+            <p class="exercise-desc" id="exerciseDesc">곧 운동을 시작합니다.</p>
+            <div class="set-check-group" id="setCheckGroup"></div>
         </div>
         <div class="info-right">
             <span class="set-label">이번 세트</span>
-            <span class="set-value">15회</span>
-            <span class="rest-label">휴식 30초 자동</span>
+            <span class="set-value" id="setValue">-</span>
+            <span class="rest-label" id="restLabel">휴식 자동</span>
         </div>
     </div>
 
-    <!-- 다음 동작 안내 카고 -->
-    <div class="next-exercise-card">
+    <!-- 개선 4: 클릭 가능한 영역임을 나타내기 위한 role 및 tabindex 부여 -->
+    <div class="next-exercise-card" id="nextExerciseCard" role="button" tabindex="0">
         <div class="next-text-group">
             <span class="next-title">다음동작</span>
-            <span class="next-name">플랭크 · 30초 x 3세트</span>
+            <span class="next-name" id="nextExerciseName">-</span>
         </div>
-        <span class="next-arrow">＞</span>
+        <span class="next-arrow" aria-hidden="true">›</span>
     </div>
 
-    <!-- 하단 세트 진행 버튼 -->
     <div class="play-action-group">
         <button type="button" class="btn-skip" id="btnSkip">건너뛰기</button>
         <button type="button" class="btn-complete" id="btnComplete">세트 완료</button>
     </div>
-
 </main>
 
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let currentStep = 3; // 현재 3번째 세그먼트 채워짐 (총 6단계)
-        const maxStep = 6;
-
-        const steps = document.querySelectorAll(".progress-step");
-        const btnComplete = document.getElementById("btnComplete");
-        const btnSkip = document.getElementById("btnSkip");
-        const statusText = document.getElementById("statusText");
-
-        function updateProgress() {
-            steps.forEach((step, idx) => {
-                if (idx < currentStep) {
-                    step.classList.add("is-active");
-                } else {
-                    step.classList.remove("is-active");
-                }
-            });
-
-            statusText.innerText = "동작 " + currentStep + "/6 · 남은 " + Math.max(1, (6 - currentStep) * 3) + "분";
-
-            // 진행바가 6칸 모두 완료되었을 때 결과 페이지 이동
-            if (currentStep >= maxStep) {
-                setTimeout(() => {
-                    location.href = "${pageContext.request.contextPath}/workout/workoutResult";
-                }, 300);
-            }
-        }
-
-        btnComplete.addEventListener("click", function () {
-            if (currentStep < maxStep) {
-                currentStep++;
-                updateProgress();
-            }
-        });
-
-        btnSkip.addEventListener("click", function () {
-            if (currentStep < maxStep) {
-                currentStep++;
-                updateProgress();
-            }
-        });
-    });
-</script>
+<script src="${pageContext.request.contextPath}/js/workout.js?v=1.4"></script>
 </body>
 </html>
