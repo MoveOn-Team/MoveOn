@@ -1702,3 +1702,43 @@ body::-webkit-scrollbar {
     font-weight: 700;
     cursor: pointer;
 }
+
+/* ---------- 현위치를 못 받았을 때 띄우는 줄 ----------
+   결과 옆의 작은 글씨('서울시청 기준')만으로는 놓치기 쉬워서
+   화면 맨 위에 한 줄 띄우고 다시 받을 단추를 같이 둔다. */
+.geo-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    padding: 0.75rem 0.875rem;
+    border: 1px solid #ffe0a3;
+    border-radius: var(--card-radius);
+    background: #fff8e8;
+}
+
+.geo-notice-text {
+    flex: 1 1 12rem;
+    min-width: 0;
+    font-size: var(--fs-meta);
+    line-height: 1.45;
+    color: #8a6a1f;
+    word-break: keep-all;
+}
+
+.geo-notice-btn {
+    flex: none;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #e0b962;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    font-size: var(--fs-meta);
+    font-weight: 600;
+    color: #8a6a1f;
+    cursor: pointer;
+}
+
+.geo-notice-btn:hover {
+    background: #fff3d6;
+}

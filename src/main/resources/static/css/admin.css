@@ -406,3 +406,40 @@ a { color: var(--ad-brand); }
     font-size: 11px;
     color: var(--ad-muted);
 }
+
+/* ---------- 시설 손보기 ----------
+   행사 화면과 같은 뼈대를 쓰되, 이 화면에만 필요한 것만 더한다. */
+
+/* 목록·상세에서 바깥 사이트로 나가는 작은 링크.
+   전에는 .cell-title 안에서만 쓰여 그 안에 규칙이 묶여 있었다. */
+.ext { font-size: 12px; white-space: nowrap; }
+
+/* 종목 표의 예약주소 칸. 스물두 줄이라 칸이 좁으면 주소가 안 보인다. */
+.admin-table input[type="url"] {
+    width: 100%;
+    min-width: 18rem;
+    padding: 5px 8px;
+    border: 1px solid var(--ad-line);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.admin-table td label { cursor: pointer; }
+
+/* 시설 찾기 줄. 자치구·이름·거르개가 한 줄에 선다. */
+.search-row select {
+    padding: 8px 10px;
+    border: 1px solid var(--ad-line);
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+}
+
+/* 비어 있어 손봐야 하는 자리 */
+.warn { color: #b42318; font-weight: 700; }
+
+/* 주소 세 자리의 순서를 보여주는 작은 표.
+   고르는 것이 아니라 폭포라는 걸 글로만 말하면 안 읽힌다. */
+.order-table { margin-bottom: 14px; }
+.order-table td:first-child,
+.order-table th:first-child { width: 3rem; text-align: center; color: var(--ad-muted); }

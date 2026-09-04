@@ -72,19 +72,28 @@
 
          즉시운동 탭의 종목 단추를 만드는 데 쓴다.
          화면에 종목 이름을 박아 두면 표에 종목이 늘어도 화면이 모른다.
-         실제로 지금 표에는 당구·골프가 있는데 화면에는 없다.
 
-         시설이 하나도 없는 종목은 뺀다. 눌러도 빈 목록만 나온다. -->
+         '시설에서' 는 workout_mode 가 있는 종목만 보여준다.
+           RENT  장소를 빌린다      배드민턴 탁구 테니스 농구 축구/풋살
+           PASS  표 끊고 혼자 한다   헬스 수영 골프 스쿼시
+           NULL  즉시운동에 안 나옴
+
+         빠지는 것들(요가·댄스·에어로빅·체조·검도·태권도·아쿠아로빅·줄넘기·인라인·당구)은
+         강좌로만 존재하는 종목이다. 관리대장에 '요가장'·'댄스장' 이라는 시설이 없고,
+         우리 자료에서도 강좌 없이 등록된 시설이 한 곳도 없다.
+         '지금 나가서 할 곳' 을 찾는 화면에 올릴 것이 없다는 뜻이라 아예 뺀다.
+         이 판단은 표에 담아 두었으므로, 나중에 넣고 싶으면 SQL 한 줄이면 된다. -->
     <select id="getSportsByCategory" resultType="SportDTO">
-        SELECT s.sport_id, s.name, s.category, s.min_people, s.met_value
+        SELECT s.sport_id, s.name, s.category, s.min_people, s.met_value, s.workout_mode
           FROM sports s
          WHERE s.is_active = 1
            AND s.category = #{category}
         <if test="category == 'FACILITY'">
+           AND s.workout_mode IS NOT NULL
            AND EXISTS (SELECT 1 FROM facility_sports fs
                         WHERE fs.sport_id = s.sport_id)
         </if>
-         ORDER BY s.sport_id
+         ORDER BY s.workout_mode, s.sport_id
     </select>
 
 </mapper>

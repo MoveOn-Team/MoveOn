@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>운동 진행 중</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.4">
 </head>
 <body class="auth-page">
 <main class="auth-shell workout-shell">

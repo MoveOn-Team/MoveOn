@@ -3,6 +3,7 @@ package com.moveon.controller;
 import com.moveon.dto.AdminDTO;
 import com.moveon.dto.EventDTO;
 import com.moveon.dto.EventSearchDTO;
+import com.moveon.dto.FacilityDTO;
 import com.moveon.service.IAdminService;
 import com.moveon.service.IEventSearchService;
 import jakarta.servlet.http.HttpSession;
@@ -305,6 +306,92 @@ public class AdminController {
             res.put("place", place);
         }
         return res;
+    }
+
+    // =====================================================================
+    // 시설 손보기
+    //
+    // 공공데이터에는 시설의 신청 주소가 거의 안 들어 있다.
+    //   홈페이지가 있는 시설  1,341곳 중 130곳
+    // 종목도 이름과 어긋난 곳이 많았다. 배드민턴장인데 배드민턴이 없던 곳이 44곳.
+    // 사람이 사이트를 열어 확인하고 채우는 자리라 관리자 화면에 둔다.
+    // =====================================================================
+
+    @GetMapping(value = "/facilityAdmin")
+    public String facilityAdmin(@RequestParam(value = "gu", required = false) String gu,
+                                @RequestParam(value = "keyword", required = false) String keyword,
+                                @RequestParam(value = "filter", required = false) String filter,
+                                HttpSession session,
+                                ModelMap model) throws Exception {
+
+        if (getAdminId(session) == null) {
+            return "redirect:/admin/login";
+        }
+
+        log.info("{}.facilityAdmin Start! gu : {} / keyword : {}", this.getClass().getName(), gu, keyword);
+
+        model.addAttribute("facilities", adminService.getFacilityList(gu, keyword, filter));
+        model.addAttribute("guList", adminService.getGuList());
+        model.addAttribute("gu", gu == null ? "" : gu);
+        model.addAttribute("keyword", keyword == null ? "" : keyword);
+        model.addAttribute("filter", filter == null ? "" : filter);
+        model.addAttribute("adminName", session.getAttribute("SS_ADMIN_NAME"));
+
+        return "admin/facilityAdmin";
+    }
+
+    @GetMapping(value = "/facilityForm")
+    public String facilityForm(@RequestParam("facilityId") int facilityId,
+                               HttpSession session,
+                               ModelMap model) throws Exception {
+
+        if (getAdminId(session) == null) {
+            return "redirect:/admin/login";
+        }
+
+        FacilityDTO facility = adminService.getFacility(facilityId);
+        if (facility == null) {
+            return "redirect:/admin/facilityAdmin";
+        }
+
+        model.addAttribute("facility", facility);
+        model.addAttribute("sports", adminService.getFacilitySports(facilityId));
+        model.addAttribute("adminName", session.getAttribute("SS_ADMIN_NAME"));
+
+        return "admin/facilityForm";
+    }
+
+    /**
+     * 저장.
+     *
+     * 종목 예약주소는 화면에서 reserveUrl_6 처럼 종목번호를 붙여 보낸다.
+     * 종목이 스물두 개라 칸을 하나씩 받으면 파라미터가 스물두 줄이 된다.
+     */
+    @PostMapping(value = "/facilityForm")
+    public String saveFacility(@RequestParam("facilityId") int facilityId,
+                               @RequestParam(value = "homepageUrl", required = false) String homepageUrl,
+                               @RequestParam(value = "rentalUrl", required = false) String rentalUrl,
+                               @RequestParam(value = "sportIds", required = false) List<Integer> sportIds,
+                               @RequestParam Map<String, String> all,
+                               HttpSession session) throws Exception {
+
+        if (getAdminId(session) == null) {
+            return "redirect:/admin/login";
+        }
+
+        Map<Integer, String> reserveUrls = new HashMap<>();
+        for (Map.Entry<String, String> e : all.entrySet()) {
+            if (e.getKey().startsWith("reserveUrl_")) {
+                reserveUrls.put(Integer.parseInt(e.getKey().substring("reserveUrl_".length())),
+                                e.getValue());
+            }
+        }
+
+        adminService.modifyFacility(facilityId, homepageUrl, rentalUrl, sportIds, reserveUrls);
+
+        // 고치던 자리로 돌아온다. 여러 곳을 잇달아 손보는 화면이라
+        // 목록으로 튕기면 검색어와 스크롤을 매번 다시 잡아야 한다.
+        return "redirect:/admin/facilityForm?facilityId=" + facilityId + "&saved=1";
     }
 
     private Integer getAdminId(HttpSession session) {

@@ -49,7 +49,13 @@ public class WorkoutService implements IWorkoutService {
 
         log.info("{}.getFacilities Start! sportId : {}", this.getClass().getName(), sportId);
 
-        List<FacilityDTO> rList = facilityMapper.getNearbyFacilities(sportId, lat, lng, LIST_LIMIT);
+        // 연령대는 null. 즉시운동 탭은 '지금 갈 수 있는 곳' 만 찾는 화면이라
+        // '내가 들을 수 있는 강좌' 를 셀 일이 없다. (my_course_count 를 안 씀)
+        //
+        // bookableOnly 도 false. 신청 창구가 없어 그냥 가서 쓰는 곳이야말로
+        // 이 화면이 찾아 줘야 하는 것이다. 축구·농구는 그런 곳이 900쌍 가까이 된다.
+        List<FacilityDTO> rList =
+                facilityMapper.getNearbyFacilities(sportId, lat, lng, LIST_LIMIT, null, false);
 
         log.info("{}.getFacilities End! {}곳", this.getClass().getName(), rList.size());
 

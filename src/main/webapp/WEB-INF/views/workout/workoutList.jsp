@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>즉시 운동하기</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.4">
 </head>
 <body class="auth-page" data-context-path="${pageContext.request.contextPath}"
       data-lat="${lat}" data-lng="${lng}">
@@ -155,7 +155,9 @@
         <%-- ========================= 시설에서 ========================= --%>
         <c:otherwise>
 
-            <%-- 종목 단추는 표에서 가져온다. 화면에 이름을 박아 두면 종목이 늘어도 화면이 모른다. --%>
+            <%-- 종목 단추는 표에서 가져온다. 화면에 이름을 박아 두면 종목이 늘어도 화면이 모른다.
+                 어떤 종목을 여기 올릴지는 sports.workout_mode 가 정한다.
+                 (PASS 혼자 하는 것 / RENT 빌리는 것 / NULL 안 올림) --%>
             <div class="sub-tag-group">
                 <c:forEach var="s" items="${sports}">
                     <a href="?tab=facility&sportId=${s.sportId}${pos}"

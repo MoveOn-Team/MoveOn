@@ -9,18 +9,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MOVE:ON ${course.name}</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.4">
 </head>
 <body class="auth-page" data-context-path="${pageContext.request.contextPath}">
 
 <main class="auth-shell workout-shell">
 
     <%-- 목록으로 돌아갈 때 현위치를 이어줘야 거리 표시가 그대로 유지된다.
-         history.back() 을 쓰면 주소로 바로 들어온 경우에 갈 곳이 없다. --%>
+         history.back() 을 쓰면 주소로 바로 들어온 경우에 갈 곳이 없다.
+
+         이 화면은 두 탭이 함께 쓴다. 추천 탭의 걷기·등산에서도 여기로 온다.
+         돌아갈 곳을 한 곳으로 박아 두면 추천을 보던 사람이 즉시운동 목록에 떨어진다. --%>
     <div class="detail-header">
-        <a class="back-button"
-           href="${pageContext.request.contextPath}/workout/workoutList?tab=outdoor&type=${course.courseType}&lat=${lat}&lng=${lng}"
-           aria-label="뒤로 가기">&#8249;</a>
+        <c:choose>
+            <c:when test="${fromRecommend}">
+                <a class="back-button"
+                   href="${pageContext.request.contextPath}/recommend/sportDetail/${sportId}?lat=${lat}&lng=${lng}"
+                   aria-label="뒤로 가기">&#8249;</a>
+            </c:when>
+            <c:otherwise>
+                <a class="back-button"
+                   href="${pageContext.request.contextPath}/workout/workoutList?tab=outdoor&type=${course.courseType}&lat=${lat}&lng=${lng}"
+                   aria-label="뒤로 가기">&#8249;</a>
+            </c:otherwise>
+        </c:choose>
     </div>
 
     <div class="detail-title-area">

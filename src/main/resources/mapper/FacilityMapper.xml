@@ -3,6 +3,25 @@
 
 <mapper namespace="com.moveon.mapper.IFacilityMapper">
 
+    <!-- 방문 접수만 받는 시설인지
+
+         programs.apply_method 에 접수 방법이 사람 말로 적혀 있다.
+           구민체육센터  '방문접수 또는 인터넷접수'   (212건)
+           노인복지관    '회원증 지참하여 3층 사무실 내방 신청'
+         인터넷을 한 번도 말하지 않는 시설은 온라인 신청 창구가 없는 곳이다.
+         노인복지관 23곳은 예약 주소를 가진 강좌가 한 건도 없다.
+         그런 곳에 '예약페이지로 이동' 을 달면 눌러도 신청할 수 없다.
+
+         접수 방법이 아예 안 적힌 시설은 알 수 없으므로 방문 전용으로 보지 않는다. -->
+    <sql id="visitOnly">
+        (EXISTS (SELECT 1 FROM programs vp
+                  WHERE vp.facility_id = f.facility_id
+                    AND vp.apply_method IS NOT NULL AND vp.apply_method &lt;&gt; '')
+         AND NOT EXISTS (SELECT 1 FROM programs vp
+                  WHERE vp.facility_id = f.facility_id
+                    AND vp.apply_method REGEXP '인터넷|온라인|홈페이지'))
+    </sql>
+
     <!-- 시설 하나
 
          거리를 함께 계산하므로 현위치도 받는다.
@@ -12,6 +31,8 @@
                f.lat, f.lng, f.phone, f.homepage_url, f.capacity,
                f.rental_url,
                fs.reserve_url,
+               f.guide_url,
+               <include refid="visitOnly"/> AS visit_only,
                ds.site_url   AS district_url,
                ds.rental_url AS district_rental_url,
                ST_Distance_Sphere(POINT(#{lng}, #{lat}),
@@ -29,17 +50,43 @@
         SELECT f.facility_id, f.name, f.gu_name, f.road_addr, f.lot_addr,
                f.lat, f.lng, f.phone, f.homepage_url, f.capacity,
                f.rental_url,
-               -- 이 시설이 이 종목을 '가르치는 곳' 인지 '빌려주는 곳' 인지.
-               -- 목록에서 바로 보여 줘야 눌러 보기 전에 무엇을 하러 가는지 안다.
+               <!-- 강습을 두 가지로 센다. 묻는 것이 서로 다르기 때문이다.
+
+                    course_count    이 시설이 이 종목을 가르치기는 하는가 (나이 무관)
+                    my_course_count 그중 내가 들을 수 있는 것이 있는가   (나이 반영)
+
+                    하나로 합칠 수 없다.
+                    신월문화체육센터 축구는 강좌가 3건 있지만 전부 어린이 대상이라
+                    성인에게 course_count=3, my_course_count=0 이 된다.
+                    앞의 값은 '개방형 코트가 아니다' 를,
+                    뒤의 값은 '여기서 배울 수는 없다' 를 말한다. -->
                (SELECT COUNT(*) FROM programs p
                  WHERE p.facility_id = f.facility_id AND p.sport_id = fs.sport_id
-                   AND p.program_type = 'COURSE')  AS course_count,
+                   AND p.program_type = 'COURSE') AS course_count,
+               <!-- 조건은 getPrograms 와 같아야 한다.
+                    한쪽만 고치면 목록 제목과 버튼 목적지가 서로 다른 말을 한다.
+                    ageBand 가 null 이면(즉시운동 탭) 나이를 따지지 않는다. -->
                (SELECT COUNT(*) FROM programs p
                  WHERE p.facility_id = f.facility_id AND p.sport_id = fs.sport_id
-                   AND p.program_type &lt;&gt; 'COURSE') AS rental_count,
+                   AND p.program_type = 'COURSE'
+                   <!-- jdbcType 을 적어 두는 까닭
+                        즉시운동 탭이 null 을 넘기는데, 그때 MyBatis 가 이 자리의 타입을
+                        알 수 없어 'JdbcType needs to be specified' 로 터진다.
+                        getPrograms 쪽은 null 이 올 일이 없어 안 적어도 된다. -->
+                   AND ( #{ageBand,jdbcType=VARCHAR} IS NULL
+                      OR p.target IS NULL
+                      OR p.target REGEXP '누구나|전체|제한없|일반'
+                      OR (#{ageBand,jdbcType=VARCHAR} = 'ADULT'  AND p.target REGEXP '성인')
+                      OR (#{ageBand,jdbcType=VARCHAR} = 'TEEN'   AND p.target REGEXP '청소년|중등|고등|초중고')
+                      OR (#{ageBand,jdbcType=VARCHAR} = 'CHILD'  AND p.target REGEXP '어린이|유아|초등')
+                      OR (#{ageBand,jdbcType=VARCHAR} = 'SENIOR' AND p.target REGEXP '노인|어르신|경로|성인') )
+               ) AS my_course_count,
                -- 예약 링크는 시설이 아니라 '시설 x 종목' 단위.
                -- 같은 복합시설이라도 테니스장만 예약 대상인 경우가 있음.
                fs.reserve_url,
+               -- 신청 창구가 없는 시설을 안내 페이지로라도 보내는 데 씀 (카카오 장소)
+               f.guide_url,
+               <include refid="visitOnly"/> AS visit_only,
                -- 시설 주소가 없을 때 쓸 자치구 창구. 강습과 대관을 따로 둔다
                ds.site_url   AS district_url,
                ds.rental_url AS district_rental_url,
@@ -52,6 +99,68 @@
           LEFT JOIN district_sites ds ON ds.gu_name = f.gu_name
          WHERE fs.sport_id = #{sportId}
            AND f.is_active = 1
+           <!-- 회원이 가서 할 수 있는 것이 하나도 없는 시설은 뺀다.
+
+                신월문화체육센터는 축구장이 있어서가 아니라 유아축구교실을 열어서
+                이 종목에 딸려 있다. 성인이 찾아가면 축구를 할 데가 없다.
+                실제로 홈페이지에도 축구 강좌가 없었다.
+
+                빼는 것은 세 가지가 겹칠 때뿐이다.
+                  ① 이 종목에 강좌가 있다        (= 종목이 강좌 때문에 붙었다)
+                  ② 그중 내 나이 것이 없다
+                  ③ 이용권·대관 자료도 없다      (= 그냥 가서 쓸 길도 없다)
+
+                반월공원·우장산인조잔디구장처럼 강좌 자료가 아예 없는 곳은 ①에 안 걸린다.
+                그런 곳은 관리대장에 코트가 등록돼 있어 목록에 든 것이므로 그대로 둔다.
+                성인 기준 3,209쌍 중 346쌍이 여기 걸린다.
+
+                ageBand 가 null 이면(즉시운동 탭) ②가 거짓이 되어 아무것도 안 빠진다. -->
+           <!-- 추천 탭은 '꾸준히 다닐 곳' 을 고르는 화면이라
+                신청이든 예약이든 창구가 있는 곳만 본다.
+
+                동네 공원 농구 골대처럼 그냥 가서 쓰는 곳은 즉시운동 탭이 맡는다.
+                '지금 나가서 할 곳' 을 찾는 화면이 그쪽이기 때문이다.
+                이 구분이 없으면 축구 953쌍 중 851쌍이 안양천 제방·아파트 앞 코트라
+                추천 목록이 그것만으로 채워진다.
+
+                bookableOnly = false 면(즉시운동 탭) 아무것도 안 빠진다. -->
+        <if test="bookableOnly">
+           <!-- '가까운 시설' 이라고 적어 놓고 13km 를 보여주지 않는다.
+                점수의 접근성도 5km 를 넘으면 0점으로 매기고 있어(FAR_KM),
+                목록만 그보다 먼 곳을 담으면 화면이 스스로와 어긋난다.
+                걸러서 한 곳도 안 남으면 즉시운동 탭으로 안내한다. -->
+           AND ST_Distance_Sphere(POINT(#{lng}, #{lat}), POINT(f.lng, f.lat)) &lt;= 5000
+           AND ( EXISTS (SELECT 1 FROM programs pp
+                          WHERE pp.facility_id = fs.facility_id AND pp.sport_id = fs.sport_id)
+              OR (f.homepage_url IS NOT NULL AND f.homepage_url &lt;&gt; '')
+              OR (f.rental_url   IS NOT NULL AND f.rental_url   &lt;&gt; '')
+              OR (fs.reserve_url IS NOT NULL AND fs.reserve_url &lt;&gt; '') )
+        </if>
+           AND NOT (
+                 EXISTS (SELECT 1 FROM programs cp
+                          WHERE cp.facility_id = fs.facility_id AND cp.sport_id = fs.sport_id
+                            AND cp.program_type = 'COURSE')
+             AND NOT EXISTS (SELECT 1 FROM programs cp
+                          WHERE cp.facility_id = fs.facility_id AND cp.sport_id = fs.sport_id
+                            AND cp.program_type = 'COURSE'
+                            AND ( #{ageBand,jdbcType=VARCHAR} IS NULL
+                               <!-- 대상이 안 적힌 강좌는 누구나 들을 수 있는 것으로 본다.
+                                    다만 청소년수련관·어린이집 같은 곳에서는 그렇게 보지 않는다.
+                                    대상 미기재 강좌 2,646건 중 1,814건(69%)이 그런 시설의 것이고,
+                                    목동청소년수련관 '실내축구' 처럼 성인이 갈 수 없는 것들이다.
+                                    이름이 그 시설의 대상을 이미 말하고 있으므로 그걸 믿는다. -->
+                               OR ( cp.target IS NULL
+                                    AND NOT ( f.name REGEXP '청소년|어린이|유아'
+                                              AND #{ageBand,jdbcType=VARCHAR} IN ('ADULT','SENIOR') ) )
+                               OR cp.target REGEXP '누구나|전체|제한없|일반'
+                               OR (#{ageBand,jdbcType=VARCHAR} = 'ADULT'  AND cp.target REGEXP '성인')
+                               OR (#{ageBand,jdbcType=VARCHAR} = 'TEEN'   AND cp.target REGEXP '청소년|중등|고등|초중고')
+                               OR (#{ageBand,jdbcType=VARCHAR} = 'CHILD'  AND cp.target REGEXP '어린이|유아|초등')
+                               OR (#{ageBand,jdbcType=VARCHAR} = 'SENIOR' AND cp.target REGEXP '노인|어르신|경로|성인') ))
+             AND NOT EXISTS (SELECT 1 FROM programs cp
+                          WHERE cp.facility_id = fs.facility_id AND cp.sport_id = fs.sport_id
+                            AND cp.program_type &lt;&gt; 'COURSE')
+           )
          ORDER BY distance_km
          LIMIT #{limit}
     </select>
@@ -142,12 +251,16 @@
                  GROUP BY place_name) pick
             ON pick.place_name = r.place_name AND pick.first_end = r.rcpt_end
          WHERE <include refid="openRental"/>
+           <!-- 대관은 '장소를 시간대로 빌리는 것' 이라 다섯 종목에만 있다.
+                (배드민턴·탁구·테니스·농구·축구/풋살. 축구는 아래 별도 조회)
+                골프장은 뺐다. 공공서비스예약의 골프장은 대관이 아니라 개인 타석 예약이고,
+                그건 시설 쪽 이용권과 같은 이야기라 여기 섞으면 두 번 세게 된다.
+                없는 종목번호가 들어오면 CASE 가 NULL 이 되어 한 줄도 안 나온다. -->
            AND r.min_class = CASE #{sportId}
                                WHEN 4 THEN '배드민턴장'
                                WHEN 5 THEN '탁구장'
                                WHEN 6 THEN '테니스장'
                                WHEN 7 THEN '농구장'
-                               WHEN 9 THEN '골프장'
                              END
          GROUP BY r.place_name
          ORDER BY distance_km

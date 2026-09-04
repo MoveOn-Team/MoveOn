@@ -1,5 +1,6 @@
 package com.moveon.service;
 
+import com.moveon.dto.CourseDTO;
 import com.moveon.dto.FacilityDTO;
 import com.moveon.dto.ProfileDTO;
 import com.moveon.dto.ProgramDTO;
@@ -28,8 +29,13 @@ public interface IRecommendService {
     SportDTO getSportScore(int userId, int sportId, double lat, double lng) throws Exception;
 
     // 해당 종목을 할 수 있는 가까운 시설 3곳
+    // 회원번호를 받는 것은 '내가 들을 수 있는 강좌 수' 를 함께 세기 위함이다
 
-    List<FacilityDTO> getNearbyFacilities(int sportId, double lat, double lng, int limit) throws Exception;
+    List<FacilityDTO> getNearbyFacilities(int userId, int sportId, double lat, double lng, int limit) throws Exception;
+
+    // 걷기·등산은 시설이 아니라 코스로 답한다. 종목 이름으로 평지/산길을 가른다
+
+    List<CourseDTO> getNearbyCourses(String sportName, double lat, double lng, int limit) throws Exception;
 
     // 특정 시설의 해당 종목 강좌
 

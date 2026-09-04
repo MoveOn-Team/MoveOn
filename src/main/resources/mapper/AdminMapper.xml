@@ -103,4 +103,102 @@
          WHERE event_id = #{eventId}
     </update>
 
+    <!-- =====================================================================
+         시설 손보기
+
+         회원 화면이 시설을 어디로 보낼지는 세 칸이 정한다.
+           facilities.homepage_url        수강신청 · 안내
+           facilities.rental_url          대관
+           facility_sports.reserve_url    대관 (시설 x 종목 단위)
+         종목(facility_sports)이 붙어 있어야 그 종목 목록에 시설이 뜬다.
+         이 화면은 그 넷을 사람이 직접 고치는 자리다.
+         ===================================================================== -->
+
+    <!-- 시설 목록. 손볼 곳을 찾는 화면이라 '무엇이 비어 있는지' 를 함께 센다. -->
+    <select id="getAdminFacilityList" resultType="FacilityDTO">
+        SELECT f.facility_id, f.name, f.gu_name, f.road_addr, f.phone,
+               f.homepage_url, f.rental_url,
+               (SELECT COUNT(*) FROM facility_sports fs
+                 WHERE fs.facility_id = f.facility_id) AS course_count,
+               (SELECT COUNT(*) FROM facility_sports fs
+                 WHERE fs.facility_id = f.facility_id
+                   AND fs.reserve_url IS NOT NULL AND fs.reserve_url &lt;&gt; '') AS my_course_count
+          FROM facilities f
+         WHERE f.is_active = 1
+        <if test="gu != null and gu != ''">
+           AND f.gu_name = #{gu}
+        </if>
+        <if test="keyword != null and keyword != ''">
+           AND f.name LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <!-- 비어 있는 것만 골라 보는 거르개.
+             전체 1,341곳을 훑는 화면이 아니라 채울 곳을 찾는 화면이다. -->
+        <if test="filter == 'noUrl'">
+           AND (f.homepage_url IS NULL OR f.homepage_url = '')
+           AND (f.rental_url   IS NULL OR f.rental_url   = '')
+        </if>
+        <if test="filter == 'noSport'">
+           AND NOT EXISTS (SELECT 1 FROM facility_sports fs WHERE fs.facility_id = f.facility_id)
+        </if>
+        <if test="filter == 'hasUrl'">
+           AND ((f.homepage_url IS NOT NULL AND f.homepage_url &lt;&gt; '')
+             OR (f.rental_url   IS NOT NULL AND f.rental_url   &lt;&gt; ''))
+        </if>
+         ORDER BY f.gu_name, f.name
+         LIMIT 300
+    </select>
+
+    <select id="getAdminFacility" resultType="FacilityDTO">
+        SELECT f.facility_id, f.name, f.gu_name, f.road_addr, f.lot_addr, f.phone,
+               f.homepage_url, f.rental_url, f.lat, f.lng,
+               ds.site_url   AS district_url,
+               ds.rental_url AS district_rental_url
+          FROM facilities f
+          LEFT JOIN district_sites ds ON ds.gu_name = f.gu_name
+         WHERE f.facility_id = #{facilityId}
+    </select>
+
+    <!-- 종목 스물두 개를 다 주되, 이 시설에 붙어 있는지와 예약주소를 함께 준다.
+         화면은 이걸로 체크박스를 그린다. DTO 를 새로 만들지 않으려고 Map 으로 받는다. -->
+    <select id="getAdminFacilitySports" resultType="java.util.LinkedHashMap">
+        SELECT s.sport_id       AS sportId,
+               s.name           AS sportName,
+               s.workout_mode   AS workoutMode,
+               fs.facility_id IS NOT NULL AS linked,
+               fs.reserve_url   AS reserveUrl,
+               (SELECT COUNT(*) FROM programs p
+                 WHERE p.facility_id = #{facilityId} AND p.sport_id = s.sport_id
+                   AND p.program_type = 'COURSE') AS courseCnt,
+               (SELECT COUNT(*) FROM programs p
+                 WHERE p.facility_id = #{facilityId} AND p.sport_id = s.sport_id
+                   AND p.program_type &lt;&gt; 'COURSE') AS otherCnt
+          FROM sports s
+          LEFT JOIN facility_sports fs
+                 ON fs.sport_id = s.sport_id AND fs.facility_id = #{facilityId}
+         WHERE s.is_active = 1 AND s.category = 'FACILITY'
+         ORDER BY s.sport_id
+    </select>
+
+    <select id="getGuList" resultType="String">
+        SELECT DISTINCT gu_name FROM facilities WHERE is_active = 1 ORDER BY gu_name
+    </select>
+
+    <!-- 빈 칸은 NULL 로 넣는다. '' 로 두면 화면의 isUsableUrl 검사를 통과하지 못하면서
+         '값이 있다' 는 조회 조건에는 걸려 두 곳이 서로 다른 말을 하게 된다. -->
+    <update id="updateFacilityUrls">
+        UPDATE facilities
+           SET homepage_url = NULLIF(TRIM(#{homepageUrl}), ''),
+               rental_url   = NULLIF(TRIM(#{rentalUrl}), '')
+         WHERE facility_id = #{facilityId}
+    </update>
+
+    <delete id="deleteFacilitySports">
+        DELETE FROM facility_sports WHERE facility_id = #{facilityId}
+    </delete>
+
+    <insert id="insertFacilitySport">
+        INSERT INTO facility_sports (facility_id, sport_id, reserve_url)
+        VALUES (#{facilityId}, #{sportId}, NULLIF(TRIM(#{reserveUrl}), ''))
+    </insert>
+
 </mapper>

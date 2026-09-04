@@ -2,10 +2,12 @@ package com.moveon.mapper;
 
 import com.moveon.dto.AdminDTO;
 import com.moveon.dto.EventDTO;
+import com.moveon.dto.FacilityDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -47,5 +49,45 @@ public interface IAdminMapper {
     int updateStatus(@Param("eventId") int eventId,
                      @Param("status") String status,
                      @Param("adminId") int adminId) throws Exception;
+
+    // =====================================================================
+    // 시설 손보기
+    //
+    // 회원을 어디로 보낼지는 세 칸이 정한다.
+    //   facilities.homepage_url      수강신청·안내
+    //   facilities.rental_url        대관
+    //   facility_sports.reserve_url  대관 (시설 x 종목)
+    // 종목이 붙어 있어야 그 종목 목록에 시설이 뜬다.
+    // =====================================================================
+
+    /**
+     * @param gu      자치구. 비우면 전체
+     * @param keyword 시설명 일부
+     * @param filter  noUrl 주소 없는 곳 / noSport 종목 없는 곳 / hasUrl 주소 있는 곳
+     */
+    List<FacilityDTO> getAdminFacilityList(@Param("gu") String gu,
+                                           @Param("keyword") String keyword,
+                                           @Param("filter") String filter) throws Exception;
+
+    FacilityDTO getAdminFacility(@Param("facilityId") int facilityId) throws Exception;
+
+    /**
+     * 종목 스물두 개 전부. 이 시설에 붙어 있는지(linked)와 예약주소를 함께 준다.
+     * 화면이 체크박스를 그리는 데 쓴다. 이것만 쓰는 값이라 DTO 를 새로 만들지 않았다.
+     */
+    List<Map<String, Object>> getAdminFacilitySports(@Param("facilityId") int facilityId) throws Exception;
+
+    List<String> getGuList() throws Exception;
+
+    int updateFacilityUrls(@Param("facilityId") int facilityId,
+                           @Param("homepageUrl") String homepageUrl,
+                           @Param("rentalUrl") String rentalUrl) throws Exception;
+
+    /** 종목은 지우고 다시 넣는다. 체크를 풀었는지 새로 넣었는지 따로 셀 필요가 없다 */
+    int deleteFacilitySports(@Param("facilityId") int facilityId) throws Exception;
+
+    int insertFacilitySport(@Param("facilityId") int facilityId,
+                            @Param("sportId") int sportId,
+                            @Param("reserveUrl") String reserveUrl) throws Exception;
 
 }
