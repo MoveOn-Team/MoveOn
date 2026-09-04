@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+
 /**
  * 점수 계산은 SQL이 아니라 RecommendService에서 함.
  * 여기서는 계산에 필요한 재료(성향점수 · 참여율 · 최근접거리)만 가져옴.
@@ -40,7 +41,8 @@ public interface ISportMapper {
                                          @Param("lng") double lng) throws Exception;
 
     /**
-     * 갈래별 종목 목록. 즉시운동 탭의 종목 단추를 만드는 데 씀.
+     * 갈래별 종목 목록
+     * 즉시운동 탭의 종목 단추를 만드는 데 씀.
      *
      * @param category FACILITY 시설에서 / OUTDOOR 야외에서 / HOME 집에서
      */

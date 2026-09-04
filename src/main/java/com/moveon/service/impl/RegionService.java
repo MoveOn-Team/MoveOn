@@ -9,6 +9,7 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * 좌표를 행정동 이름으로 바꾼다 (카카오 로컬 API)
  *
@@ -43,7 +44,7 @@ public class RegionService implements IRegionService {
 
         try {
             Map<String, Object> body = restClient.get()
-                    .uri(URL + "?x={x}&y={y}", lng, lat)   // 카카오는 x 가 경도, y 가 위도다
+                    .uri(URL + "?x={x}&y={y}", lng, lat)   // 카카오는 x 가 경도, y 가 위도
                     .header("Authorization", "KakaoAK " + kakaoKey)
                     .retrieve()
                     .body(Map.class);

@@ -122,10 +122,19 @@ public class WorkoutController {
         return "workout/workoutDetail";
     }
 
+    /**
+     * 야외 코스 상세
+     *
+     * 추천 탭의 걷기·등산에서도 이 화면으로 온다. 같은 자료라 화면을 또 만들지 않았다.
+     * 대신 from 으로 어디서 왔는지 받아 뒤로가기와 아래 탭바를 그쪽에 맞춘다.
+     * 없으면 즉시운동 탭에서 온 것으로 본다.
+     */
     @GetMapping("/courseDetail/{courseId}")
     public String courseDetail(@PathVariable("courseId") int courseId,
                                @RequestParam(value = "lat", required = false) Double lat,
                                @RequestParam(value = "lng", required = false) Double lng,
+                               @RequestParam(value = "from", required = false) String from,
+                               @RequestParam(value = "sportId", defaultValue = "0") int sportId,
                                ModelMap model) throws Exception {
 
         double myLat = lat != null ? lat : DEFAULT_LAT;
@@ -135,13 +144,19 @@ public class WorkoutController {
             return "redirect:/workout/workoutList?tab=outdoor";
         }
 
+        boolean fromRecommend = "recommend".equals(from) && sportId > 0;
+
         model.addAttribute("course", course);
         model.addAttribute("points", workoutService.getCoursePoints(courseId));
         model.addAttribute("kakaoMapKey", kakaoMapKey);
         model.addAttribute("lat", myLat);
         model.addAttribute("lng", myLng);
         model.addAttribute("usingGps", lat != null && lng != null);
-        model.addAttribute("active", "workout");
+
+        // 뒤로가기가 갈 곳과 아래 탭바에서 켤 칸
+        model.addAttribute("fromRecommend", fromRecommend);
+        model.addAttribute("sportId", sportId);
+        model.addAttribute("active", fromRecommend ? "recommend" : "workout");
 
         return "workout/courseDetail";
     }

@@ -14,6 +14,7 @@
 <header class="admin-top">
     <h1>지역 스포츠 행사</h1>
     <div class="admin-who">
+        <a href="${pageContext.request.contextPath}/admin/facilityAdmin">시설</a>
         ${adminName}
         <a href="${pageContext.request.contextPath}/admin/logout">로그아웃</a>
     </div>

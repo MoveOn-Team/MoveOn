@@ -51,54 +51,90 @@
          '이 종목을 어디서 할 수 있나' 가 이 화면의 첫 번째 답이라,
          빌리러 가든 배우러 가든 가까운 곳은 알려 줘야 한다. --%>
     <c:choose>
-        <%-- 우리 시설 자료에 없을 때만 서울시 공공서비스예약을 뒤져 대신 보여준다.
-             그것도 없으면 그때 못 찾았다고 말한다. --%>
-        <c:when test="${empty facilities and empty rentals}">
-            <h2 class="section-title">가까운 시설</h2>
-            <div class="empty-box">
-                현위치 주변에 ${sport.name} 을(를) 할 수 있는<br>
-                시설을 찾지 못했어요.
-            </div>
-        </c:when>
-
-        <c:when test="${empty facilities}">
-            <h2 class="section-title">지금 빌릴 수 있는 곳 <small>가까운 순</small></h2>
+        <%-- 걷기·등산. 시설이 아니라 코스로 답하는 종목이다.
+             즉시운동 탭 '야외에서' 와 같은 서울두드림길 자료를 쓴다.
+             예약이라는 절차가 없는 길이라 아래 버튼도 필요 없다. --%>
+        <c:when test="${not empty courses}">
+            <h2 class="section-title">가까운 코스 ${courses.size()}곳 <small>가까운 순</small></h2>
             <ul class="facility-list">
-                <c:forEach var="r" items="${rentals}">
+                <c:forEach var="c" items="${courses}">
                     <li>
-                        <a class="facility-item" href="${r.svcUrl}" target="_blank" rel="noopener">
+                        <%-- 코스 상세는 즉시운동 탭 것을 그대로 쓴다. 같은 자료라 화면을 또 만들 이유가 없다.
+                             다만 from 을 달아 준다. 이게 없으면 뒤로가기가 즉시운동 목록으로 가서,
+                             추천을 보다가 누른 사람이 엉뚱한 탭에 떨어진다. --%>
+                        <a class="facility-item"
+                           href="${pageContext.request.contextPath}/workout/courseDetail/${c.courseId}?lat=${lat}&lng=${lng}&from=recommend&sportId=${sport.sportId}">
                             <span class="facility-body">
-                                <span class="facility-name">${r.placeName}</span>
+                                <span class="facility-name">${c.name}</span>
                                 <span class="facility-addr">
-                                    ${r.minClass}<c:if test="${not empty r.payYn}"> · ${r.payYn}</c:if>
+                                    <c:if test="${c.distanceKm ne null}">
+                                        <fmt:formatNumber value="${c.distanceKm}" maxFractionDigits="1"/>km
+                                    </c:if>
+                                    <c:if test="${c.durationMin ne null}"> · 약 ${c.durationMin}분</c:if>
+                                    <c:if test="${not empty c.guName}"> · ${c.guName}</c:if>
                                 </span>
                             </span>
                             <span class="facility-km">
-                                <fmt:formatNumber value="${r.distanceKm}" minFractionDigits="1"
-                                                  maxFractionDigits="1"/>km
+                                <c:choose>
+                                    <c:when test="${c.distanceFromMe lt 1}">
+                                        <fmt:formatNumber value="${c.distanceFromMe * 1000}" maxFractionDigits="0"/>m
+                                    </c:when>
+                                    <c:otherwise>
+                                        <fmt:formatNumber value="${c.distanceFromMe}" minFractionDigits="1"
+                                                          maxFractionDigits="1"/>km
+                                    </c:otherwise>
+                                </c:choose>
                             </span>
                         </a>
                     </li>
                 </c:forEach>
             </ul>
-            <p class="data-notice">누르면 서울시 공공서비스예약으로 이동해요.</p>
+            <%-- 코스 길이와 현위치까지의 거리가 나란히 나오면 헷갈린다.
+                 왼쪽은 '이 길이 몇 km 인지', 오른쪽 뱃지는 '시작점이 얼마나 먼지'다. --%>
+            <p class="data-notice">
+                누르면 소요시간과 코스안내를 볼 수 있어요.
+            </p>
+        </c:when>
+
+        <%-- 이 탭은 신청·예약 창구가 있는 곳만 본다.
+             그래서 비었다는 말은 '할 데가 없다' 가 아니라 '신청할 데가 없다' 는 뜻이다.
+             동네 공원 코트는 즉시운동 탭에 그대로 있으므로 그리로 보낸다.
+             축구는 890쌍 중 851쌍이 그런 곳이라 여기가 비는 일이 드물지 않다. --%>
+        <c:when test="${empty facilities and empty rentals}">
+            <h2 class="section-title">가까운 시설</h2>
+            <div class="empty-box">
+                주변에 ${sport.name} 을(를) 신청하거나 예약할 수 있는<br>
+                곳을 찾지 못했어요.
+            </div>
+            <p class="data-notice">
+                예약 없이 그냥 쓰는 동네 코트는
+                <a href="${pageContext.request.contextPath}/workout/workoutList?tab=facility&sportId=${sport.sportId}&lat=${lat}&lng=${lng}">즉시운동 탭</a>
+                에서 볼 수 있어요.
+            </p>
         </c:when>
 
         <c:otherwise>
+            <%-- 시설 목록이 비어 있을 수 있다. 아래 대관 목록만 나오는 경우다.
+                 서울시 공공서비스예약에는 있는데 공공체육시설 관리대장에는 없는 곳이
+                 인재개발원 축구장·서남물재생센터 테니스장처럼 꽤 있다. --%>
+            <c:if test="${not empty learnFacilities}">
             <%-- 제목이 이 목록의 성격을 말한다.
                  이 동네에서 이 종목에 강습이 하나도 없으면 배우러 갈 곳이 아니라
-                 빌리러 갈 곳들이므로, 제목부터 그렇게 적는다. --%>
+                 그냥 이용하러 갈 곳들이므로, 제목부터 그렇게 적는다. --%>
             <h2 class="section-title">
+                <%-- '빌릴 수 있는' 이라고 못 박지 않는다. 강습이 없는 시설이라고
+                     다 대관은 아니다. 자유수영처럼 표를 끊고 혼자 쓰는 곳이 더 많다.
+                     장소를 시간대로 빌리는 것은 아래 대관 목록이 따로 맡는다. --%>
                 <c:choose>
-                    <c:when test="${rentalMode}">지금 빌릴 수 있는 ${facilities.size()}곳</c:when>
-                    <c:otherwise>가까운 시설 ${facilities.size()}곳</c:otherwise>
+                    <c:when test="${rentalMode}">지금 이용할 수 있는 ${learnFacilities.size()}곳</c:when>
+                    <c:otherwise>가까운 시설 ${learnFacilities.size()}곳</c:otherwise>
                 </c:choose>
             </h2>
 
             <ul class="facility-list">
-                <c:forEach var="f" items="${facilities}">
+                <c:forEach var="f" items="${learnFacilities}">
                     <li>
-                        <a class="facility-item ${f.facilityId == pickId ? 'is-pick' : ''}"
+                        <a class="facility-item ${f.facilityId == pick.facilityId ? 'is-pick' : ''}"
                            href="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}?facilityId=${f.facilityId}&lat=${lat}&lng=${lng}">
                             <span class="facility-body">
                                 <span class="facility-name">${f.name}</span>
@@ -135,31 +171,50 @@
                  틀린 목록을 보여 주느니, 여기서는 '어디로 가면 되는지' 만 말하고
                  실제 강좌는 아래 버튼 너머 신청 페이지에서 보게 한다. --%>
             <c:choose>
-                <%-- 예약이라는 절차가 없어서 그냥 가면 되는 곳.
-                     '없다' 고만 하면 자료가 빠진 것처럼 읽힌다. --%>
-                <c:when test="${openAccess}">
-                    <div class="empty-box">
-                        예약 없이 바로 쓸 수 있는 곳이에요.<br>
-                        가서 비어 있으면 이용하시면 됩니다.
-                    </div>
-                </c:when>
+                <%-- 예약이라는 절차가 없어서 그냥 가면 되는 곳. 아무 말도 하지 않는다.
+                     '그냥 가서 쓰세요' 는 알려 주는 말이 아니라 빈자리를 메우는 말이었다.
+                     여기서 할 일은 위치를 알려 주는 것뿐이고 그건 아래 지도 단추가 한다.
+
+                     그래도 이 가지를 지우지는 않는다.
+                     지우면 아래 '창구를 못 찾았어요' 로 흘러가는데,
+                     개방형 코트는 못 찾은 게 아니라 찾을 것이 없는 곳이다. --%>
+                <c:when test="${openAccess}"></c:when>
                 <c:when test="${empty linkUrl and empty rentals}">
                     <div class="empty-box">
                         이 시설의 신청 창구를 아직 못 찾았어요.<br>
                         아래 지도로 위치만 확인해 주세요.
                     </div>
                 </c:when>
+                <%-- 방문 접수만 받는 곳. 버튼 너머에서 신청이 안 되니 미리 말해 준다.
+                     노인복지관·사회복지관이 여기 해당한다. --%>
+                <c:when test="${visitOnly}">
+                    <p class="data-notice">
+                        여기는 직접 찾아가 접수하는 곳이에요.
+                        <c:choose>
+                            <c:when test="${not empty linkUrl}">아래에서 어떤 프로그램이 있는지 먼저 보세요.</c:when>
+                            <%-- 온라인 창구가 없으면 남는 답은 전화뿐이다.
+                                 목동테니스장은 접수 방법이 아예 '전화문의' 로 적혀 있다.
+                                 눌러서 걸 수 있게 tel: 로 건다. --%>
+                            <c:when test="${not empty pick.phone}">
+                                접수 기간은 <a href="tel:${pick.phone}">${pick.phone}</a> 로 확인해 주세요.
+                            </c:when>
+                            <c:otherwise>가시기 전에 접수 기간을 확인해 주세요.</c:otherwise>
+                        </c:choose>
+                    </p>
+                </c:when>
+
                 <%-- 안내 문구도 버튼과 같은 이야기를 해야 한다.
                      빌리러 가는 곳에 '여는 강좌' 를 말하면 앞뒤가 어긋난다. --%>
                 <c:when test="${not empty linkUrl and toRental}">
                     <p class="data-notice">
-                        여기는 빌려서 쓰는 곳이에요.
+                        여기는 시간을 잡아 빌리는 곳이에요.
                         요금과 빈 시간은 아래에서 확인해 주세요.
                     </p>
                 </c:when>
+
                 <c:when test="${not empty linkUrl}">
                     <p class="data-notice">
-                        여는 강좌와 요금은 자주 바뀌어요.
+                        여는 강좌와 요금은 자주 바뀌어요.</br>
                         아래에서 지금 열리는 것을 확인해 주세요.
                     </p>
                 </c:when>
@@ -170,18 +225,78 @@
                  예약·안내 링크는 컨트롤러가 네 순위로 정해 linkUrl 에 담아 준다. --%>
             <c:if test="${not empty pick}">
                 <div class="detail-actions">
-                    <%-- 카카오맵 검색 탭으로 보내되 '이름' 이 아니라 '주소' 로 찾는다.
+                    <%-- 길찾기. 도착지를 좌표로 넘긴다.
+                         link/to 는 그 자리를 도착지로 놓고 길찾기를 열어 주고,
+                         출발지는 카카오맵이 회원의 현위치로 잡는다.
+
+                         이름이 아니라 좌표를 넘기는 것이 중요하다.
                          시설명은 지자체 관리대장 기준이라 지도 검색과 어긋난다.
                          예) '반월공원' 으로 검색하면 26km 떨어진 안산 반월공원이 나온다.
-                         주소는 표본 4곳 모두 제자리를 찾았다. --%>
+                         여기서 이름은 도착지에 붙는 이름표일 뿐이라 엉뚱한 곳을 찍지 않는다. --%>
                     <a class="outline-button"
-                       href="https://map.kakao.com/link/search/${not empty pick.roadAddr ? pick.roadAddr : pick.lotAddr}"
-                       target="_blank" rel="noopener">지도에서 보기</a>
+                       href="https://map.kakao.com/link/to/${pick.name},${pick.lat},${pick.lng}"
+                       target="_blank" rel="noopener">길찾기</a>
 
                     <c:if test="${not empty linkUrl}">
                         <a class="primary-button" href="${linkUrl}" target="_blank" rel="noopener">${linkLabel}</a>
                     </c:if>
                 </div>
+            </c:if>
+            </c:if>
+
+            <%-- ---------- 대관 ----------
+                 우리 시설 목록과 따로 세운다. 붙이려 하지 않는다.
+                 서울시 공공서비스예약의 장소 175곳 중 절반 넘게가
+                 인재개발원·서남물재생센터·에코파크처럼 공공체육시설 관리대장에 없는 곳이라,
+                 이름으로도 좌표로도 우리 시설에 못 붙는다. 억지로 붙이면 옆 시설을 문다.
+
+                 배드민턴·탁구·테니스·농구·축구/풋살 다섯 종목에만 나온다.
+                 장소를 시간대로 빌리는 것이 이 다섯뿐이기 때문이다.
+                 수영장을 통째로 빌리는 사람은 없고, 자유수영은 위 시설 쪽이 맡는다. --%>
+            <c:if test="${not empty rentals}">
+                <h2 class="section-title">
+                    지금 빌릴 수 있는 ${rentals.size()}곳 <small>가까운 순</small>
+                </h2>
+                <ul class="facility-list">
+                    <c:forEach var="r" items="${rentals}">
+                        <li>
+                            <%-- 우리 시설(facilityId > 0)은 상세 화면으로 들여보내 거기서 대관 단추를 누르고,
+                                 서울시 예약 자료는 바로 바깥 예약 화면으로 내보낸다. --%>
+                            <c:choose>
+                                <c:when test="${r.facilityId > 0}">
+                                    <c:set var="href"
+                                           value="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}?facilityId=${r.facilityId}&lat=${lat}&lng=${lng}"/>
+                                    <c:set var="tgt" value=""/>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:set var="href" value="${r.svcUrl}"/>
+                                    <c:set var="tgt" value="_blank"/>
+                                </c:otherwise>
+                            </c:choose>
+                            <a class="facility-item ${r.facilityId == pick.facilityId ? 'is-pick' : ''}"
+                               href="${href}" target="${tgt}" rel="noopener">
+                                <span class="facility-body">
+                                    <span class="facility-name">${r.placeName}</span>
+                                    <span class="facility-addr">
+                                        ${r.minClass}<c:if test="${not empty r.payYn}"> · ${r.payYn}</c:if>
+                                    </span>
+                                </span>
+                                <span class="facility-km">
+                                    <c:choose>
+                                        <c:when test="${r.distanceKm < 1}">
+                                            <fmt:formatNumber value="${r.distanceKm * 1000}" maxFractionDigits="0"/>m
+                                        </c:when>
+                                        <c:otherwise>
+                                            <fmt:formatNumber value="${r.distanceKm}" minFractionDigits="1"
+                                                              maxFractionDigits="1"/>km
+                                        </c:otherwise>
+                                    </c:choose>
+                                </span>
+                            </a>
+                        </li>
+                    </c:forEach>
+                </ul>
+                <p class="data-notice">서울시 공공서비스예약과 시설 예약 화면으로 이어져요.</p>
             </c:if>
         </c:otherwise>
     </c:choose>

@@ -20,6 +20,8 @@
     var KEY_COORDS = "moveon.coords";
     var KEY_STATE = "moveon.geoState";
 
+    var KEY_REASON = "moveon.geoReason";
+
     var params = new URLSearchParams(location.search);
 
     // 이미 좌표를 달고 온 요청이면 다시 물어볼 이유가 없다.
@@ -28,8 +30,10 @@
         return;
     }
 
-    // 이번 세션에서 이미 거부했으면 다시 묻지 않는다
+    // 이번 세션에서 이미 거부했으면 다시 묻지 않는다.
+    // 대신 왜 못 받았는지 화면에 띄우고, 다시 받아볼 길을 준다.
     if (sessionStorage.getItem(KEY_STATE) === "denied") {
+        showNotice(sessionStorage.getItem(KEY_REASON));
         return;
     }
 
@@ -63,8 +67,13 @@
         function (err) {
             // 거부·시간초과·실패 모두 화면은 그대로 두고 기본 좌표를 쓴다.
             // 위치를 못 받았다고 추천을 못 보여줄 이유는 없다.
+            //
+            // 다만 조용히 넘어가지는 않는다.
+            // 서울시청에서 잰 거리를 '현위치' 로 읽으면 회원이 속는 셈이고,
+            // 왜 그런지 모르면 고칠 방법도 없다.
             sessionStorage.setItem(KEY_STATE, "denied");
-            console.log("현위치를 받지 못해 기본 좌표(서울시청)로 계산합니다.", err.message);
+            sessionStorage.setItem(KEY_REASON, reasonOf(err));
+            showNotice(reasonOf(err));
         },
         {
             enableHighAccuracy: true,
@@ -78,5 +87,61 @@
         params.set("lat", lat);
         params.set("lng", lng);
         location.replace(location.pathname + "?" + params.toString());
+    }
+
+    /**
+     * 왜 못 받았는지 회원이 알아들을 말로 바꾼다.
+     * 브라우저가 주는 code 는 셋뿐이라 각각 할 수 있는 일이 다르다.
+     */
+    function reasonOf(err) {
+        if (!err) {
+            return "위치를 받지 못했어요.";
+        }
+        if (err.code === 1) {   // PERMISSION_DENIED
+            return "위치 권한이 꺼져 있어요. 주소창 왼쪽 자물쇠에서 켤 수 있어요.";
+        }
+        if (err.code === 2) {   // POSITION_UNAVAILABLE
+            return "위치를 찾지 못했어요. 실내에서는 어려울 수 있어요.";
+        }
+        if (err.code === 3) {   // TIMEOUT
+            return "위치를 받는 데 오래 걸려요.";
+        }
+        return "위치를 받지 못했어요.";
+    }
+
+    /**
+     * 화면 맨 위에 한 줄 띄운다.
+     *
+     * 결과에 붙는 작은 글씨('서울시청 기준')만으로는 놓치기 쉽다.
+     * 알리기만 하고 끝내면 회원이 할 수 있는 게 없으므로 다시 받는 단추를 같이 둔다.
+     */
+    function showNotice(reason) {
+        if (document.getElementById("geoNotice")) {
+            return;
+        }
+        var shell = document.querySelector(".auth-shell, .container");
+        if (!shell) {
+            return;
+        }
+
+        var box = document.createElement("div");
+        box.id = "geoNotice";
+        box.className = "geo-notice";
+        box.innerHTML =
+            '<span class="geo-notice-text">' +
+            (reason || "위치를 받지 못했어요.") +
+            ' 서울시청 기준으로 보여드려요.</span>' +
+            '<button type="button" class="geo-notice-btn">현위치로 다시 보기</button>';
+
+        // 제목보다 위에 둔다. 결과를 보기 전에 어떤 기준인지 알아야 한다.
+        shell.insertBefore(box, shell.firstChild);
+
+        box.querySelector(".geo-notice-btn").addEventListener("click", function () {
+            // 막아 둔 것을 풀고 처음부터 다시 물어본다.
+            sessionStorage.removeItem(KEY_STATE);
+            sessionStorage.removeItem(KEY_REASON);
+            sessionStorage.removeItem(KEY_COORDS);
+            location.reload();
+        });
     }
 })();

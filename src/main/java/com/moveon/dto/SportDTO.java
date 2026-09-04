@@ -27,6 +27,17 @@ public class SportDTO {
 
     private double metValue; // 대사당량. 칼로리 계산과 강도 판정에 사용
 
+    /**
+     * 즉시운동 탭에서 이 종목을 어떻게 다루는지.
+     *
+     *   RENT  장소를 시간대로 빌린다   배드민턴 탁구 테니스 농구 축구/풋살
+     *   PASS  표 끊고 혼자 한다       헬스 수영 골프 스쿼시
+     *   null  즉시운동에 안 나온다    (강좌로만 존재하는 종목)
+     *
+     * 추천 탭은 이 값을 안 본다. 거기서는 스물두 종목을 다 다룬다.
+     */
+    private String workoutMode;
+
     /** 이 회원에게 얼마나 맞는지 - 점수 재료 */
 
     private double traitScore; // 성향 4축 점수 평균 (0~100)

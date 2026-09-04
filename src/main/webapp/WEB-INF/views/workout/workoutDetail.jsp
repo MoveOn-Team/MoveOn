@@ -9,14 +9,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MOVE:ON ${facility.name}</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.4">
 </head>
 <body class="auth-page" data-context-path="${pageContext.request.contextPath}">
 
-<%-- 이 화면은 아직 손보는 중이다.
-     목업에는 이용요금·평일·주말·휴관일 칸이 있는데, facilities 표에 그런 칸이 없다.
-     요금과 시간은 시설이 아니라 강좌(programs)마다 다르게 붙어 있어서다.
-     지금은 표에 실제로 있는 값만 보여준다. 강좌 목록 꾸미기는 다음 차례. --%>
+<%-- 목업에는 이용요금·평일·주말·휴관일 칸이 있는데 채울 자료가 없다.
+     facilities.hours_manual 은 칸만 있고 1,378곳 모두 비어 있다.
+     요금은 programs 에 있지만 강좌마다 붙은 값이라 '이 시설의 요금' 이 아니다.
+     지금은 표에 실제로 있는 값만 보여준다. --%>
 
 <main class="auth-shell workout-shell">
 
@@ -63,14 +63,14 @@
         </c:if>
     </div>
 
-    <%-- 강좌 수도 적지 않는다.
-         원본이 2025년 9월 자료라 개수마저 지금과 어긋난다.
+    <%-- 상자로 두르지 않는다.
+         경고 상자는 회원이 무언가 해야 할 때 쓰는 것인데, 이건 그냥 단서다.
+         정보 칸 오른쪽 끝에 맞춰 두면 위의 값들에 붙은 말로 읽힌다.
+
+         강좌 수도 적지 않는다. 원본이 2025년 9월 자료라 개수마저 지금과 어긋난다.
          '여는 강좌 26개' 라고 적어 놓고 실제로는 다른 강좌가 열려 있으면
          숫자만 정확해 보여서 오히려 잘못 믿게 된다. --%>
-    <div class="notice-alert-box">
-        <p class="notice-title">요금·운영시간은 상시 변경될 수 있습니다</p>
-        <p class="notice-desc">방문 전 안내 페이지에서 꼭 확인해 주세요</p>
-    </div>
+    <p class="notice-inline">요금·운영시간은 방문 전 확인해 주세요</p>
 
     <%-- 시설 위치. 좌표는 모든 시설에 다 있어서 코스와 달리 빠지는 곳이 없다.
          키가 없거나 도메인 등록이 안 됐으면 kakao 가 아예 없으므로 자리표시만 남는다. --%>
@@ -93,8 +93,10 @@
     </p>
 
     <div class="detail-action-btns">
+        <%-- link/map 은 그 자리를 지도에 띄우기만 한다. 단추 이름이 '길찾기' 이므로
+             link/to 로 바꿔 도착지를 정해 주고, 출발지는 카카오맵이 현위치로 잡게 한다. --%>
         <button type="button" id="btnFacilityMap" class="btn-outline"
-                data-map-url="https://map.kakao.com/link/map/${facility.name},${facility.lat},${facility.lng}">
+                data-map-url="https://map.kakao.com/link/to/${facility.name},${facility.lat},${facility.lng}">
             길찾기
         </button>
         <%-- 즉시운동은 오늘 가서 쓰는 화면이라 대관·이용 창구로 보낸다.

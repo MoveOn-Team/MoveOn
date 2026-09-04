@@ -141,12 +141,13 @@
         접수 전 원본 사이트에서 반드시 확인해주세요
     </p>
 
-    <%-- 길찾기는 좌표로 연다.
-         추천 탭에서는 시설명이 지도 검색과 어긋나 주소로 찾았지만,
-         여기는 관리자가 넣을 때 좌표를 직접 확인해 두므로 좌표 링크가 정확하다. --%>
+    <%-- 길찾기는 좌표로 연다. 관리자가 넣을 때 좌표를 확인해 두므로 좌표 링크가 정확하다.
+         link/map 은 그 자리를 지도에 띄우기만 해서 단추 이름과 어긋난다.
+         link/to 는 도착지를 정해 주고 출발지는 카카오맵이 현위치로 잡는다.
+         행사명에 쉼표가 들어가면 좌표가 밀리므로 미리 뗀다. --%>
     <div class="detail-btn-group">
         <button type="button" id="btnLocation" class="btn-location"
-                data-map-url="https://map.kakao.com/link/map/${event.placeName},${event.lat},${event.lng}">
+                data-map-url="https://map.kakao.com/link/to/${fn:replace(event.placeName, ',', ' ')},${event.lat},${event.lng}">
             길찾기
         </button>
         <button type="button" id="btnExternal" class="btn-external"

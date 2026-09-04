@@ -89,6 +89,7 @@
     display: none;
 }
 
+
 .sub-tag-btn {
     flex: none;
     padding: 0.4375rem 0.875rem;
@@ -289,26 +290,14 @@
 }
 
 /* 공공데이터의 요금·운영시간은 갱신이 늦다.
-   틀릴 수 있다는 것을 화면에서 먼저 밝혀야 한다. */
-.notice-alert-box {
-    margin-bottom: 1.25rem;
-    padding: 0.75rem 1rem;
-    background: #fdf3e7;
-    border: 1px solid #f2ddc0;
-    border-radius: 0.875rem;
-}
-
-.notice-title {
-    margin: 0 0 0.125rem;
-    font-size: var(--fs-meta);
-    font-weight: 700;
-    color: #a76c1c;
-}
-
-.notice-desc {
-    margin: 0;
+   틀릴 수 있다는 것을 밝히되, 경고 상자로 두르지는 않는다.
+   상자는 회원이 무언가 해야 할 때 쓰는 것이고 이건 단서일 뿐이다.
+   정보 칸 오른쪽 끝에 맞춰 두면 위의 값들에 붙은 말로 읽힌다. */
+.notice-inline {
+    margin: -0.5rem 0 1.25rem;
     font-size: var(--fs-cap);
-    color: #c08a3d;
+    text-align: right;
+    color: #8b9099;
 }
 
 /* ---------- 코스 모양 ----------

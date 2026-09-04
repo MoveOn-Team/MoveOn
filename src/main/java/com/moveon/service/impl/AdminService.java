@@ -2,14 +2,17 @@ package com.moveon.service.impl;
 
 import com.moveon.dto.AdminDTO;
 import com.moveon.dto.EventDTO;
+import com.moveon.dto.FacilityDTO;
 import com.moveon.mapper.IAdminMapper;
 import com.moveon.service.IAdminService;
 import com.moveon.util.EncryptUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -158,6 +161,63 @@ public class AdminService implements IAdminService {
         }
 
         return adminMapper.updateStatus(eventId, status, adminId);
+    }
+
+    // =====================================================================
+    // 시설 손보기
+    // =====================================================================
+
+    @Override
+    public List<FacilityDTO> getFacilityList(String gu, String keyword, String filter) throws Exception {
+        return adminMapper.getAdminFacilityList(gu, keyword, filter);
+    }
+
+    @Override
+    public FacilityDTO getFacility(int facilityId) throws Exception {
+        return adminMapper.getAdminFacility(facilityId);
+    }
+
+    @Override
+    public List<Map<String, Object>> getFacilitySports(int facilityId) throws Exception {
+        return adminMapper.getAdminFacilitySports(facilityId);
+    }
+
+    @Override
+    public List<String> getGuList() throws Exception {
+        return adminMapper.getGuList();
+    }
+
+    /**
+     * 종목은 지우고 다시 넣는다.
+     *
+     * 체크를 푼 것과 새로 넣은 것을 따로 셈하지 않아도 되고,
+     * 예약주소만 바뀐 경우도 같은 길로 처리된다.
+     * 한 시설의 종목은 많아야 스물두 줄이라 지우고 넣는 값이 싸다.
+     *
+     * 한 덩어리로 묶는다. 주소는 저장됐는데 종목이 날아간 상태로 끝나면 안 된다.
+     */
+    @Transactional
+    @Override
+    public void modifyFacility(int facilityId, String homepageUrl, String rentalUrl,
+                               List<Integer> sportIds, Map<Integer, String> reserveUrls) throws Exception {
+
+        log.info("{}.modifyFacility Start! facilityId : {}", this.getClass().getName(), facilityId);
+
+        adminMapper.updateFacilityUrls(facilityId, homepageUrl, rentalUrl);
+        adminMapper.deleteFacilitySports(facilityId);
+
+        if (sportIds != null) {
+            for (Integer sid : sportIds) {
+                if (sid == null) {
+                    continue;
+                }
+                adminMapper.insertFacilitySport(facilityId, sid,
+                        reserveUrls == null ? null : reserveUrls.get(sid));
+            }
+        }
+
+        log.info("{}.modifyFacility End! 종목 {}개", this.getClass().getName(),
+                sportIds == null ? 0 : sportIds.size());
     }
 
 }

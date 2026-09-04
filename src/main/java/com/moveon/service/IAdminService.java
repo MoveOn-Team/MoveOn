@@ -2,8 +2,10 @@ package com.moveon.service;
 
 import com.moveon.dto.AdminDTO;
 import com.moveon.dto.EventDTO;
+import com.moveon.dto.FacilityDTO;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -32,5 +34,30 @@ public interface IAdminService {
 
     /** 승인 / 반려. 아는 상태값이 아니면 아무것도 하지 않는다 */
     int changeStatus(int eventId, String status, int adminId) throws Exception;
+
+    // =====================================================================
+    // 시설 손보기
+    //
+    // 공공데이터에는 시설의 신청 주소가 거의 안 들어 있어 사람이 채워야 한다.
+    // 종목도 마찬가지다. 배드민턴장인데 배드민턴이 안 붙어 있던 곳이 44곳이었다.
+    // =====================================================================
+
+    List<FacilityDTO> getFacilityList(String gu, String keyword, String filter) throws Exception;
+
+    FacilityDTO getFacility(int facilityId) throws Exception;
+
+    /** 종목 스물두 개와 이 시설의 연결 상태. 화면이 체크박스를 그리는 데 쓴다 */
+    List<Map<String, Object>> getFacilitySports(int facilityId) throws Exception;
+
+    List<String> getGuList() throws Exception;
+
+    /**
+     * 주소와 종목을 한 번에 저장한다.
+     *
+     * @param sportIds    체크된 종목번호
+     * @param reserveUrls 종목번호별 예약주소. 값이 없는 종목은 안 담겨 있어도 된다
+     */
+    void modifyFacility(int facilityId, String homepageUrl, String rentalUrl,
+                        List<Integer> sportIds, Map<Integer, String> reserveUrls) throws Exception;
 
 }
