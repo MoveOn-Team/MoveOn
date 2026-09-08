@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -37,12 +38,12 @@
         </p>
     </c:if>
 
+    <c:if test="${param.deleted eq '1'}">
+        <p class="form-hint">행사를 지웠습니다.</p>
+    </c:if>
 
-    <%-- ==================== 검색 ====================
-         관리자가 버튼을 눌렀을 때만 네이버에 물어본다.
-         결과는 DB 에 저장하지 않는다. 화면에 뿌리고 끝이다.
-         스케줄러로 긁어 쌓으면 작년 대회 후기와 광고가 수백 건 들어와
-         검수 화면 자체를 못 쓰게 된다. --%>
+
+    <%-- 검색 결과는 DB 에 저장하지 않는다. 긁어 쌓으면 작년 후기와 광고만 수백 건 남는다 --%>
     <section class="panel">
         <h2>대회 찾기</h2>
         <p class="panel-sub">
@@ -111,12 +112,13 @@
                                         </c:choose>
                                     </span>
                                 </td>
+                                <%-- 관리자 화면도 똑같이 이스케이프. 주소는 http 일 때만 건다 --%>
                                 <td class="cell-title">
                                     <a href="${pageContext.request.contextPath}/admin/eventForm?eventId=${e.eventId}">
-                                        ${e.title}
+                                        ${fn:escapeXml(e.title)}
                                     </a>
-                                    <c:if test="${not empty e.homepageUrl}">
-                                        <a class="ext" href="${e.homepageUrl}" target="_blank"
+                                    <c:if test="${fn:startsWith(e.homepageUrl, 'http')}">
+                                        <a class="ext" href="${fn:escapeXml(e.homepageUrl)}" target="_blank"
                                            rel="noopener" title="공식 사이트 열기">↗</a>
                                     </c:if>
                                 </td>
@@ -127,12 +129,14 @@
                                         <c:otherwise>${e.applyEnd}</c:otherwise>
                                     </c:choose>
                                 </td>
-                                <td>${e.placeName}</td>
+                                <td>${fn:escapeXml(e.placeName)}</td>
                                 <td>
                                     <%-- 좌표가 없으면 사용자 목록에서 통째로 빠진다.
-                                         거리 계산이 안 되기 때문이다. 그래서 눈에 띄게 표시한다. --%>
+                                         공개 조건이 lat·lng 를 둘 다 보므로 여기서도 둘 다 본다 --%>
                                     <c:choose>
-                                        <c:when test="${e.lat eq 0}"><span class="warn">없음</span></c:when>
+                                        <c:when test="${e.lat eq 0 or e.lng eq 0}">
+                                            <span class="warn">없음</span>
+                                        </c:when>
                                         <c:otherwise>있음</c:otherwise>
                                     </c:choose>
                                 </td>
@@ -153,6 +157,14 @@
                                             <button type="submit" class="btn-no">반려</button>
                                         </form>
                                     </c:if>
+
+                                    <%-- 반려가 아니라 아예 지우는 자리. admin.js 가 한 번 물어본다 --%>
+                                    <form method="post" class="form-delete"
+                                          action="${pageContext.request.contextPath}/admin/deleteEvent"
+                                          data-title="${fn:escapeXml(e.title)}">
+                                        <input type="hidden" name="eventId" value="${e.eventId}">
+                                        <button type="submit" class="btn-del">삭제</button>
+                                    </form>
                                 </td>
                             </tr>
                         </c:forEach>

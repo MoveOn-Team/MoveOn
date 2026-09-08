@@ -4,6 +4,7 @@ import com.moveon.dto.EventDTO;
 import com.moveon.dto.EventSearchDTO;
 import com.moveon.service.IAiService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -14,16 +15,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+
 
 /**
- * Gemini 로 글에서 행사 정보를 뽑는다.
- *
- * 모델은 flash-lite 를 쓴다. 무료 한도가 가장 넉넉해서다(하루 1,000건).
- * 우리는 관리자가 대회 하나 등록할 때 한 번 부르므로 이걸로 충분하다.
- *
- * 주소는 v1beta 의 generateContent 를 쓴다.
- *   문서 첫 쪽에 나오는 /v1beta/interactions 는 권한이 없어 403 이 났고,
- *   gemini-2.5-* 모델은 "신규 사용자에게 더 이상 제공되지 않는다" 며 3.x 로 안내한다.
+ * Gemini 로 글에서 행사 정보를 뽑음.
  */
 @Slf4j
 @Service
@@ -33,10 +30,10 @@ public class AiService implements IAiService {
             "https://generativelanguage.googleapis.com/v1beta/models/"
             + "gemini-3.5-flash-lite:generateContent";
 
-    /** 대회 홈페이지 한 곳에서 읽어 보낼 글 길이. 안내는 앞쪽에 몰려 있어 이 정도면 넉넉하다 */
+    /** 대회 홈페이지에서 읽어 보낼 글 길이. 안내는 앞쪽에 몰려 있다 */
     private static final int MAX_TEXT = 8000;
 
-    /** 검색 결과를 나눠 보낼 때 한 묶음 크기. 제목·요약을 다 합치면 8만 자가 넘는다 */
+    /** 검색 결과를 나눠 보낼 때 한 묶음 크기. 다 합치면 8만 자가 넘는다 */
     private static final int CHUNK = 14000;
 
     private static final String PROMPT = """
@@ -72,9 +69,15 @@ public class AiService implements IAiService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String apiKey;
 
-    public AiService(@Value("${gemini.api.key:}") String apiKey) {
+    /** 제목 묶음을 나눠 물을 때 쓴다. ExternalApiConfig 가 만들어 준다 */
+    private final ExecutorService searchExecutor;
+
+    public AiService(@Qualifier("aiRestClient") RestClient restClient,
+                     ExecutorService searchExecutor,
+                     @Value("${gemini.api.key:}") String apiKey) {
         this.apiKey = apiKey;
-        this.restClient = RestClient.create();
+        this.searchExecutor = searchExecutor;
+        this.restClient = restClient;
     }
 
     @Override
@@ -108,19 +111,13 @@ public class AiService implements IAiService {
             rDTO.setApplyStart(date(v.get("applyStart")));
             rDTO.setApplyEnd(date(v.get("applyEnd")));
 
-            // 지난 회차 날짜를 가져오는 일이 실제로 있다.
-            // 대회 사이트에 작년 기록이 함께 남아 있고, 프롬프트로 막아도 새어 나온다.
-            // 행사일이 오늘보다 앞이면 잘못 읽은 것으로 보고 날짜를 통째로 버린다.
-            // 사람이 직접 넣게 두는 편이, 작년 날짜가 그대로 저장되는 것보다 낫다.
-            // 접수 시작과 마감이 같은 날로 오면 마감을 비운다.
-            // '2026년 9월 1일 10:00 ~ 선착순마감' 처럼 마감 날짜가 없는 대회에서
-            // 시작일을 마감일 자리에도 넣어 버리는 일이 있다.
-            // 비워 두면 화면에 '사이트에서 확인' 으로 나오므로 그편이 안전하다.
+            // 선착순 대회에서 시작일을 마감일 자리에도 넣어 버리는 일이 있다. 비우는 편이 안전하다.
             if (rDTO.getApplyEnd() != null && rDTO.getApplyEnd().equals(rDTO.getApplyStart())) {
                 log.info("접수 시작·마감이 같아 마감을 비운다 : {}", rDTO.getApplyEnd());
                 rDTO.setApplyEnd(null);
             }
 
+            // 프롬프트로 막아도 작년 날짜가 새어 나온다. 통째로 버리고 사람이 넣게 둔다.
             if (rDTO.getStartDate() != null && rDTO.getStartDate().isBefore(LocalDate.now())) {
                 log.warn("지난 회차 날짜로 보여 버린다 : {}", rDTO.getStartDate());
                 rDTO.setStartDate(null);
@@ -139,8 +136,7 @@ public class AiService implements IAiService {
                     rDTO.getStartDate(), rDTO.getPlaceName(), rDTO.getFeeText());
 
         } catch (Exception e) {
-            // 한도를 넘겼거나 응답이 이상해도 관리자 화면은 열려야 한다.
-            // 규칙으로 뽑은 값이 이미 있고, 없으면 사람이 넣으면 된다.
+            // 실패해도 관리자 화면은 열려야 한다. 사람이 넣으면 된다.
             log.warn("Gemini 호출 실패 : {}", e.getMessage());
         }
 
@@ -184,13 +180,8 @@ public class AiService implements IAiService {
             return rList;
         }
 
-        // 제목과 요약을 다 이어 붙이면 8만 자가 넘는다.
-        // 한 번에 다 보낼 수 없어 나눠서 여러 번 묻는다.
-        //
-        // 처음에는 앞 8,000자만 잘라 보냈다.
-        // 그랬더니 검색어 여섯 개 중 첫 번째 것도 다 못 들어가서,
-        // 뒤에 있던 경기도 검색 결과는 아예 도달하지 못했다.
-        // 그래서 경기 대회가 한 건도 안 나왔다.
+        // 8만 자를 한 번에 못 보내서 나눠 묻는다.
+        // 앞부분만 잘라 보냈더니 뒤쪽 경기도 검색 결과가 아예 도달하지 못했다.
         List<String> chunks = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         for (String t : titles) {
@@ -204,11 +195,16 @@ public class AiService implements IAiService {
             chunks.add(sb.toString());
         }
 
-        // 묶음도 한꺼번에 묻는다. 하나씩 기다리면 묶음마다 2초씩 쌓인다.
-        // flash-lite 는 분당 15번까지라 서너 개를 같이 보내도 여유가 있다.
+        // 묶음도 한꺼번에 묻는다. flash-lite 는 분당 15번까지라 서너 개는 여유가 있다.
         int year = LocalDate.now().getYear();
-        List<String> answers = chunks.parallelStream()
-                .map(chunk -> ask(NAME_PROMPT.formatted(year, LocalDate.now(), chunk)))
+        List<CompletableFuture<String>> calls = chunks.stream()
+                .map(chunk -> CompletableFuture.supplyAsync(
+                        () -> ask(NAME_PROMPT.formatted(year, LocalDate.now(), chunk)),
+                        searchExecutor))
+                .toList();
+
+        List<String> answers = calls.stream()
+                .map(CompletableFuture::join)
                 .filter(java.util.Objects::nonNull)
                 .toList();
 
@@ -236,16 +232,14 @@ public class AiService implements IAiService {
 
         log.info("Gemini 이름 추출 : 제목 {}개 -> 대회 {}개", titles.size(), rList.size());
 
-        // 합치기는 여기서 하지 않는다.
-        // 지역으로 먼저 걸러 목록을 줄인 뒤에 합쳐야 결과가 안정적이다.
-        // 109개를 한 번에 합치라고 하면 부를 때마다 102개, 53개로 들쭉날쭉해진다.
+        // 합치기는 mergeNames 가 한다. 지역으로 먼저 걸러 목록을 줄여야 결과가 안정적이다.
         return rList;
     }
 
 
     private static final String MERGE_PROMPT = """
             아래는 여러 번에 나눠 뽑은 대회 이름 목록이다. 같은 대회가 여러 번 들어 있다.
-            중복을 합쳐 최종 목록을 JSON 배열로 답하라.
+            중복을 합치고, 각 대회가 이미 등록된 것인지 판단해 JSON 배열로 답하라.
 
             합치는 기준
             - 같은 대회면 하나로. 아래는 모두 같은 대회다.
@@ -259,7 +253,24 @@ public class AiService implements IAiService {
             - %d년이 아닌 대회. 오늘은 %s 다
             - 이미 열린 대회
 
-            설명 없이 [{"name":"이름","region":"지역"}] 형태의 배열만 답하라.
+            status 는 아래 셋 중 하나로 적어라.
+            - REGISTERED  [이미 등록된 대회] 목록에 있는 대회와 같은 대회다
+            - REJECTED    [반려한 대회] 목록에 있는 대회와 같은 대회다
+            - NEW         둘 다 아니다
+
+            같은 대회인지는 위의 '합치는 기준' 과 똑같이 판단하라.
+            이름이 글자까지 같아야 하는 것이 아니다.
+            주최사·연도·회차·거리 표기가 달라도 같은 대회면 REGISTERED 다.
+            애매하면 NEW 로 두어라. 등록된 것을 새 것으로 보는 쪽이,
+            새 대회를 등록됐다고 감춰 버리는 것보다 낫다.
+
+            [이미 등록된 대회]
+            %s
+
+            [반려한 대회]
+            %s
+
+            설명 없이 [{"name":"이름","region":"지역","status":"NEW"}] 형태의 배열만 답하라.
 
             목록:
             %s
@@ -267,10 +278,12 @@ public class AiService implements IAiService {
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<EventSearchDTO> mergeNames(List<EventSearchDTO> names) {
+    public List<EventSearchDTO> mergeNames(List<EventSearchDTO> names,
+                                           List<String> registered,
+                                           List<String> rejected) {
 
-        if (!isReady() || names.size() < 2) {
-            return names;
+        if (!isReady() || names.isEmpty()) {
+            return null;
         }
 
         try {
@@ -281,9 +294,10 @@ public class AiService implements IAiService {
             }
 
             String json = ask(MERGE_PROMPT.formatted(
-                    LocalDate.now().getYear(), LocalDate.now(), sb));
+                    LocalDate.now().getYear(), LocalDate.now(),
+                    bullets(registered), bullets(rejected), sb));
             if (json == null) {
-                return names;
+                return null;
             }
 
             List<EventSearchDTO> merged = new ArrayList<>();
@@ -299,20 +313,40 @@ public class AiService implements IAiService {
                 EventSearchDTO dto = new EventSearchDTO();
                 dto.setName(name);
                 dto.setRegion(str(v.get("region")));
+
+                String status = str(v.get("status"));
+                dto.setRegistered("REGISTERED".equals(status));
+                dto.setRejected("REJECTED".equals(status));
+
                 merged.add(dto);
             }
 
             if (merged.isEmpty()) {
-                return names;
+                return null;
             }
 
-            log.info("이름 합치기 : {}개 -> {}개", names.size(), merged.size());
+            log.info("이름 합치기 : {}개 -> {}개 (등록됨 {} / 반려 {})",
+                    names.size(), merged.size(),
+                    merged.stream().filter(EventSearchDTO::isRegistered).count(),
+                    merged.stream().filter(EventSearchDTO::isRejected).count());
             return merged;
 
         } catch (Exception e) {
             log.warn("이름 합치기 실패 : {}", e.getMessage());
-            return names;
+            return null;
         }
+    }
+
+    /** 목록을 프롬프트에 넣을 줄 모양으로. 비어 있으면 '(없음)' */
+    private String bullets(List<String> items) {
+        if (items == null || items.isEmpty()) {
+            return "(없음)";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String s : items) {
+            sb.append("- ").append(s).append("\n");
+        }
+        return sb.toString();
     }
 
     private static final String SITE_PROMPT = """
@@ -372,8 +406,7 @@ public class AiService implements IAiService {
             if (url == null || !url.startsWith("http") || "NONE".equals(kind)) {
                 return null;
             }
-            // 종류를 앞에 붙여 돌려준다. 관리자에게 무엇인지 알려 줘야 하기 때문이다.
-            return (kind == null ? "INFO" : kind) + "|" + url;
+            return (kind == null ? "INFO" : kind) + "|" + url;   // 화면이 종류를 알려 줘야 한다
 
         } catch (Exception e) {
             log.warn("공식 사이트 고르기 실패 : {}", e.getMessage());
@@ -381,12 +414,7 @@ public class AiService implements IAiService {
         }
     }
 
-    /**
-     * Gemini 에 물어 본문 글자만 돌려준다. 실패하면 null.
-     *
-     * 503(과부하)이 제법 자주 온다. 무료 등급이라 그렇다.
-     * 한 번 실패했다고 규칙으로 돌아가면 결과가 크게 나빠지므로 두 번까지 다시 부른다.
-     */
+    /** Gemini 에 물어 본문 글자만 돌려준다. 무료 등급이라 503 이 잦아 두 번까지 다시 부른다 */
     private String ask(String prompt) {
         for (int i = 0; i < 3; i++) {
             String res = askOnce(prompt);
@@ -395,8 +423,7 @@ public class AiService implements IAiService {
             }
             if (i < 2) {
                 try {
-                    // 잠깐 쉬었다 다시. 과부하는 대개 곧 풀린다.
-                    Thread.sleep(1200L * (i + 1));
+                    Thread.sleep(1200L * (i + 1));   // 과부하는 대개 곧 풀린다
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     return null;
@@ -411,11 +438,8 @@ public class AiService implements IAiService {
         try {
             Map<String, Object> body = Map.of(
                     "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))),
-                    // temperature 0 : 같은 물음에 같은 답을 하게 한다.
-                    // 기본값이면 부를 때마다 뽑히는 대회 수가 달라진다.
-                    // temperature 0 : 같은 물음에 같은 답을 하게 한다.
-                    // 기본값이면 부를 때마다 뽑히는 대회 수가 달라진다.
-                    // maxOutputTokens : 목록이 길면 응답이 중간에 잘려 결과가 들쭉날쭉해진다.
+                    // temperature 0 이라야 같은 물음에 같은 답을 한다.
+                    // maxOutputTokens 가 작으면 목록이 길 때 응답이 중간에 잘린다.
                     "generationConfig", Map.of("responseMimeType", "application/json",
                                                "temperature", 0.0,
                                                "maxOutputTokens", 8192));

@@ -3,7 +3,7 @@
 
 <mapper namespace="com.moveon.mapper.IAdminMapper">
 
-    <!-- 로그인. 비밀번호 비교는 서비스에서 salt 를 붙여 해시한 뒤 한다. -->
+    <!-- 로그인. 비밀번호 비교는 서비스에서 salt 를 붙여 해시한 뒤 함. -->
     <select id="getAdmin" resultType="AdminDTO">
         SELECT admin_id, login_id, password, salt, name, created_at
           FROM admins
@@ -11,18 +11,13 @@
          LIMIT 1
     </select>
 
-    <!--
-        관리자용 목록.
-        사용자 화면과 달리 status 를 가리지 않는다. 검수해야 할 것을 봐야 하기 때문이다.
-
-        정렬은 PENDING 을 맨 위로 올린다. 관리자가 할 일이 그것이기 때문이다.
-        CASE 가 만든 숫자로 줄을 세운다.
-    -->
+    <!-- 사용자 화면과 달리 status 를 가리지 않는다. 검수할 것을 봐야 하기 때문이다.
+         PENDING 을 맨 위로 올린다. 관리자가 할 일이 그것이라서. -->
     <select id="getAdminEventList" resultType="EventDTO">
-        SELECT event_id, title, event_type, sido, sigungu, place_name,
+        SELECT event_id, title, event_type, sigungu, place_name,
                lat, lng, start_date, end_date, apply_start, apply_end,
                target, distances, fee_text, contact, homepage_url,
-               status, source, source_url, approved_by, approved_at, collected_at
+               status, source, source_url, collected_at
           FROM events
         <if test="status != null and status != ''">
          WHERE status = #{status}
@@ -34,44 +29,53 @@
     </select>
 
     <select id="getAdminEvent" resultType="EventDTO">
-        SELECT event_id, title, event_type, sido, sigungu, place_name,
+        SELECT event_id, title, event_type, sigungu, place_name,
                lat, lng, start_date, end_date, apply_start, apply_end,
                target, distances, fee_text, contact, homepage_url,
-               status, source, source_url, approved_by, approved_at, collected_at
+               status, source, source_url, collected_at
           FROM events
          WHERE event_id = #{eventId}
     </select>
 
+    <!-- 검색 결과에 '이미 등록됨' / '반려함' 을 붙이는 데 쓴다.
+         지난 대회는 뺀다. 겹칠 일이 없는데 Gemini 프롬프트만 길어진다. -->
+    <sql id="notPast">
+        AND (start_date IS NULL OR start_date &gt;= CURDATE())
+    </sql>
+
     <select id="getEventTitles" resultType="String">
         SELECT title FROM events
+         WHERE status &lt;&gt; 'REJECTED'
+        <include refid="notPast"/>
+    </select>
+
+    <select id="getRejectedTitles" resultType="String">
+        SELECT title FROM events
+         WHERE status = 'REJECTED'
+        <include refid="notPast"/>
     </select>
 
     <insert id="insertEvent" parameterType="EventDTO"
             useGeneratedKeys="true" keyProperty="eventId">
         INSERT INTO events
-            (title, event_type, sido, sigungu, place_name, lat, lng,
+            (title, event_type, sigungu, place_name, lat, lng,
              start_date, end_date, apply_start, apply_end,
              target, distances, fee_text, contact, homepage_url,
              status, source, source_url, collected_at)
         VALUES
-            (#{title}, #{eventType}, #{sido}, #{sigungu}, #{placeName}, #{lat}, #{lng},
+            (#{title}, #{eventType}, #{sigungu}, #{placeName}, #{lat}, #{lng},
              #{startDate}, #{endDate}, #{applyStart}, #{applyEnd},
              #{target}, #{distances}, #{feeText}, #{contact}, #{homepageUrl},
              #{status}, #{source}, #{sourceUrl}, NOW())
     </insert>
 
-    <!--
-        수정.
-        &lt;set&gt; 안의 &lt;if&gt; 로 값이 온 칸만 바꾼다.
-        폼에서 비워 둔 칸 때문에 이미 채워 둔 값이 지워지는 일을 막는다.
-        회원 온보딩(UserMapper.updateOnboarding)에서 같은 이유로 쓰고 있다.
-    -->
+    <!-- &lt;set&gt; 안의 &lt;if&gt; 로 값이 온 칸만 바꾼다.
+         폼에서 비워 둔 칸 때문에 이미 채워 둔 값이 지워지는 것을 막는다. -->
     <update id="updateEvent" parameterType="EventDTO">
         UPDATE events
         <set>
             <if test="title      != null and title      != ''">title       = #{title},</if>
             <if test="eventType  != null and eventType  != ''">event_type  = #{eventType},</if>
-            <if test="sido       != null and sido       != ''">sido        = #{sido},</if>
             <if test="sigungu    != null and sigungu    != ''">sigungu     = #{sigungu},</if>
             <if test="placeName  != null and placeName  != ''">place_name  = #{placeName},</if>
             <if test="lat != 0">lat = #{lat},</if>
@@ -90,11 +94,8 @@
         WHERE event_id = #{eventId}
     </update>
 
-    <!--
-        승인 / 반려.
-        PUBLISHED 로 바꿀 때만 누가 언제 했는지 남긴다.
-        반려는 되돌릴 수 있어야 해서 기록을 지우지 않고 그대로 둔다.
-    -->
+    <!-- PUBLISHED 로 바꿀 때만 누가 언제 했는지 남긴다.
+         ELSE 로 자기 자신을 다시 넣어 반려할 때는 기록을 안 지운다. -->
     <update id="updateStatus">
         UPDATE events
            SET status = #{status},
@@ -102,6 +103,12 @@
                approved_at = CASE WHEN #{status} = 'PUBLISHED' THEN NOW() ELSE approved_at END
          WHERE event_id = #{eventId}
     </update>
+
+    <!-- 반려는 '대회는 맞는데 지금 것이 아니다', 삭제는 '애초에 대회가 아니었다'.
+         되돌릴 수 없으므로 POST 로만 받고 화면에서 한 번 더 물어본다. -->
+    <delete id="deleteEvent">
+        DELETE FROM events WHERE event_id = #{eventId}
+    </delete>
 
     <!-- =====================================================================
          시설 손보기

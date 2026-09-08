@@ -33,8 +33,19 @@ public interface IAdminMapper {
     /** 수정 화면에 띄울 행사 한 건. 상태와 상관없이 가져온다 */
     EventDTO getAdminEvent(@Param("eventId") int eventId) throws Exception;
 
-    /** 이미 등록된 대회 이름 목록. 검색 결과에 '등록됨' 표시를 붙이는 데 쓴다 */
+    /**
+     * 등록된 대회 이름 목록. 검색 결과에 '등록됨' 표시를 붙이는 데 쓴다.
+     * 반려한 것은 빠져 있다.
+     */
     List<String> getEventTitles() throws Exception;
+
+    /**
+     * 반려한 대회 이름 목록.
+     *
+     * 위 목록과 나눠 받는다. 한 덩어리로 받으면 반려한 대회도 '이미 등록됨' 으로
+     * 회색 처리되어, 잘못 반려한 것을 검색으로 다시 찾을 수 없다.
+     */
+    List<String> getRejectedTitles() throws Exception;
 
     int insertEvent(EventDTO pDTO) throws Exception;
 
@@ -49,6 +60,14 @@ public interface IAdminMapper {
     int updateStatus(@Param("eventId") int eventId,
                      @Param("status") String status,
                      @Param("adminId") int adminId) throws Exception;
+
+    /**
+     * 아예 지운다. 되돌릴 수 없다.
+     *
+     * 반려는 '대회는 맞는데 지금 것이 아니다' 이고, 이건 '대회가 아니었다' 이다.
+     * 검색이 잘못 물어 온 글 제목을 남겨 두면 이름 대조에 걸려 멀쩡한 대회를 가린다.
+     */
+    int deleteEvent(@Param("eventId") int eventId) throws Exception;
 
     // =====================================================================
     // 시설 손보기

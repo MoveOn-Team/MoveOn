@@ -23,8 +23,6 @@
         <input type="hidden" name="eventId" value="${event.eventId}">
         <input type="hidden" name="source" value="${empty event.source ? 'MANUAL' : event.source}">
 
-        <%-- 공식 사이트가 이미 잡혀 있으면 바로 열 수 있게 해 둔다.
-             접수기간·참가비는 대개 '대회요강' 쪽에 있어서 눈으로 보고 옮겨 적게 된다. --%>
         <%-- 이미 열린 대회를 넣으려 했을 때 --%>
         <c:if test="${param.past eq '1'}">
             <p class="form-warn">
@@ -118,9 +116,7 @@
                 <input type="date" name="applyEnd" value="${event.applyEnd}">
             </label>
 
-            <%-- ---------- 장소와 좌표 ----------
-                 좌표가 비면 거리 계산이 안 되어 사용자 목록에서 통째로 빠진다.
-                 손으로 적기 어려우니 장소 이름으로 카카오에 물어 채운다. --%>
+            <%-- 좌표가 비면 사용자 목록에서 통째로 빠진다. 카카오에 물어 채운다 --%>
             <label class="full">
                 <span>장소 *</span>
                 <span class="with-btn">
@@ -132,18 +128,11 @@
             </label>
 
             <label>
-                <span>시·도</span>
-                <input type="text" id="sido" name="sido" value="${event.sido}" readonly>
-            </label>
-
-            <label>
                 <span>자치구</span>
                 <input type="text" id="sigungu" name="sigungu" value="${event.sigungu}" readonly>
             </label>
 
-            <%-- 좌표가 0 이면 빈 칸으로 둔다.
-                 "0.0" 을 그대로 넣어 두면 값이 있는 셈이라 required 가 통과시켜 버린다.
-                 실제로 좌표 0 인 행사가 저장돼 사용자 목록에서 통째로 빠졌다. --%>
+            <%-- 좌표 0 이면 빈 칸으로. "0.0" 을 두면 값이 있는 셈이라 required 가 통과시킨다 --%>
             <label>
                 <span>위도</span>
                 <input type="text" id="lat" name="lat" readonly

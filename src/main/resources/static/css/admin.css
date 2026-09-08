@@ -98,7 +98,8 @@ a { color: var(--ad-brand); }
 .btn-primary,
 .btn-line,
 .btn-ok,
-.btn-no {
+.btn-no,
+.btn-del {
     display: inline-block;
     padding: 8px 16px;
     border-radius: 8px;
@@ -113,6 +114,14 @@ a { color: var(--ad-brand); }
 .btn-line    { background: #fff; color: var(--ad-ink); border-color: var(--ad-line); }
 .btn-ok      { background: var(--ad-ok); color: #fff; border: none; }
 .btn-no      { background: #fff; color: var(--ad-warn); border-color: var(--ad-warn); }
+
+/* 가끔 쓰는 단추라 공개·반려보다 흐리게 둔다 */
+.btn-del {
+    background: #fff;
+    color: var(--ad-muted);
+    border-color: var(--ad-line);
+    font-weight: 500;
+}
 
 .btn-primary:disabled { background: #a8b8d4; cursor: default; }
 
@@ -178,6 +187,13 @@ a { color: var(--ad-brand); }
 .found-list .nm { flex: 1; font-size: 13px; }
 
 .found-list .done { font-size: 12px; color: var(--ad-muted); }
+
+/* 반려한 대회. 등록됨과 달리 옆에 '다시 등록' 단추가 함께 있다 */
+.found-list .rejected {
+    font-size: 12px;
+    color: var(--ad-warn);
+    margin-right: 8px;
+}
 
 /* ---------- 상태 거르기 ---------- */
 .filter-row {
