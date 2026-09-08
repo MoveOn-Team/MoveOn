@@ -35,3 +35,5 @@ build/
 ### sensitive info ###
 credentials/*
 !credentials/*.example
+### tooling ###
+.claude/

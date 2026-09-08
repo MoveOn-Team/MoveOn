@@ -328,3 +328,13 @@
     background: #eceff3;
     color: #9a9ea5;
 }
+
+/* 선착순 배지.
+   'D-4' 와 규칙이 다른 대회라 색을 나눈다. 마감일이 없어 목록에서는 아래에 깔리는데,
+   주황색을 그대로 쓰면 위쪽 'D-4' 들과 구별이 안 된다.
+   더 급해 보이게 하려는 게 아니라 '종류가 다르다' 를 알리는 것이라 파랑을 쓴다. */
+.tag-status.is-first,
+.detail-badge.is-first {
+    background: #e7f1f6;
+    color: #2b6d85;
+}

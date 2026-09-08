@@ -24,17 +24,7 @@ import java.util.Map;
 
 /**
  * 관리자 화면
- *
- *   로그인      GET/POST  /admin/login
- *   행사 목록   GET       /admin/eventAdmin
- *   등록·수정   GET/POST  /admin/eventForm
- *   승인·반려   POST      /admin/changeStatus
- *   검색(ajax)  GET       /admin/searchEvents , /admin/findSite , /admin/findPlace
- *
- * 회원 화면과 세션 키를 나눈다.
- *   회원   SS_USER_NO
- *   관리자 SS_ADMIN_NO
- * 회원이 로그인했다고 관리자 화면이 열리면 안 되기 때문이다.
+ * 세션 키를 회원(SS_USER_NO)과 나눈다. 회원이 로그인했다고 관리자 화면이 열리면 안 된다.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -98,7 +88,7 @@ public class AdminController {
             return "redirect:/admin/login";
         }
 
-        List<EventDTO> events = adminService.getEventList(status);
+        List<EventDTO> events = adminService.getAdminEventList(status);
 
         model.addAttribute("events", events);
         model.addAttribute("status", status == null ? "" : status);
@@ -125,23 +115,19 @@ public class AdminController {
             return "redirect:/admin/login";
         }
 
-        EventDTO event = (eventId == null) ? new EventDTO() : adminService.getEvent(eventId);
+        EventDTO event = (eventId == null) ? new EventDTO() : adminService.getAdminEvent(eventId);
         if (event == null) {
             return "redirect:/admin/eventAdmin";
         }
 
-        // 검색에서 고르고 들어온 경우.
-        // 제목을 채우고, 공식 사이트를 찾고, 그 사이트를 읽어 값까지 미리 채워 둔다.
+        // 검색에서 고르고 들어온 경우. 사이트를 찾아 읽고 값까지 미리 채워 둔다
         boolean autoFilled = false;
         if (eventId == null && name != null && !name.isBlank()) {
             event.setTitle(name);
             event.setSource("NAVER_SEARCH");
 
-            // "종류|주소" 로 온다.
-            //   OFFICIAL  대회 전용 홈페이지
-            //   APPLY     전용 사이트는 없고 접수만 받는 곳 (브랜드 행사에 흔하다)
-            //   INFO      위 둘이 없을 때 대회 정보를 정리해 둔 곳
-            // 무엇인지 화면에 알려 줘야 관리자가 그대로 둘지 고칠지 판단할 수 있다.
+            // "종류|주소" 로 온다. OFFICIAL(전용 홈페이지) / APPLY(접수처) / INFO(정보 페이지).
+            // 무엇인지 화면에 알려 줘야 관리자가 그대로 둘지 판단할 수 있다.
             String found = eventSearchService.findSite(name);
             String site = null;
             if (found != null) {
@@ -156,11 +142,8 @@ public class AdminController {
                 event.setSourceUrl(site);
             }
 
-            // 공식 사이트를 못 찾았어도 값 채우기는 해 본다.
-            // 검색 요약에 날짜·장소가 들어 있는 대회가 있어서다.
+            // 사이트를 못 찾았어도 해 본다. 검색 요약만으로 채워지는 대회가 있다
             {
-                // 기계가 읽은 값이라 틀릴 수 있다.
-                // 그래서 뽑아낸 칸은 화면에서 따로 표시해 관리자가 반드시 보게 한다.
                 EventDTO read = eventSearchService.readSite(site, name);
                 if (read.getStartDate() != null) {
                     event.setStartDate(read.getStartDate());
@@ -179,24 +162,17 @@ public class AdminController {
                     event.setApplyStart(read.getApplyStart());
                     autoFilled = true;
                 }
-                // 장소·종목·대상·문의는 규칙으로 못 뽑아 Gemini 가 채운 것이다
                 if (read.getPlaceName() != null) {
                     event.setPlaceName(read.getPlaceName());
                     autoFilled = true;
 
-                    // 장소를 알았으면 좌표까지 바로 이어서 채운다.
-                    //
-                    // 버튼을 누르게 두었더니 아무도 안 눌러서 좌표 없는 행사만 쌓였다.
-                    // 좌표가 없으면 공개가 안 되고, 공개해도 사용자 목록에서 빠진다.
-                    // 관리자가 할 일은 '맞는지 보는 것' 이지 '버튼을 누르는 것' 이 아니다.
+                    // 좌표까지 바로 채운다. 버튼을 누르게 뒀더니 좌표 없는 행사만 쌓였다
                     EventDTO place = eventSearchService.findPlace(read.getPlaceName());
                     if (place != null) {
                         event.setLat(place.getLat());
                         event.setLng(place.getLng());
-                        event.setSido(place.getSido());
                         event.setSigungu(place.getSigungu());
-                        // 카카오가 아는 정식 이름으로 바꿔 둔다. 길찾기 링크가 정확해진다.
-                        event.setPlaceName(place.getPlaceName());
+                        event.setPlaceName(place.getPlaceName());   // 카카오의 정식 이름
                     }
                 }
                 if (read.getDistances() != null) {
@@ -233,8 +209,7 @@ public class AdminController {
         log.info("{}.saveEvent Start! eventId : {}", this.getClass().getName(), pDTO.getEventId());
 
         if (pDTO.getEventId() == 0) {
-            // 이미 열린 대회는 서비스가 -1 을 돌려주며 넣지 않는다.
-            // 그대로 목록으로 보내면 왜 안 들어갔는지 알 수 없어 다시 넣으려 하게 된다.
+            // -1 이면 이미 열린 대회. 그냥 목록으로 보내면 왜 안 들어갔는지 알 수 없다
             if (adminService.addEvent(pDTO) < 0) {
                 log.info("{}.saveEvent End! 이미 열린 대회", this.getClass().getName());
                 return "redirect:/admin/eventForm?past=1";
@@ -268,6 +243,27 @@ public class AdminController {
         }
 
         return "redirect:/admin/eventAdmin";
+    }
+
+    // =====================================================================
+    // 삭제 (반려는 '대회는 맞는데 지금 것이 아니다', 삭제는 '애초에 대회가 아니었다')
+    // 되돌릴 수 없어 POST 로만 받는다. GET 이면 주소만 알아도 지워진다.
+    // =====================================================================
+
+    @PostMapping(value = "/deleteEvent")
+    public String deleteEvent(@RequestParam("eventId") int eventId,
+                              HttpSession session) throws Exception {
+
+        if (getAdminId(session) == null) {
+            return "redirect:/admin/login";
+        }
+
+        log.info("{}.deleteEvent Start! eventId : {}", this.getClass().getName(), eventId);
+
+        int res = adminService.removeEvent(eventId);
+
+        // 지워진 게 없으면 이미 남이 지운 것이다
+        return "redirect:/admin/eventAdmin" + (res > 0 ? "?deleted=1" : "");
     }
 
     // =====================================================================
