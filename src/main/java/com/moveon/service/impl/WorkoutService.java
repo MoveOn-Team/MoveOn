@@ -13,7 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -136,7 +139,7 @@ public class WorkoutService implements IWorkoutService {
         plan.setIntensityLabel(intensityLabel(useIntensity));
         plan.setTargetMin(useTargetMin);
 
-        List<HomeExerciseDTO> picked = pickRoutine(uniqueByPhaseAndExercise(raw));
+        List<HomeExerciseDTO> picked = pickRoutine(uniqueByPhaseAndExercise(raw), useTargetMin);
         tuneSets(picked, useIntensity, useTargetMin);
 
         int totalMin = 0;
@@ -187,26 +190,36 @@ public class WorkoutService implements IWorkoutService {
         return List.copyOf(map.values());
     }
 
-    private List<HomeExerciseDTO> pickRoutine(List<HomeExerciseDTO> source) {
+    private List<HomeExerciseDTO> pickRoutine(List<HomeExerciseDTO> source, int targetMin) {
+        // 고른 시간만큼 동작 수가 달라진다. 세트만 늘리면 10분과 30분이 같은 운동이 된다.
+        int main = targetMin >= 30 ? 5 : targetMin <= 15 ? 2 : 3;
+        int warm = targetMin >= 30 ? 3 : 2;
+        int cool = targetMin >= 30 ? 2 : 1;
+
         List<HomeExerciseDTO> picked = new ArrayList<>();
-        addPhase(picked, source, "WARMUP", 2);
-        addPhase(picked, source, "MAIN", 3);
-        addPhase(picked, source, "COOLDOWN", 1);
+        addPhase(picked, source, "WARMUP", warm);
+        addPhase(picked, source, "MAIN", main);
+        addPhase(picked, source, "COOLDOWN", cool);
         return picked;
     }
 
     private void addPhase(List<HomeExerciseDTO> picked, List<HomeExerciseDTO> source,
                           String phase, int limit) {
-        int count = 0;
+        // 이미 뽑힌 동작은 뺀다. 한 동작이 준비와 본운동에 두 번 나오면 안 된다.
+        Set<Integer> taken = new HashSet<>();
+        for (HomeExerciseDTO item : picked) {
+            taken.add(item.getExerciseId());
+        }
+
+        List<HomeExerciseDTO> pool = new ArrayList<>();
         for (HomeExerciseDTO item : source) {
-            if (phase.equals(item.getPhase())) {
-                picked.add(item);
-                count++;
-                if (count == limit) {
-                    return;
-                }
+            if (phase.equals(item.getPhase()) && !taken.contains(item.getExerciseId())) {
+                pool.add(item);
             }
         }
+        // 섞는다. 앞에서부터 집으면 같은 사람이 매일 같은 운동을 받는다.
+        Collections.shuffle(pool);
+        picked.addAll(pool.subList(0, Math.min(limit, pool.size())));
     }
 
     private void tuneSets(List<HomeExerciseDTO> items, String intensity, int targetMin) {
