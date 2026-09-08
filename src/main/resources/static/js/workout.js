@@ -174,7 +174,6 @@
         var exerciseDesc = document.getElementById("exerciseDesc");
         var setCheckGroup = document.getElementById("setCheckGroup");
         var setValue = document.getElementById("setValue");
-        var restLabel = document.getElementById("restLabel");
         var nextExerciseName = document.getElementById("nextExerciseName");
 
         progressBarGroup.innerHTML = exercises.map(function () {
@@ -218,7 +217,6 @@
             exerciseTitle.innerText = exercise.name;
             exerciseDesc.innerText = exercise.instruction || "천천히 정확한 자세로 진행하세요.";
             setValue.innerText = exercise.reps ? exercise.reps + "회" : exercise.durationSec + "초";
-            restLabel.innerText = "휴식 " + exercise.restSec + "초 자동";
             nextExerciseName.innerText = exercises[exerciseIndex + 1]
                 ? exercises[exerciseIndex + 1].name + " · " + volume(exercises[exerciseIndex + 1])
                 : "마지막 동작";

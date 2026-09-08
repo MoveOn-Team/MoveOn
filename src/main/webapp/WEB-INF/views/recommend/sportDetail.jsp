@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MOVE:ON ${sport.name}</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/recommend.css?v=1.1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/recommend.css?v=1.2">
 </head>
 <body class="auth-page">
 <main class="auth-shell detail-shell">
@@ -134,7 +134,7 @@
             <ul class="facility-list">
                 <c:forEach var="f" items="${learnFacilities}">
                     <li>
-                        <a class="facility-item ${f.facilityId == pick.facilityId ? 'is-pick' : ''}"
+                        <a class="facility-item ${f.facilityId == pick.facilityId and empty pickPlace ? 'is-pick' : ''}"
                            href="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}?facilityId=${f.facilityId}&lat=${lat}&lng=${lng}">
                             <span class="facility-body">
                                 <span class="facility-name">${f.name}</span>
@@ -189,7 +189,7 @@
                      노인복지관·사회복지관이 여기 해당한다. --%>
                 <c:when test="${visitOnly}">
                     <p class="data-notice">
-                        여기는 직접 찾아가 접수하는 곳이에요.
+                        여기는 직접 찾아가 접수하는 곳이에요.</br>
                         <c:choose>
                             <c:when test="${not empty linkUrl}">아래에서 어떤 프로그램이 있는지 먼저 보세요.</c:when>
                             <%-- 온라인 창구가 없으면 남는 답은 전화뿐이다.
@@ -220,29 +220,8 @@
                 </c:when>
             </c:choose>
 
-            <%-- ---------- 아래 버튼 ----------
-                 지도에서 보기는 고른 시설 주소로 카카오맵을 연다.
-                 예약·안내 링크는 컨트롤러가 네 순위로 정해 linkUrl 에 담아 준다. --%>
-            <c:if test="${not empty pick}">
-                <div class="detail-actions">
-                    <%-- 길찾기. 도착지를 좌표로 넘긴다.
-                         link/to 는 그 자리를 도착지로 놓고 길찾기를 열어 주고,
-                         출발지는 카카오맵이 회원의 현위치로 잡는다.
-
-                         이름이 아니라 좌표를 넘기는 것이 중요하다.
-                         시설명은 지자체 관리대장 기준이라 지도 검색과 어긋난다.
-                         예) '반월공원' 으로 검색하면 26km 떨어진 안산 반월공원이 나온다.
-                         여기서 이름은 도착지에 붙는 이름표일 뿐이라 엉뚱한 곳을 찍지 않는다. --%>
-                    <a class="outline-button"
-                       href="https://map.kakao.com/link/to/${pick.name},${pick.lat},${pick.lng}"
-                       target="_blank" rel="noopener">길찾기</a>
-
-                    <c:if test="${not empty linkUrl}">
-                        <a class="primary-button" href="${linkUrl}" target="_blank" rel="noopener">${linkLabel}</a>
-                    </c:if>
-                </div>
             </c:if>
-            </c:if>
+
 
             <%-- ---------- 대관 ----------
                  우리 시설 목록과 따로 세운다. 붙이려 하지 않는다.
@@ -260,21 +239,23 @@
                 <ul class="facility-list">
                     <c:forEach var="r" items="${rentals}">
                         <li>
-                            <%-- 우리 시설(facilityId > 0)은 상세 화면으로 들여보내 거기서 대관 단추를 누르고,
-                                 서울시 예약 자료는 바로 바깥 예약 화면으로 내보낸다. --%>
+                            <%-- 두 줄 다 우리 화면에 머문다.
+                                 전에는 서울시 예약 장소를 바로 바깥으로 내보냈는데,
+                                 그러면 길찾기를 쓸 기회가 없이 예약 페이지로 튕겨 나갔다.
+                                 고르는 것과 나가는 것을 나눠, 나가는 일은 아래 단추가 맡는다. --%>
                             <c:choose>
                                 <c:when test="${r.facilityId > 0}">
                                     <c:set var="href"
                                            value="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}?facilityId=${r.facilityId}&lat=${lat}&lng=${lng}"/>
-                                    <c:set var="tgt" value=""/>
+                                    <c:set var="on" value="${r.facilityId == pick.facilityId and empty pickPlace}"/>
                                 </c:when>
                                 <c:otherwise>
-                                    <c:set var="href" value="${r.svcUrl}"/>
-                                    <c:set var="tgt" value="_blank"/>
+                                    <c:set var="href"
+                                           value="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}?place=${r.placeName}&lat=${lat}&lng=${lng}"/>
+                                    <c:set var="on" value="${r.placeName eq pickPlace}"/>
                                 </c:otherwise>
                             </c:choose>
-                            <a class="facility-item ${r.facilityId == pick.facilityId ? 'is-pick' : ''}"
-                               href="${href}" target="${tgt}" rel="noopener">
+                            <a class="facility-item ${on ? 'is-pick' : ''}" href="${href}">
                                 <span class="facility-body">
                                     <span class="facility-name">${r.placeName}</span>
                                     <span class="facility-addr">
@@ -296,7 +277,40 @@
                         </li>
                     </c:forEach>
                 </ul>
-                <p class="data-notice">서울시 공공서비스예약과 시설 예약 화면으로 이어져요.</p>
+            </c:if>
+
+            <%-- ---------- 고른 시설의 단추 ----------
+                 목록을 다 보여준 뒤 맨 아래에 한 번만 둔다.
+
+                 전에는 '가까운 시설' 블록 안에 있었다. 그러면 자리가 오락가락한다.
+                 테니스는 그 목록이 있어 단추가 목록 아래에 붙지만,
+                 축구는 강좌 시설이 없어 목록이 통째로 빠지면서
+                 단추가 제목 바로 밑으로 올라와 무엇에 대한 단추인지 알 수 없었다.
+
+                 고른 시설이 위 목록에 있을 수도, 아래 대관 목록에 있을 수도 있어
+                 어느 한쪽에 붙일 수 없다. 그래서 밖으로 빼고 이름을 함께 적는다. --%>
+            <c:if test="${not empty pickName}">
+                <%-- 이름은 적지 않는다.
+                     고른 줄에 이미 파란 테두리가 들어가 있어 두 번 말하는 셈이고,
+                     '난지물재생센터>난지물재생센터 테니스장' 처럼 긴 이름은
+                     단추 위에서 두 줄로 접혀 더 어수선해진다. --%>
+                <div class="detail-actions">
+                    <%-- 길찾기. 도착지를 좌표로 넘긴다.
+                         link/to 는 그 자리를 도착지로 놓고 길찾기를 열어 주고,
+                         출발지는 카카오맵이 회원의 현위치로 잡는다.
+
+                         이름이 아니라 좌표를 넘기는 것이 중요하다.
+                         시설명은 지자체 관리대장 기준이라 지도 검색과 어긋난다.
+                         예) '반월공원' 으로 검색하면 26km 떨어진 안산 반월공원이 나온다.
+                         여기서 이름은 도착지에 붙는 이름표일 뿐이라 엉뚱한 곳을 찍지 않는다. --%>
+                    <a class="outline-button"
+                       href="https://map.kakao.com/link/to/${pickName},${pickLat},${pickLng}"
+                       target="_blank" rel="noopener">길찾기</a>
+
+                    <c:if test="${not empty linkUrl}">
+                        <a class="primary-button" href="${linkUrl}" target="_blank" rel="noopener">${linkLabel}</a>
+                    </c:if>
+                </div>
             </c:if>
         </c:otherwise>
     </c:choose>

@@ -19,13 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * 利됱떆 ?대룞?섍린.
- *
- * ?섎뒗 ?쇱씠 嫄곗쓽 ?녿떎. 嫄곕Ⅴ怨?以??몄슦??寃껋? SQL ???쒕떎.
- * ?ш린?쒕뒗 ?붾㈃?먯꽌 ?섏뼱??媛믪씠 ?꾨뒗 媛믪씤吏 ?뺤씤?섍퀬, 紐?媛쒓퉴吏 媛?몄삱吏 ?뺥븳??
- *
- * 異붿쿇 ??낵 ?щ━ ?먯닔瑜?留ㅺ린吏 ?딅뒗??
- * '吏湲?媛????덈뒗 怨? ??李얜뒗 ?붾㈃?대씪 湲곗???嫄곕━ ?섎굹肉먯씠??
+ * 즉시 운동하기. 고르고 줄 세우는 일은 SQL 에 맡기고
+ * 여기서는 화면에서 넘어온 값이 쓸 수 있는 값인지만 본다.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -45,11 +40,8 @@ public class WorkoutService implements IWorkoutService {
 
         log.info("{}.getFacilities Start! sportId : {}", this.getClass().getName(), sportId);
 
-        // 연령대는 null. 즉시운동 탭은 '지금 갈 수 있는 곳' 만 찾는 화면이라
-        // '내가 들을 수 있는 강좌' 를 셀 일이 없다. (my_course_count 를 안 씀)
-        //
-        // bookableOnly 도 false. 신청 창구가 없어 그냥 가서 쓰는 곳이야말로
-        // 이 화면이 찾아 줘야 하는 것이다. 축구·농구는 그런 곳이 900쌍 가까이 된다.
+        // 연령대 null, bookableOnly false.
+        // 신청 창구가 없어 그냥 가서 쓰는 곳이야말로 이 화면이 찾아 줘야 하는 것이다.
         List<FacilityDTO> rList =
                 facilityMapper.getNearbyFacilities(sportId, lat, lng, LIST_LIMIT, null, false);
 
@@ -63,8 +55,7 @@ public class WorkoutService implements IWorkoutService {
 
         log.info("{}.getCourses Start! courseType : {}", this.getClass().getName(), courseType);
 
-        // 二쇱냼李쎌뿉 ?type=drop 媛숈? 嫄??곸뼱 ?ｌ뼱??SQL 濡??섎윭媛吏 ?딄쾶 ?ш린??留됰뒗??
-        // WALK ?됱? / HIKE ?곌만.
+        // 주소창에 아무 값이나 넣어도 SQL 로 흘러가지 않게 여기서 막는다
         String type = "HIKE".equals(courseType) ? "HIKE" : "WALK";
 
         List<CourseDTO> rList = courseMapper.getNearbyCourses(type, lat, lng, LIST_LIMIT);
@@ -84,7 +75,7 @@ public class WorkoutService implements IWorkoutService {
 
         log.info("{}.getPrograms Start!", this.getClass().getName());
 
-        // ?섏씠??留욌뒗 媛뺤쥖瑜??꾨줈 ?щ━?ㅻ㈃ ?뚯썝 ?섏씠媛 ?꾩슂?섎떎.
+        // 나이에 맞는 강좌를 위로 올리려면 회원 나이가 필요하다
         UserDTO pDTO = new UserDTO();
         pDTO.setUserId(userId);
         UserDTO me = Optional.ofNullable(userMapper.getUserBody(pDTO)).orElseGet(UserDTO::new);
@@ -228,6 +219,10 @@ public class WorkoutService implements IWorkoutService {
                 if ("HARD".equals(intensity)) {
                     sets++;
                 }
+            } else {
+                // 준비와 마무리는 한 세트만. 기본값 3세트를 그대로 두면
+                // 준비 자리에 든 팔굽혀펴기가 본운동만큼 힘들어진다.
+                sets = 1;
             }
             item.setSets(Math.max(1, Math.min(5, sets)));
         }
@@ -299,13 +294,7 @@ public class WorkoutService implements IWorkoutService {
         return (int) Math.round(totalMetMin * 3.5 * useWeight / 200);
     }
 
-    /**
-     * 肄붿뒪瑜??대（??吏?먮뱾.
-     *
-     * ?덉쟾?먮뒗 ?ш린??醫뚰몴瑜?洹몃┝ 醫뚰몴(x, y)濡???린怨?SVG ?좉퉴吏 留뚮뱾?덈떎.
-     * 吏???놁씠 媛쒕뀗?꾨? 洹몃━???뚯쓽 ?쇱씠??
-     * 吏湲덉? 移댁뭅??吏?꾧? 醫뚰몴瑜?洹몃?濡?諛쏆븘 洹몃━誘濡???만 ?쇱씠 ?녿떎.
-     */
+    /** 코스를 이루는 지점들. 지도에 선으로 그리는 데 쓴다 */
     @Override
     public List<CoursePointDTO> getCoursePoints(int courseId) throws Exception {
 
@@ -316,23 +305,13 @@ public class WorkoutService implements IWorkoutService {
         return points;
     }
 
-    /**
-     * ?먮낯 ?먮즺??吏???대쫫 以묒뿉???щ엺?먭쾶 ?몃え?녿뒗 寃껋씠 ?욎뿬 ?덈떎.
-     *
-     * '臾명솕?먯썝?곌퀎遺' 媛 11踰? '?쒕ぉ ?녿뒗 寃쎈줈' 媛 3踰??섏삤怨?
-     * ??肄붿뒪 ?덉뿉??媛숈? ?대쫫????踰??섑??대릺湲곕룄 ?쒕떎.
-     * ?쒖슱???먮뱶由쇨만 ?먮즺瑜?留뚮뱾 ?????대? 遺꾨쪟紐낆씠??湲??덈궡?먮뒗 ?꾩??????쒕떎.
-     *
-     * 諛섎?濡?'?섏쑀??吏?섏쿋 4?몄꽑', '?앹꽟?좎썝吏' 媛숈? ?대쫫? 洹몃?濡???留뚰븯??
-     * 洹몃옒??吏?곗? ?딄퀬 ?몃え?녿뒗 寃껊쭔 嫄몃윭 ?몃떎.
-     */
+    /** 자료의 지점 이름 중 '문화자원연계부' 처럼 사람에게 뜻 없는 것을 지운다 */
     private String cleanPointName(String name) {
         if (name == null || name.isBlank()) {
             return null;
         }
         String s = name.trim();
-        // contains 濡?蹂몃떎. matches 濡??섎㈃ ?꾩껜媛 ?묎컳?꾩빞 ?댁꽌
-        // '?몃웾吏꾧만吏꾩엯濡?' 泥섎읆 ?욎뿉 湲?먭? 遺숈? 寃껋쓣 ?볦튇??
+        // matches 로 하면 이름 전체가 같아야 해서 '인량진고개진입로' 같은 것을 놓친다
         if (s.contains("문화자원") || s.contains("제목 없는") || s.contains("진입로")) {
             return null;
         }

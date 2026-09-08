@@ -28,6 +28,10 @@ public class RentalDTO {
 
     private double distanceKm; // 현위치에서의 거리
 
+    /** 길찾기에 쓸 좌표. 서울시 예약 자료도 장소마다 좌표를 갖고 있다 */
+    private double lat;
+    private double lng;
+
     /**
      * 우리 시설이면 그 번호, 서울시 예약 자료면 0.
      *

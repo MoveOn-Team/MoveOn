@@ -241,7 +241,7 @@
     </sql>
 
     <select id="getNearbyRentals" resultType="RentalDTO">
-        SELECT r.place_name, r.min_class, r.pay_yn, r.svc_url,
+        SELECT r.place_name, r.min_class, r.pay_yn, r.svc_url, r.lat, r.lng,
                ST_Distance_Sphere(POINT(#{lng}, #{lat}),
                                   POINT(r.lng, r.lat)) / 1000 AS distance_km
           FROM reservation_raw r
@@ -269,7 +269,7 @@
 
     <!-- 축구/풋살(8)만 풋살장·축구장 두 종류를 함께 본다 -->
     <select id="getNearbyFootballRentals" resultType="RentalDTO">
-        SELECT r.place_name, r.min_class, r.pay_yn, r.svc_url,
+        SELECT r.place_name, r.min_class, r.pay_yn, r.svc_url, r.lat, r.lng,
                ST_Distance_Sphere(POINT(#{lng}, #{lat}),
                                   POINT(r.lng, r.lat)) / 1000 AS distance_km
           FROM reservation_raw r

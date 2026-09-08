@@ -125,4 +125,25 @@ public class MyPageService implements IMyPageService {
 
         return report;
     }
+
+    /**
+     * 홈트 완료 기록.
+     *
+     * 회원이 따로 적지 않아도 리포트에 올라가야 한다.
+     * 운동을 다 하고 나서 또 손으로 적으라고 하면 아무도 안 적는다.
+     */
+    @Override
+    public int addHomeWorkoutLog(int userId, int durationMin, String intensity,
+                                 int caloriesKcal, String memo) throws Exception {
+
+        log.info("{}.addHomeWorkoutLog Start! userId : {}", this.getClass().getName(), userId);
+
+        int res = myPageMapper.insertHomeWorkoutLog(userId, durationMin, intensity, caloriesKcal, memo);
+
+        log.info("{}.addHomeWorkoutLog End! {}분 / {}kcal", this.getClass().getName(),
+                durationMin, caloriesKcal);
+
+        return res;
+    }
+
 }
