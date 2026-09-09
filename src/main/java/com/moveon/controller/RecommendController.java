@@ -61,6 +61,8 @@ public class RecommendController {
         r.setPlaceName(f.getName());
         r.setMinClass(sportName);
         r.setDistanceKm(f.getDistanceKm());
+        r.setLat(f.getLat());
+        r.setLng(f.getLng());
         return r;
     }
 
@@ -133,6 +135,7 @@ public class RecommendController {
                               @RequestParam(value = "lat", required = false) Double lat,
                               @RequestParam(value = "lng", required = false) Double lng,
                               @RequestParam(value = "facilityId", required = false) Integer facilityId,
+                              @RequestParam(value = "place", required = false) String place,
                               ModelMap model) throws Exception {
 
         log.info("{}.sportDetail Start! sportId : {}", this.getClass().getName(), sportId);
@@ -158,7 +161,14 @@ public class RecommendController {
             return "redirect:/recommend/recommendList";
         }
 
-        List<FacilityDTO> facilities = recommendService.getNearbyFacilities(userId, sportId, myLat, myLng, LIST_SIZE);
+        // 화면에 세 곳씩 보여주지만 조회는 넉넉히 한다.
+        //
+        // 아래에서 이 목록을 '배우는 곳' 과 '빌리는 곳' 둘로 가르기 때문이다.
+        // 세 곳만 가져오면 강좌 시설이 세 자리를 다 먹었을 때
+        // 대관 시설은 후보에도 못 든다. 목동에서 축구를 찾으면
+        // 강좌 시설 셋(952m·1.4km·1.6km)에 밀려 우장산인조잔디구장(3.1km)이 빠졌다.
+        List<FacilityDTO> facilities =
+                recommendService.getNearbyFacilities(userId, sportId, myLat, myLng, LIST_SIZE * 4);
 
         // 어느 시설을 볼지 정함
         //
@@ -214,9 +224,13 @@ public class RecommendController {
                 learnList.add(f);
             }
         }
+        // 가른 뒤에 각자 세 곳씩 자른다. 위에서 넉넉히 가져온 까닭이 이것이다.
         rentals.sort(Comparator.comparingDouble(RentalDTO::getDistanceKm));
         if (rentals.size() > LIST_SIZE) {
             rentals = rentals.subList(0, LIST_SIZE);
+        }
+        if (learnList.size() > LIST_SIZE) {
+            learnList = learnList.subList(0, LIST_SIZE);
         }
         model.addAttribute("learnFacilities", learnList);
 
@@ -226,6 +240,32 @@ public class RecommendController {
 
         // 종목 상세보기 버튼에 쓸 말. 그 너머에서 할 수 있는 일을 그대로 적음.
         String linkLabel = (linkUrl == null) ? null : dest.go().label;
+
+        // 아래 단추가 가리키는 곳. 우리 시설일 수도, 서울시 예약 장소일 수도 있음.
+        //
+        // 예약 장소를 목록에서 바로 바깥으로 내보내면 길찾기를 쓸 수 없음.
+        // 눌러도 우리 화면에 남게 하고, 나가는 것은 '대관 신청하기' 가 맡음.
+        String pickName = (pick == null) ? null : pick.getName();
+        double pickLat = (pick == null) ? 0 : pick.getLat();
+        double pickLng = (pick == null) ? 0 : pick.getLng();
+
+        if (place != null && !place.isBlank()) {
+            for (RentalDTO r : rentals) {
+                if (r.getFacilityId() == 0 && place.equals(r.getPlaceName())) {
+                    pickName = r.getPlaceName();
+                    pickLat = r.getLat();
+                    pickLng = r.getLng();
+                    linkUrl = r.getSvcUrl();
+                    linkLabel = Go.RENT.label;
+                    toRental = true;
+                    break;
+                }
+            }
+        }
+        model.addAttribute("pickName", pickName);
+        model.addAttribute("pickLat", pickLat);
+        model.addAttribute("pickLng", pickLng);
+        model.addAttribute("pickPlace", place == null ? "" : place);
 
         // 방문 접수만 받는 곳인지. 화면은 이걸로 '가서 접수하세요' 안내를 붙임.
         model.addAttribute("visitOnly", pick != null && pick.isVisitOnly());
@@ -262,9 +302,11 @@ public class RecommendController {
         // 신월문화체육센터 축구는 강좌가 3건이지만 전부 어린이 대상이라,
         // 성인에게 '가까운 시설 3곳' 이라고 적으면 배울 데가 있는 것처럼 읽힘.
         // 아래 버튼이 나이를 거른 programs 로 목적지를 정하므로 제목도 같은 기준을 씀.
-        // 위 목록에 남는 시설 기준으로 봄. 아래로 내려간 대관 시설은 셈에서 뺌.
+        // 화면에 실제로 뜨는 목록으로 봄. facilities 는 조회용이라 열두 곳까지 담겨 있고,
+        // 아래로 내려간 대관 시설도 섞여 있어 제목 판단에 쓰면 안 됨.
+        List<FacilityDTO> shown = learnList;
         model.addAttribute("rentalMode",
-                facilities.stream().allMatch(f -> f.getMyCourseCount() == 0));
+                shown.stream().allMatch(f -> f.getMyCourseCount() == 0));
 
         model.addAttribute("sport", sport);
         model.addAttribute("profile", recommendService.getProfile(userId, myLat, myLng));

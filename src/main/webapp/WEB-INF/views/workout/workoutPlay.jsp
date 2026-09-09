@@ -15,22 +15,18 @@
 <main class="auth-shell workout-shell workout-play-shell" id="homeWorkoutPlay">
     <div class="play-header">
         <a href="${pageContext.request.contextPath}/workout/workoutList?tab=home" class="back-button" aria-label="뒤로 가기">&#8249;</a>
-        <!-- 개선 1: 초기 진입 시 서버 데이터(homePlan)가 없을 때 null 표기 방지 및 accessibility 향상 -->
         <span class="play-status-text" id="statusText">
             <c:choose>
                 <c:when test="${not empty homePlan}">동작 1/6 · 남은 ${homePlan.totalMin}분</c:when>
                 <c:otherwise>운동 준비 중...</c:otherwise>
             </c:choose>
         </span>
-        <!-- 개선 2: 일시정지/재생 상태 변경을 위한 data 속성 부여 -->
-        <button type="button" class="btn-pause" id="btnPause" data-state="paused">일시정지</button>
     </div>
 
     <div class="progress-bar-group" id="progressBarGroup" role="progressbar" aria-label="전체 운동 진행률"></div>
 
     <div class="media-box" id="exerciseMedia">
         <span class="set-tag-badge" id="setTagBadge">-세트 / -세트</span>
-        <!-- 개선 3: 이미지/비디오를 동적으로 넣어줄 컨테이너 명확화 -->
         <div class="media-placeholder" id="mediaPlaceholder">
             <span class="placeholder-text">동작 이미지</span>
         </div>
@@ -45,11 +41,9 @@
         <div class="info-right">
             <span class="set-label">이번 세트</span>
             <span class="set-value" id="setValue">-</span>
-            <span class="rest-label" id="restLabel">휴식 자동</span>
         </div>
     </div>
 
-    <!-- 개선 4: 클릭 가능한 영역임을 나타내기 위한 role 및 tabindex 부여 -->
     <div class="next-exercise-card" id="nextExerciseCard" role="button" tabindex="0">
         <div class="next-text-group">
             <span class="next-title">다음동작</span>

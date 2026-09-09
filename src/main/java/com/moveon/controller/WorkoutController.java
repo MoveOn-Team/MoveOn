@@ -3,6 +3,7 @@ package com.moveon.controller;
 import com.moveon.dto.*;
 import com.moveon.mapper.IUserMapper;
 import com.moveon.service.IUserService;
+import com.moveon.service.IMyPageService;
 import com.moveon.service.IWorkoutService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,9 @@ public class WorkoutController {
     private IUserMapper userMapper;
 
     private final IWorkoutService workoutService;
+
+    /** 홈트를 끝냈을 때 리포트에 기록을 남기는 데 쓴다 */
+    private final IMyPageService myPageService;
 
     @Value("${kakao.javascript.key:}")
     private String kakaoMapKey;
@@ -123,11 +127,8 @@ public class WorkoutController {
     }
 
     /**
-     * 야외 코스 상세
-     *
-     * 추천 탭의 걷기·등산에서도 이 화면으로 온다. 같은 자료라 화면을 또 만들지 않았다.
-     * 대신 from 으로 어디서 왔는지 받아 뒤로가기와 아래 탭바를 그쪽에 맞춘다.
-     * 없으면 즉시운동 탭에서 온 것으로 본다.
+     * 야외 코스 상세. 추천 탭에서도 이 화면으로 온다.
+     * from 으로 어디서 왔는지 받아 뒤로가기와 탭바를 그쪽에 맞춘다.
      */
     @GetMapping("/courseDetail/{courseId}")
     public String courseDetail(@PathVariable("courseId") int courseId,
@@ -292,7 +293,22 @@ public class WorkoutController {
         plan.setTotalKcal(burnedCalories);
         session.setAttribute("burnedCalories", burnedCalories);
 
-        // 3. 업데이트된 plan 세션 재저장
+        // 4. 리포트에 자동으로 남긴다.
+        // HOME_RESULT_SESSION 이 있으면 이미 넣은 것이라 건너뛴다. 계획 하나에 기록 하나.
+        // 기록에 실패해도 결과 화면은 보여준다.
+        boolean already = session.getAttribute(HOME_RESULT_SESSION) != null;
+        Integer userId = getSessionUserId(session);
+        if (!already && userId != null) {
+            try {
+                int minutes = plan.getTotalMin() > 0 ? plan.getTotalMin() : plan.getTargetMin();
+                myPageService.addHomeWorkoutLog(userId, minutes, plan.getIntensity(),
+                        burnedCalories, "홈트 " + plan.getIntensityLabel());
+            } catch (Exception e) {
+                log.warn("홈트 기록을 남기지 못했다 : {}", e.getMessage());
+            }
+        }
+
+        // 5. 업데이트된 plan 세션 재저장
         session.setAttribute(HOME_RESULT_SESSION, plan);
 
         Map<String, Object> res = new HashMap<>();

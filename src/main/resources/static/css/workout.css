@@ -494,16 +494,6 @@
     color: var(--workout-muted);
 }
 
-.btn-pause {
-    padding: 0;
-    background: none;
-    border: none;
-    font-size: var(--fs-sub);
-    font-weight: 700;
-    color: var(--workout-accent);
-    cursor: pointer;
-}
-
 /* 동작이 여섯 개라 한 칸이 한 동작이다.
    숫자만 적어 두면 얼마나 남았는지 한눈에 안 들어온다. */
 .progress-bar-group {
@@ -622,8 +612,7 @@
     text-align: right;
 }
 
-.set-label,
-.rest-label {
+.set-label {
     font-size: var(--fs-tag);
     color: var(--workout-muted);
 }

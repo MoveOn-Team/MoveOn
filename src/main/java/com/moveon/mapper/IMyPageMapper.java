@@ -28,6 +28,19 @@ public interface IMyPageMapper {
     int insertWorkoutLog(WorkoutLogDTO workoutLogDTO);
 
     /**
+     * 홈트를 끝냈을 때 남기는 기록
+     *
+     * 손으로 넣는 기록과 나눠 두었다. 종목은 '홈트' 로 못 박고,
+     * 강도는 계획이 들고 있는 LIGHT/MODERATE/HARD 를 그대로 쓰며,
+     * source 는 HOME_WORKOUT 이라 리포트에서 손으로 적은 것과 구분된다.
+     */
+    int insertHomeWorkoutLog(@Param("userId") int userId,
+                             @Param("durationMin") int durationMin,
+                             @Param("intensity") String intensity,
+                             @Param("caloriesKcal") int caloriesKcal,
+                             @Param("memo") String memo);
+
+    /**
      * 오늘 운동 완료 목록 조회 [추가]
      */
     List<WorkoutLogDTO> selectTodayWorkoutList(@Param("userId") Integer userId);
