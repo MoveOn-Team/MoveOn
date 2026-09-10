@@ -15,6 +15,7 @@ import org.springframework.web.util.UriUtils;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -53,23 +54,13 @@ public class EventSearchService implements IEventSearchService {
     };
 
     /**
-     * 대회 공식 사이트가 아닌 곳. 여기 걸리면 후보에서 뺀다.
-     *
-     * 모음 사이트가 더 위험하다. 어느 대회로 검색해도 걸린다.
+     * 이 개수 이상의 서로 다른 대회에 나온 호스트는 공식 사이트가 아니라고 본다.
+     * 대회 홈페이지는 그 대회에만 나오고, 모음 사이트·블로그·뉴스는 전부에 나온다.
      */
-    private static final String[] NOT_OFFICIAL = {
-            // 블로그 · 커뮤니티 · 뉴스
-            "blog.naver.com", "tistory.com", "namu.wiki", "v.daum.net", "ezday.co.kr",
-            "cafe.naver.com", "post.naver.com", "brunch.co.kr", "youtube.com",
-            "instagram.com", "dcinside.com", "instiz.net", "pann.nate.com",
-            "news.naver.com", "sports.naver.com", "in.naver.com", "band.us",
-            "facebook.com", "cashwalk.com", "news2day.co.kr", "newsis.com",
-            "yna.co.kr", "hankyung.com", "mk.co.kr", "chosun.com", "donga.com",
-            // 대회 모음 사이트
-            "kormarathon.com", "marathongo.co.kr", "runningwikii.com", "runable.me",
-            "rankingmarathon.com", "gorunning.kr", "runningon.co.kr", "kimrunning.com",
-            "roadrun.co.kr", "emarathon.or.kr", "runko.kr", "runit.co.kr",
-            "mara1080.com", "sfinder.co.kr"};
+    private static final int SHARED_HOST_MIN = 3;
+
+    /** 호스트 -> 그 호스트가 나온 대회들. findSite 를 부를 때마다 쌓이고 재시작하면 비워진다 */
+    private final Map<String, Set<String>> hostSeen = new ConcurrentHashMap<>();
 
     /** 찾은 결과를 잠깐 담아 두는 곳. 검색어별로 하나씩 */
     private final Map<String, Cached> cache = new ConcurrentHashMap<>();
@@ -127,24 +118,13 @@ public class EventSearchService implements IEventSearchService {
             if (hit != null && hit.fresh()) {
                 log.info("{}.discover End! 보관해 둔 결과 {}건",
                         this.getClass().getName(), hit.list().size());
-                return hit.list();
+                return remark(hit.list());
             }
         }
 
         String[] queries = (keyword == null || keyword.isBlank())
                 ? DEFAULT_QUERIES : new String[]{keyword};
 
-        // 검색 결과 제목을 먼저 다 모은다.
-        //
-        // webkr(웹문서)을 함께 보는 이유가 있다.
-        // 블로그는 같은 대회를 여러 사람이 써서 한 대회가 목록을 다 차지한다.
-        // 웹문서는 대회 공식 사이트가 바로 걸리고, 요약에 날짜·장소까지 들어 있다.
-        //   예) "제23회 강남국제평화마라톤대회"
-        //       -> 2026. 10. 05. 봉은사로 삼성1동주민센터 앞, Full/Half/10km/5km
-        //
-        // 그래서 제목만 쓰지 않고 요약도 함께 넘긴다. 이름을 더 정확히 잡아낸다.
-        // 검색어 6개 x 종류 3가지 = 18번을 한꺼번에 부른다.
-        // 하나씩 기다리면 그것만 3초 가까이 걸린다.
         List<String[]> jobs = new ArrayList<>();
         for (String q : queries) {
             for (String kind : new String[]{"webkr", "blog", "news"}) {
@@ -152,15 +132,6 @@ public class EventSearchService implements IEventSearchService {
             }
         }
 
-        // 정렬은 sim(정확도)으로 고정한다.
-        // date(최신순)로 하면 새 글이 올라올 때마다 30건의 내용이 바뀌어,
-        // 같은 버튼을 눌러도 찾아지는 대회 수가 매번 달라진다.
-        //
-        // 요약은 앞부분만 쓴다. 대회 이름을 알아보는 데는 그걸로 충분하고,
-        // 통째로 보내면 8만 자가 넘어 Gemini 를 여러 번 나눠 불러야 한다.
-        // 같은 글이 검색어 여러 개에 걸리므로 겹치는 것도 버린다.
-        //
-        // parallelStream() 은 병렬도가 (코어수 - 1) 이라 18개가 3개씩 나뉘어 돌았다
         List<CompletableFuture<List<Map<String, Object>>>> calls = jobs.stream()
                 .map(j -> CompletableFuture.supplyAsync(
                         () -> naverItems(j[0], j[1], 30, "sim"), searchExecutor))
@@ -179,26 +150,41 @@ public class EventSearchService implements IEventSearchService {
                 .distinct()
                 .toList();
 
-        // 제목에서 대회 이름을 뽑는다. Gemini 가 못 하면 여기서 끝낸다.
-        // 규칙으로 뽑던 대비책은 없앴다. 네이버 키가 없으면 제목 자체가 0개라 어차피 못 뽑고,
-        // Gemini 가 죽었을 때는 잡음 섞인 목록을 보여주느니 다시 찾게 하는 편이 낫다.
         List<EventSearchDTO> found = aiService.isReady()
                 ? aiService.extractNames(titles) : List.of();
 
         if (found.isEmpty()) {
             log.info("{}.discover End! Gemini 를 못 썼다 : {}", this.getClass().getName(),
                     aiService.isReady() ? "호출이 모두 실패했다" : "키가 없다");
-            // 보관하지 않는다. 담아 두면 10분 동안 빈 목록만 보게 된다.
+
             return List.of();
         }
 
         // 합치기 전에 지역으로 먼저 거른다. 백 개가 넘는 목록을 한 번에 합치라고 하면
         // 부를 때마다 102개, 53개로 들쭉날쭉해진다.
         List<EventSearchDTO> ours = new ArrayList<>();
+        List<String> pastOut = new ArrayList<>();
+        List<String> demoted = new ArrayList<>();
+        int regionOut = 0;
         for (EventSearchDTO d : found) {
-            if (isOurRegion(d.getRegion()) && isThisYear(d.getName())) {
+            if (!isOurRegion(d.getRegion())) {
+                regionOut++;
+            } else if (!keep(d)) {
+                pastOut.add(d.getName() + "(" + d.getEventDate() + ")");
+            } else {
                 ours.add(d);
+                if (d.isPastEdition()) {
+                    demoted.add(d.getName() + "(" + d.getEventDate() + ")");
+                }
             }
+        }
+        log.info("거르기 : {}개 -> {}개 (지역 {} / 끝난 대회 {} / 지난 회차 {})",
+                found.size(), ours.size(), regionOut, pastOut.size(), demoted.size());
+        if (!pastOut.isEmpty()) {
+            log.info("끝난 대회로 보고 뺀 것 : {}", pastOut);
+        }
+        if (!demoted.isEmpty()) {
+            log.info("지난 회차로 보고 아래로 내린 것 : {}", demoted);
         }
 
         // 한 덩어리로 받으면 반려한 대회도 '이미 등록됨' 이 되어 다시 등록할 길이 없다
@@ -218,8 +204,8 @@ public class EventSearchService implements IEventSearchService {
         Set<String> seen = new LinkedHashSet<>();
         for (EventSearchDTO d : ours) {
             String key = groupKey(d.getName());
-            if (!seen.add(key)) {
-                continue;
+            if (!seen.add(key) || !keep(d)) {
+                continue;   // 합치면서 대회일이 새로 붙기도 해서 여기서 한 번 더 본다
             }
             if (merged == null) {
                 d.setRegistered(matches(registered, key));
@@ -228,9 +214,9 @@ public class EventSearchService implements IEventSearchService {
             rList.add(d);
         }
 
-        // 아직 안 넣은 대회를 맨 위로. 관리자가 할 일이 그것이기 때문이다.
-        // 안정 정렬이라 그 안에서는 Gemini 가 준 차례가 그대로 남는다.
-        rList.sort(Comparator.comparing(EventSearchDTO::isRegistered));
+        // 안 넣은 것 먼저, 그 안에서 지난 회차를 아래로. 안정 정렬이라 나머지 차례는 그대로다.
+        rList.sort(Comparator.comparing(EventSearchDTO::isRegistered)
+                .thenComparing(EventSearchDTO::isPastEdition));
 
         cache.put(cacheKey, new Cached(System.currentTimeMillis(), rList));
 
@@ -256,11 +242,10 @@ public class EventSearchService implements IEventSearchService {
                 naverItems("webkr", eventName + " 참가신청", 8, "sim"));
         items.addAll(naverItems("webkr", eventName, 8, "sim"));
 
-        // 확실히 공식이 아닌 곳은 먼저 걷어낸다
         List<Map<String, String>> cands = new ArrayList<>();
         for (Map<String, Object> it : items) {
             String url = str(it.get("link"));
-            if (host(url).isEmpty() || isNotOfficial(url)) {
+            if (host(url).isEmpty()) {
                 continue;
             }
             cands.add(Map.of("title", clean(str(it.get("title"))), "link", url));
@@ -269,12 +254,9 @@ public class EventSearchService implements IEventSearchService {
             return null;
         }
 
-        // 남은 후보 중에서 고르는 건 Gemini 에게 맡긴다.
-        //
-        // 도메인이 몇 번 나왔는지로만 고르다가 두 번 틀렸다.
-        //   '롯데리아 마라톤'      -> 뉴스 기사가 잡혔다
-        //   '강남국제평화마라톤'   -> 대행 용역업체 선정 공고가 잡혔다
-        // 둘 다 제목을 읽으면 공식이 아닌 게 바로 보이는데, 도메인만 봐서는 알 수 없었다.
+        cands = dropSharedHosts(cands, eventName);
+
+        // 도메인 빈도로만 고르면 뉴스 기사나 입찰 공고가 잡힌다. 제목을 읽어야 알 수 있다.
         if (aiService.isReady()) {
             // "종류|주소" 로 온다. 억지로 고르지 말라고 시켰으므로 못 골랐으면 null 이다.
             return aiService.pickSite(eventName, cands);
@@ -333,6 +315,9 @@ public class EventSearchService implements IEventSearchService {
             EventDTO rDTO = new EventDTO();
             rDTO.setPlaceName(str(d.get("place_name")));
             rDTO.setSigungu(parts.length > 1 ? parts[1] : null);
+
+            // Gemini 가 지역을 잘못 봐서 충남 대회가 통과한 적이 있다. 실제 주소로 다시 본다
+            rDTO.setOutsideArea(parts.length > 0 && !isOurRegion(parts[0]));
             rDTO.setLat(Double.parseDouble(str(d.get("y"))));
             rDTO.setLng(Double.parseDouble(str(d.get("x"))));
 
@@ -638,11 +623,46 @@ public class EventSearchService implements IEventSearchService {
         return false;
     }
 
-    /** 이름에 박힌 연도가 올해인지. 연도가 없으면 통과시킨다. 대회일로 다시 걸러진다 */
-    private boolean isThisYear(String name) {
-        Matcher m = Pattern.compile("20\\d\\d").matcher(name);
+    /**
+     * 목록에 남길지 정한다.
+     *
+     * 대회일이 지났어도 이름에 연도가 없으면 빼지 않는다.
+     * '잠수교 10K 나이트런' 처럼 해마다 열리는 대회는 검색에 작년 글이 더 많이 걸려서,
+     * 그 날짜로 빼 버리면 올해 열릴 대회를 관리자가 못 본다. 아래로 내리기만 한다.
+     */
+    private boolean keep(EventSearchDTO d) {
+        if (isUpcoming(d)) {
+            return true;
+        }
+        if (Pattern.compile("20\\d\\d").matcher(d.getName()).find()) {
+            return false;   // 이름이 회차를 못 박았다. 확실히 끝난 대회다
+        }
+        d.setPastEdition(true);
+        return true;
+    }
+
+    /** 오늘보다 뒤에 열리는 대회인지. 날짜를 모르면 통과시킨다 */
+    private boolean isUpcoming(EventSearchDTO d) {
+        LocalDate today = LocalDate.now();
+        String date = d.getEventDate();
+
+        // Gemini 가 준 대회일이 있으면 그것만 본다. "YYYY-MM" 만 알면 달 단위로 견준다
+        if (date != null && date.length() >= 7) {
+            try {
+                if (YearMonth.parse(date.substring(0, 7)).isBefore(YearMonth.from(today))) {
+                    return false;
+                }
+                return date.length() < 10
+                        || !LocalDate.parse(date.substring(0, 10)).isBefore(today);
+            } catch (Exception ignore) {
+                // 날짜 모양이 아니면 아래 이름 검사로 넘어간다
+            }
+        }
+
+        // 날짜를 모르면 이름에 박힌 연도만 본다. 지난 해면 뺀다
+        Matcher m = Pattern.compile("20\\d\\d").matcher(d.getName());
         while (m.find()) {
-            if (!m.group().equals(String.valueOf(LocalDate.now().getYear()))) {
+            if (Integer.parseInt(m.group()) < today.getYear()) {
                 return false;
             }
         }
@@ -659,6 +679,33 @@ public class EventSearchService implements IEventSearchService {
         return cut.length() >= 5 ? cut : key;
     }
 
+    /**
+     * 보관해 둔 목록의 등록·반려 표시만 DB 로 다시 맞춘다.
+     *
+     * 캐시가 10분이라 방금 등록한 대회가 계속 '이걸로 등록' 으로 보였고, 그래서 두 번 등록됐다.
+     * Gemini 판단은 지우지 않고 켜기만 한다. 이름 대조가 Gemini 보다 못하기 때문이다.
+     */
+    private List<EventSearchDTO> remark(List<EventSearchDTO> list) throws Exception {
+        List<String> registered = adminMapper.getEventTitles();
+        List<String> rejected = adminMapper.getRejectedTitles();
+        for (EventSearchDTO d : list) {
+            String key = groupKey(d.getName());
+            if (matches(registered, key)) {
+                d.setRegistered(true);
+            }
+            if (matches(rejected, key)) {
+                d.setRejected(true);
+            }
+        }
+        return list;
+    }
+
+    /** 지우거나 상태를 바꿨을 때. 표시만 고쳐서는 못 되돌려서 통째로 버린다 */
+    @Override
+    public void clearCache() {
+        cache.clear();
+    }
+
     /** 이미 DB 에 있는 대회인지. 한쪽이 더 긴 이름인 경우가 흔해 양쪽 다 본다 */
     private boolean matches(List<String> titles, String key) {
         return titles.stream().anyMatch(t -> {
@@ -667,13 +714,39 @@ public class EventSearchService implements IEventSearchService {
         });
     }
 
-    private boolean isNotOfficial(String url) {
-        for (String s : NOT_OFFICIAL) {
-            if (url.contains(s)) {
-                return true;
+    /**
+     * 여러 대회에 걸쳐 나오는 호스트를 후보에서 뺀다.
+     *
+     * 하드코딩한 도메인 목록을 대신한다. 목록은 새 모음 사이트가 생길 때마다 손대야 했고,
+     * 뉴스 사이트는 수백 개라 애초에 다 적을 수 없었다.
+     */
+    private List<Map<String, String>> dropSharedHosts(List<Map<String, String>> cands,
+                                                      String eventName) {
+
+        String eventKey = groupKey(eventName);
+
+        // 거르기 전에 적어야 한다. 걸러낸 뒤에 적으면 그 호스트는 다시는 안 세어진다
+        for (Map<String, String> c : cands) {
+            String h = host(c.get("link"));
+            if (!h.isEmpty()) {
+                hostSeen.computeIfAbsent(h, k -> ConcurrentHashMap.newKeySet()).add(eventKey);
             }
         }
-        return false;
+
+        List<Map<String, String>> kept = cands.stream()
+                .filter(c -> hostSeen.getOrDefault(host(c.get("link")), Set.of())
+                                     .size() < SHARED_HOST_MIN)
+                .toList();
+
+        // 전부 걸리면 거르지 않는다. 아무것도 없는 것보다는 Gemini 에게 보여 주는 편이 낫다
+        if (kept.isEmpty()) {
+            return cands;
+        }
+
+        if (kept.size() < cands.size()) {
+            log.info("여러 대회에 나오는 호스트 {}개를 뺐다", cands.size() - kept.size());
+        }
+        return kept;
     }
 
     private String host(String url) {
