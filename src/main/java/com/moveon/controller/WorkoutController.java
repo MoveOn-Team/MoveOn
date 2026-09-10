@@ -6,6 +6,7 @@ import com.moveon.service.IUserService;
 import com.moveon.service.IMyPageService;
 import com.moveon.service.IWorkoutService;
 import jakarta.servlet.http.HttpSession;
+import static com.moveon.util.UrlUtil.firstUsable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -315,22 +316,6 @@ public class WorkoutController {
         res.put("ok", true);
         res.put("redirectUrl", "/workout/workoutResult");
         return res;
-    }
-
-    private String firstUsable(String... urls) {
-        for (String u : urls) {
-            if (u == null) {
-                continue;
-            }
-            String v = u.trim();
-            if (v.isEmpty() || "null".equalsIgnoreCase(v) || "-".equals(v)) {
-                continue;
-            }
-            if (v.startsWith("http://") || v.startsWith("https://")) {
-                return v;
-            }
-        }
-        return null;
     }
 
     private Integer getSessionUserId(HttpSession session) {
