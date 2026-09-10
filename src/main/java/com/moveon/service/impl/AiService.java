@@ -146,11 +146,14 @@ public class AiService implements IAiService {
 
     private static final String NAME_PROMPT = """
             아래는 러닝·마라톤 대회를 다룬 글 제목들이다.
-            여기서 %d년에 앞으로 열릴 대회를 뽑아 아래 모양의 JSON 배열로 답하라.
+            오늘(%s)보다 뒤에 열릴 대회를 뽑아 아래 모양의 JSON 배열로 답하라.
 
-            [{"name": "대회 정식 이름", "region": "열리는 지역"}]
+            [{"name": "대회 정식 이름", "region": "열리는 지역", "date": "대회일"}]
 
             지켜야 할 것
+            - date 는 대회가 열리는 날이다. 글에 적혀 있으면 YYYY-MM-DD 로,
+              몇 월인지만 알면 YYYY-MM 으로, 전혀 모르면 "" 로 두어라. 지어내지 마라.
+            - **내년에 열리는 대회도 넣어라.** 오늘보다 뒤이기만 하면 된다.
             - region 은 **대회가 열리는 곳**을 적어라. 주최사 이름이 아니다.
               '아식스 서울신문 고프리런' 은 서울신문이 주최하지만 여의도에서 열리므로 "서울" 이다.
               이름에 지역이 없어도 글 내용을 보고 판단하라.
@@ -162,8 +165,7 @@ public class AiService implements IAiService {
               "OO 10km대회" = "OO 10km마라톤" = "OO 10K 마라톤대회"
               뒤에 붙는 대회/마라톤/레이스 같은 말이 달라도 앞부분이 같으면 같은 대회다.
             - 대회가 아닌 것은 빼라. 맛집 글, 후기, 종목 이름, 문장 조각은 대회가 아니다.
-            - **이미 열린 대회는 빼라.** 오늘은 %s 다.
-              글이 지난 대회의 후기나 결과를 다루고 있으면 넣지 마라.
+            - **이미 열린 대회는 빼라.** 글이 지난 대회의 후기나 결과를 다루면 넣지 마라.
             - 설명 없이 배열만 답하라.
 
             제목:
@@ -196,10 +198,9 @@ public class AiService implements IAiService {
         }
 
         // 묶음도 한꺼번에 묻는다. flash-lite 는 분당 15번까지라 서너 개는 여유가 있다.
-        int year = LocalDate.now().getYear();
         List<CompletableFuture<String>> calls = chunks.stream()
                 .map(chunk -> CompletableFuture.supplyAsync(
-                        () -> ask(NAME_PROMPT.formatted(year, LocalDate.now(), chunk)),
+                        () -> ask(NAME_PROMPT.formatted(LocalDate.now(), chunk)),
                         searchExecutor))
                 .toList();
 
@@ -223,6 +224,7 @@ public class AiService implements IAiService {
                     EventSearchDTO dto = new EventSearchDTO();
                     dto.setName(name);
                     dto.setRegion(str(v.get("region")));
+                    dto.setEventDate(str(v.get("date")));
                     rList.add(dto);
                 }
             } catch (Exception e) {
@@ -247,11 +249,11 @@ public class AiService implements IAiService {
               "OO 하프마라톤" = "OO 하프 마라톤대회" = "제3회 OO 하프마라톤"
             - 합칠 때는 가장 온전한 이름을 남겨라.
               회차와 연도가 붙은 정식 이름이 좋다.
+            - date 는 합친 것 중 가장 확실한 값을 남겨라. 아무도 모르면 "" 로.
 
             빼야 할 것
             - 대회가 아닌 것. "상품상세 - OO", "요즘 러닝" 같은 글 제목 조각
-            - %d년이 아닌 대회. 오늘은 %s 다
-            - 이미 열린 대회
+            - 이미 열린 대회. 오늘은 %s 다. 내년 대회는 남겨라
 
             status 는 아래 셋 중 하나로 적어라.
             - REGISTERED  [이미 등록된 대회] 목록에 있는 대회와 같은 대회다
@@ -270,7 +272,7 @@ public class AiService implements IAiService {
             [반려한 대회]
             %s
 
-            설명 없이 [{"name":"이름","region":"지역","status":"NEW"}] 형태의 배열만 답하라.
+            설명 없이 [{"name":"이름","region":"지역","date":"대회일","status":"NEW"}] 형태의 배열만 답하라.
 
             목록:
             %s
@@ -290,12 +292,13 @@ public class AiService implements IAiService {
             StringBuilder sb = new StringBuilder();
             for (EventSearchDTO n : names) {
                 sb.append("- ").append(n.getName())
-                  .append(" (지역: ").append(n.getRegion()).append(")\n");
+                  .append(" (지역: ").append(n.getRegion())
+                  .append(" / 대회일: ").append(n.getEventDate() == null ? "모름" : n.getEventDate())
+                  .append(")\n");
             }
 
             String json = ask(MERGE_PROMPT.formatted(
-                    LocalDate.now().getYear(), LocalDate.now(),
-                    bullets(registered), bullets(rejected), sb));
+                    LocalDate.now(), bullets(registered), bullets(rejected), sb));
             if (json == null) {
                 return null;
             }
@@ -313,6 +316,7 @@ public class AiService implements IAiService {
                 EventSearchDTO dto = new EventSearchDTO();
                 dto.setName(name);
                 dto.setRegion(str(v.get("region")));
+                dto.setEventDate(str(v.get("date")));
 
                 String status = str(v.get("status"));
                 dto.setRegistered("REGISTERED".equals(status));
@@ -360,6 +364,9 @@ public class AiService implements IAiService {
                          브랜드가 여는 행사는 전용 사이트 없이 접수 플랫폼만 쓰는 경우가 많다.
                          주최사가 올린 공지·이벤트 페이지도 여기에 든다.
             3. INFO      위 둘이 없을 때만. 대회 정보를 정리해 둔 곳.
+
+            여러 대회를 모아 둔 사이트는 OFFICIAL 도 APPLY 도 아니다. 골라야 한다면 INFO 로만 하라.
+            그런 곳은 대회 이름이 도메인에 없고, 다른 대회 이름이 목록으로 함께 걸려 있다.
 
             아래는 어느 쪽으로도 고르지 마라.
             - 뉴스 기사

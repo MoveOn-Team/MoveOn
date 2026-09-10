@@ -23,6 +23,15 @@
         <input type="hidden" name="eventId" value="${event.eventId}">
         <input type="hidden" name="source" value="${empty event.source ? 'MANUAL' : event.source}">
 
+        <%-- 검색 단계에서 지역을 잘못 봐서 다른 지역 대회가 통과하는 일이 있다 --%>
+        <c:if test="${event.outsideArea}">
+            <p class="form-warn">
+                <b>서울·경기 대회가 아닌 것 같습니다.</b>
+                주소를 보니 <b><c:out value="${event.sigungu}"/></b> 입니다.
+                이 앱은 서울·경기만 다루니 맞는지 확인하고, 아니면 저장하지 마세요.
+            </p>
+        </c:if>
+
         <%-- 이미 열린 대회를 넣으려 했을 때 --%>
         <c:if test="${param.past eq '1'}">
             <p class="form-warn">

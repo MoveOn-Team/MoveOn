@@ -173,6 +173,7 @@ public class AdminController {
                         event.setLng(place.getLng());
                         event.setSigungu(place.getSigungu());
                         event.setPlaceName(place.getPlaceName());   // 카카오의 정식 이름
+                        event.setOutsideArea(place.isOutsideArea());
                     }
                 }
                 if (read.getDistances() != null) {
@@ -237,6 +238,9 @@ public class AdminController {
 
         int res = adminService.changeStatus(eventId, status, adminId);
 
+        // 반려하면 '등록됨' 을 '반려함' 으로 되돌려야 해서 표시만 고쳐서는 안 된다
+        eventSearchService.clearCache();
+
         // 공개는 행사일과 좌표가 다 있어야 된다. 왜 안 됐는지 알려 준다.
         if (res < 0) {
             return "redirect:/admin/eventAdmin?fail=" + (res == -1 ? "date" : "pos");
@@ -261,6 +265,9 @@ public class AdminController {
         log.info("{}.deleteEvent Start! eventId : {}", this.getClass().getName(), eventId);
 
         int res = adminService.removeEvent(eventId);
+
+        // 지운 대회는 다시 '이걸로 등록' 이 되어야 한다
+        eventSearchService.clearCache();
 
         // 지워진 게 없으면 이미 남이 지운 것이다
         return "redirect:/admin/eventAdmin" + (res > 0 ? "?deleted=1" : "");
