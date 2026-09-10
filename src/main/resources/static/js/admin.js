@@ -53,6 +53,10 @@
                                   + (it.region
                                         ? ' <span class="rg">' + escapeHtml(it.region) + '</span>'
                                         : '')
+                                  + (it.eventDate
+                                        ? ' <span class="rg">' + escapeHtml(it.eventDate) + '</span>'
+                                        : '')
+                                  + (it.pastEdition ? ' <span class="past">지난 회차</span>' : '')
                                   + '</span>'
                                   + mark
                                   + '</li>';

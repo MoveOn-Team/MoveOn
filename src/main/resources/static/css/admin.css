@@ -188,6 +188,15 @@ a { color: var(--ad-brand); }
 
 .found-list .done { font-size: 12px; color: var(--ad-muted); }
 
+/* 지난 회차. 빼지는 않고 아래로만 내린 것이라 눈에 덜 띄게 둔다 */
+.found-list .past {
+    font-size: 11px;
+    color: var(--ad-muted);
+    border: 1px solid var(--ad-line);
+    border-radius: 6px;
+    padding: 1px 5px;
+}
+
 /* 반려한 대회. 등록됨과 달리 옆에 '다시 등록' 단추가 함께 있다 */
 .found-list .rejected {
     font-size: 12px;

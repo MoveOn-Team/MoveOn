@@ -19,6 +19,9 @@ public interface IEventSearchService {
      */
     List<EventSearchDTO> discover(String keyword, boolean refresh) throws Exception;
 
+    /** 보관해 둔 검색 결과를 버린다. 지우거나 상태를 바꿨을 때 부른다 */
+    void clearCache();
+
     /** 대회 이름으로 공식 홈페이지를 찾음. "종류|주소" 형태. 못 찾으면 null */
     String findSite(String eventName) throws Exception;
 

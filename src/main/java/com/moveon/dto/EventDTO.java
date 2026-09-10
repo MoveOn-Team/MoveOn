@@ -74,4 +74,6 @@ public class EventDTO {
     private Integer dday; // 접수 마감까지 남은 날
 
     private String applyState; // 접수 배지 종류 OPEN / BEFORE / CLOSED / UNKNOWN
+
+    private boolean outsideArea; // 서울·경기 밖. findPlace 가 세우고 등록 화면이 경고에 쓴다
 }
