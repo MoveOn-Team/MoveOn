@@ -24,7 +24,9 @@
          WHERE e.is_active = 1
            AND r.intensity = #{intensity}
            AND r.age_group IN (#{ageGroup}, #{ageBand}, '&#xC804;&#xCCB4;', 'ALL')
+        <if test="bmiGrade != null">
            AND r.bmi_grade IN (#{bmiGrade}, '&#xC804;&#xCCB4;', 'ALL')
+        </if>
            AND r.gender IN (#{gender}, 'ALL')
          ORDER BY CASE r.phase
                     WHEN 'WARMUP' THEN 1

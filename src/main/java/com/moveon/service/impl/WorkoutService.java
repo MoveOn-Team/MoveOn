@@ -130,6 +130,13 @@ public class WorkoutService implements IWorkoutService {
         List<HomeExerciseDTO> raw = homeWorkoutMapper.getRuleExercises(
                 ageGroup, ageBand, bmiGrade, gender, useIntensity);
 
+        // BMI 로 한 건도 못 찾으면 그 조건을 빼고 다시 찾는다.
+        // 등급 이름이 어긋나 계획이 통째로 비는 것보다, BMI 를 못 맞춘 계획이라도 주는 편이 낫다.
+        if (raw.isEmpty() && bmiGrade != null) {
+            log.warn("bmi_grade '{}' 로 찾은 동작이 없어 BMI 조건을 빼고 다시 찾는다", bmiGrade);
+            raw = homeWorkoutMapper.getRuleExercises(ageGroup, ageBand, null, gender, useIntensity);
+        }
+
         HomeWorkoutPlanDTO plan = new HomeWorkoutPlanDTO();
         plan.setAgeGroup(ageGroup);
         plan.setAgeBand(ageBand);
@@ -286,9 +293,14 @@ public class WorkoutService implements IWorkoutService {
         return (age / 10 * 10) + "대";
     }
 
+    /**
+     * home_workout_rules.bmi_grade 에 실제로 들어 있는 여섯 값으로만 돌려준다.
+     * 대한비만학회 분류라 '과체중' · '비만' 이 아니라 '비만전단계비만' · 'N단계비만' 이다.
+     * 모르면 null. 부르는 쪽이 BMI 조건을 빼고 다시 찾는다.
+     */
     private String bmiGrade(double bmi) {
         if (bmi <= 0) {
-            return "전체";
+            return null;
         }
         if (bmi < 18.5) {
             return "저체중";
@@ -297,9 +309,15 @@ public class WorkoutService implements IWorkoutService {
             return "정상";
         }
         if (bmi < 25) {
-            return "과체중";
+            return "비만전단계비만";
         }
-        return "비만";
+        if (bmi < 30) {
+            return "1단계비만";
+        }
+        if (bmi < 35) {
+            return "2단계비만";
+        }
+        return "3단계비만";
     }
 
     private int estimateKcal(double totalMetMin, double weightKg) {
