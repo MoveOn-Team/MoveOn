@@ -7,6 +7,8 @@ import com.moveon.dto.RentalDTO;
 import com.moveon.dto.SportDTO;
 import com.moveon.service.IRecommendService;
 import jakarta.servlet.http.HttpSession;
+import static com.moveon.util.UrlUtil.firstUsable;
+import static com.moveon.util.UrlUtil.isUsable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -218,7 +220,7 @@ public class RecommendController {
         // 따로 담아 두면 1.0km 짜리 아래에 2.2km 짜리가 먼저 오고 개수도 넘침.
         List<FacilityDTO> learnList = new ArrayList<>();
         for (FacilityDTO f : facilities) {
-            if (isUsableUrl(f.getReserveUrl()) || isUsableUrl(f.getRentalUrl())) {
+            if (isUsable(f.getReserveUrl()) || isUsable(f.getRentalUrl())) {
                 rentals.add(asRental(f, sport.getName()));
             } else {
                 learnList.add(f);
@@ -386,7 +388,7 @@ public class RecommendController {
 
         if (hasCourse) {
             for (ProgramDTO p : programs) {
-                if (isUsableUrl(p.getReservationUrl())) {
+                if (isUsable(p.getReservationUrl())) {
                     return new Destination(p.getReservationUrl(), Go.LEARN);
                 }
             }
@@ -411,7 +413,7 @@ public class RecommendController {
         // 자치구 대관 사이트는 그 구 시설들의 대관 목록이다.
         // 우리 자료에 아무 기록도 없는 시설은 그 목록에 있는지 확인된 바가 없어 보내지 않는다.
         // 근린공원 농구장을 강남구 대관으로 보내 헛걸음시키던 것이 그 경우였다.
-        if (!programs.isEmpty() && isUsableUrl(pick.getDistrictRentalUrl())) {
+        if (!programs.isEmpty() && isUsable(pick.getDistrictRentalUrl())) {
             return new Destination(pick.getDistrictRentalUrl(), Go.RENT);
         }
 
@@ -430,34 +432,6 @@ public class RecommendController {
 
         // 빌릴 창구를 못 찾았으면 그 시설 홈페이지라도. 그건 신청 화면이 아니라 안내다.
         return new Destination(firstUsable(pick.getHomepageUrl()), Go.INFO);
-    }
-
-    /** 앞에서부터 쓸 만한 주소를 고름. 없으면 null. */
-    private String firstUsable(String... urls) {
-        for (String u : urls) {
-            if (isUsableUrl(u)) {
-                return u;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 링크로 쓸 수 있는 주소인지 봄.
-     *
-     * 공공데이터에는 값이 비어 있다는 뜻으로 "null" 이라는 글자가 그대로 들어온 행이 많음.
-     * (programs.reservation_url 만 249건) 자바의 null 검사로는 걸러지지 않아
-     * 그대로 두면 버튼이 깨진 주소로 연결됨.
-     */
-    private boolean isUsableUrl(String url) {
-        if (url == null || url.isBlank()) {
-            return false;
-        }
-        String v = url.trim();
-        if ("null".equalsIgnoreCase(v) || "-".equals(v)) {
-            return false;
-        }
-        return v.startsWith("http://") || v.startsWith("https://");
     }
 
 

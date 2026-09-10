@@ -10,7 +10,6 @@
     <!-- 1. jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- 4. 커스텀 JS 파일 (body 맨 밑 또는 head 하단) -->
-    <script src="${pageContext.request.contextPath}/js/weather-anim.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MOVE:ON 맞춤 운동 추천</title>

@@ -3,6 +3,7 @@ $(document).ready(function () {
     const $weatherIcon = $('#weather-icon');
     const contextPath = $('#weather-icon').data('context-path') || '';
     const API_KEY = $weatherIcon.data('api-key');
+    const CITY = 'Seoul';
 
     function fetchWeather() {
         const url = `https://api.openweathermap.org/data/2.5/weather?q=${CITY}&appid=${API_KEY}&units=metric&lang=kr`;

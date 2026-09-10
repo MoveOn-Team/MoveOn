@@ -6,6 +6,7 @@ import com.moveon.dto.FacilityDTO;
 import com.moveon.mapper.IAdminMapper;
 import com.moveon.service.IAdminService;
 import com.moveon.util.EncryptUtil;
+import com.moveon.util.UrlUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -82,17 +83,9 @@ public class AdminService implements IAdminService {
 
     /** javascript: 주소는 window.open 이 실행해 버린다. &lt;input type="url"&gt; 은 그것도 통과시킨다 */
     private String cleanUrl(String url) {
-        if (url == null) {
-            return null;
-        }
-        String s = url.trim();
-        if (s.isEmpty()) {
-            return null;
-        }
-        if (!s.regionMatches(true, 0, "http://", 0, 7)
-                && !s.regionMatches(true, 0, "https://", 0, 8)) {
-            log.warn("http/https 가 아닌 주소라 버린다 : {}", s);
-            return null;
+        String s = UrlUtil.firstUsable(url);
+        if (s == null && url != null && !url.isBlank()) {
+            log.warn("쓸 수 없는 주소라 버린다 : {}", url);
         }
         return s;
     }

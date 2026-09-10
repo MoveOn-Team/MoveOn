@@ -163,23 +163,6 @@
                     </p>
                 </c:if>
 
-                <%-- 지나는 지점 이름. 같은 이름이 잇달아 나오면 한 번만 적는다. --%>
-                <c:set var="prev" value=""/>
-                <c:set var="hasName" value="false"/>
-                <c:forEach var="pt" items="${points}">
-                    <c:if test="${not empty pt.pointName}"><c:set var="hasName" value="true"/></c:if>
-                </c:forEach>
-
-                <c:if test="${hasName}">
-                    <p class="course-legend">
-                        <c:forEach var="pt" items="${points}">
-                            <c:if test="${not empty pt.pointName and pt.pointName ne prev}">
-                                <span>${pt.pointName}</span>
-                                <c:set var="prev" value="${pt.pointName}"/>
-                            </c:if>
-                        </c:forEach>
-                    </p>
-                </c:if>
             </div>
 
             <%-- 지도 라이브러리.
