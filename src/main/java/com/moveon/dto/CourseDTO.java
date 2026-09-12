@@ -59,9 +59,6 @@ public class CourseDTO {
     private double startLat;
     private double startLng;
 
-    /** 원본 안내 페이지 */
-    private String guideUrl;
-
     /** DUDREAM 두드림길 / DULLE 둘레길 / MOUNTAIN 산길 */
     private String source;
 

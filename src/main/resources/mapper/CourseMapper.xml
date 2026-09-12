@@ -8,7 +8,7 @@
         c.course_id, c.name, c.course_type, c.gu_name,
         c.distance_km, c.duration_min, c.difficulty, c.features,
         c.loop_type, c.subway_info, c.start_lat, c.start_lng,
-        c.guide_url, c.source
+        c.source
     </sql>
 
     <!-- 현위치에서 가까운 야외 코스

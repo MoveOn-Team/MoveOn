@@ -31,7 +31,6 @@
                f.lat, f.lng, f.phone, f.homepage_url, f.capacity,
                f.rental_url,
                fs.reserve_url,
-               f.guide_url,
                <include refid="visitOnly"/> AS visit_only,
                ds.site_url   AS district_url,
                ds.rental_url AS district_rental_url,
@@ -84,8 +83,6 @@
                -- 예약 링크는 시설이 아니라 '시설 x 종목' 단위.
                -- 같은 복합시설이라도 테니스장만 예약 대상인 경우가 있음.
                fs.reserve_url,
-               -- 신청 창구가 없는 시설을 안내 페이지로라도 보내는 데 씀 (카카오 장소)
-               f.guide_url,
                <include refid="visitOnly"/> AS visit_only,
                -- 시설 주소가 없을 때 쓸 자치구 창구. 강습과 대관을 따로 둔다
                ds.site_url   AS district_url,
