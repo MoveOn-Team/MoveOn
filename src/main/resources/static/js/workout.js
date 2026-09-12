@@ -340,8 +340,9 @@
             }, 200);
         }
 
-        openFrom(document.getElementById("btnCourseRoute"), "mapUrl",
+        bindFollow(document.getElementById("btnCourseRoute"),
             "이 코스의 위치 정보가 아직 없습니다.");
+        bindFollow(document.getElementById("btnCourseFollow"), "");
         openFrom(document.getElementById("btnFacilityMap"), "mapUrl",
             "이 시설의 위치 정보가 아직 없습니다.");
         openFrom(document.getElementById("btnFacilitySite"), "targetUrl",
@@ -399,6 +400,52 @@
             position: latlng,
             yAnchor: 2.2,
             content: '<span class="map-pin-label">' + esc(text) + '</span>'
+        });
+    }
+
+    /** 휴대폰·태블릿인지. 네이버지도는 PC용 앱이 없어 여기서 갈린다 */
+    function isPhone() {
+        if (navigator.userAgentData && typeof navigator.userAgentData.mobile === "boolean") {
+            return navigator.userAgentData.mobile;
+        }
+        return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    /**
+     * 길 안내. 폰에서는 네이버 앱을 먼저 부르고, 안 열리면 카카오맵으로 간다.
+     * 앱 스킴은 앱이 없으면 오류도 없이 아무 일도 안 일어나서, 화면이 그대로인지로 가른다.
+     */
+    function bindFollow(el, emptyMsg) {
+        if (!el) {
+            return;
+        }
+        el.addEventListener("click", function () {
+            var naver = el.dataset.naverUrl;
+            var kakao = el.dataset.mapUrl;
+
+            if (!naver && !kakao) {
+                alert(emptyMsg);
+                return;
+            }
+
+            // PC 는 네이버 앱이 있을 수 없으니 기다리지 않고 바로 카카오로 간다
+            if (!naver || !isPhone()) {
+                window.open(kakao, "_blank", "noopener");
+                return;
+            }
+
+            var left = false;
+            function gone() { left = true; }
+            document.addEventListener("visibilitychange", gone);
+
+            location.href = naver;
+
+            setTimeout(function () {
+                document.removeEventListener("visibilitychange", gone);
+                if (!left && !document.hidden) {
+                    window.open(kakao, "_blank", "noopener");
+                }
+            }, 1500);
         });
     }
 

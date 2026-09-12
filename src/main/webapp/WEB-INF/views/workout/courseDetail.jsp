@@ -176,25 +176,28 @@
         </c:otherwise>
     </c:choose>
 
-    <%-- 버튼은 하나만 둔다.
-
-         '지도에서 보기' 를 함께 두었는데, 바로 위에 이미 지도가 있어 겹쳤다.
-         화면 안 지도로 코스 모양을 보고, 갈 마음이 서면 시작점까지 안내받는다.
-         그 둘이면 충분하다.
-
-         길 안내는 코스 '시작점' 을 가리킨다.
-         코스는 선이라 중간 지점이 더 가까울 수 있지만, 실제로 가야 하는 곳은 시작점이다.
-         입구가 공원 안쪽이나 골목에 있는 코스가 많아 이 버튼이 필요하다.
-
-         link/to 는 카카오맵의 길찾기 화면을 연다.
-         출발지는 카카오맵이 알아서 현위치로 잡는다.
-         휴대폰에서는 카카오맵 앱이 있으면 앱으로 넘어간다. --%>
+    <%-- 시작점 : 코스 입구까지. 입구가 공원 안쪽이나 골목인 코스가 많다.
+         따라가기 : 코스를 훑는다. 경유지가 5개뿐이라 지점을 추려 넣는다.
+         둘 다 네이버 앱을 먼저 부르고 없으면 카카오로 간다. --%>
     <div class="detail-action-btns">
         <button type="button" id="btnCourseRoute" class="btn-primary"
+                data-naver-url="${startNaverUrl}"
                 data-map-url="https://map.kakao.com/link/to/${fn:replace(course.name, ',', ' ')},${course.startLat},${course.startLng}">
             시작점까지 길 안내
         </button>
+        <c:if test="${not empty routeUrl}">
+            <button type="button" id="btnCourseFollow" class="btn-outline"
+                    data-naver-url="${naverUrl}" data-map-url="${routeUrl}">
+                코스 따라가기
+            </button>
+        </c:if>
     </div>
+    <c:if test="${not empty routeUrl}">
+        <p class="map-sub-info">
+            네이버지도 앱이 있으면 음성 안내로, 없으면 카카오맵으로 열려요.<br>
+            코스의 주요 지점만 이어 지도앱이 다시 계산한 경로라 실제 산책로와 다를 수 있어요.
+        </p>
+    </c:if>
 </main>
 
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>

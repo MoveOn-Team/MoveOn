@@ -2,11 +2,10 @@ package com.moveon.controller;
 
 import com.moveon.dto.*;
 import com.moveon.mapper.IUserMapper;
-import com.moveon.service.IUserService;
 import com.moveon.service.IMyPageService;
 import com.moveon.service.IWorkoutService;
+import com.moveon.util.CourseRouteUtil;
 import jakarta.servlet.http.HttpSession;
-import static com.moveon.util.UrlUtil.firstUsable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +13,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.moveon.util.UrlUtil.firstUsable;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -148,8 +144,18 @@ public class WorkoutController {
 
         boolean fromRecommend = "recommend".equals(from) && sportId > 0;
 
+        List<CoursePointDTO> points = workoutService.getCoursePoints(courseId);
+
         model.addAttribute("course", course);
-        model.addAttribute("points", workoutService.getCoursePoints(courseId));
+        model.addAttribute("points", points);
+
+        // 도보 길찾기. 경유지가 5개뿐이라 지점을 추려 넣는다.
+        // 네이버는 실시간 안내가 있지만 앱이 있어야 하고, 카카오는 웹으로도 열린다.
+        boolean loop = "LOOP".equals(course.getLoopType());
+        model.addAttribute("routeUrl", CourseRouteUtil.walkUrl(points, loop));
+        model.addAttribute("naverUrl", CourseRouteUtil.naverWalkUrl(points, loop));
+        model.addAttribute("startNaverUrl",
+                CourseRouteUtil.naverToUrl(course.getStartLat(), course.getStartLng(), course.getName()));
         model.addAttribute("kakaoMapKey", kakaoMapKey);
         model.addAttribute("lat", myLat);
         model.addAttribute("lng", myLng);
