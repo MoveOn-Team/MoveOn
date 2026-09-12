@@ -67,9 +67,9 @@
         <c:when test="${currentTab == 'outdoor'}">
             <div class="sub-tag-group">
                 <a href="?tab=outdoor&type=WALK${pos}"
-                   class="sub-tag-btn ${courseType == 'WALK' ? 'is-active' : ''}">걷기</a>
+                   class="sub-tag-btn ${courseType == 'WALK' ? 'is-active' : ''}">평지</a>
                 <a href="?tab=outdoor&type=HIKE${pos}"
-                   class="sub-tag-btn ${courseType == 'HIKE' ? 'is-active' : ''}">등산</a>
+                   class="sub-tag-btn ${courseType == 'HIKE' ? 'is-active' : ''}">산길</a>
             </div>
 
             <c:choose>
