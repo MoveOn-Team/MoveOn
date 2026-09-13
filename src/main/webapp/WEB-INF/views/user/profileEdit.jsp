@@ -43,12 +43,12 @@
             <h2 class="group-title">신체 정보</h2>
             <div class="edit-input-card">
                 <label class="card-label">키 (cm)</label>
-                <input type="number" step="0.1" min="100" max="250" name="heightCm" id="height" class="card-input" value="${user.heightCm}" required>
+                <input type="number" step="0.1" min="50" max="250" name="heightCm" id="height" class="card-input" value="${user.heightCm}" required>
             </div>
 
             <div class="edit-input-card mt-12">
                 <label class="card-label">몸무게 (kg)</label>
-                <input type="number" step="0.1" min="30" max="200" name="weightKg" id="weight" class="card-input" value="${user.weightKg}" required>
+                <input type="number" step="0.1" min="10" max="250" name="weightKg" id="weight" class="card-input" value="${user.weightKg}" required>
             </div>
         </div>
 
