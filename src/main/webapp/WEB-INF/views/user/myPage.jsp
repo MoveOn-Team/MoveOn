@@ -43,7 +43,7 @@
 
     </style>
 </head>
-<body class="auth-page" data-context-path="${pageContext.request.contextPath}" data-user-weight="${user.weightKg != null ? user.weightKg : 65}">
+<body class="auth-page" data-context-path="${pageContext.request.contextPath}" data-user-weight="${user.weightKg != null and user.weightKg > 0 ? user.weightKg : 65}">
 <main class="auth-shell mypage-shell">
 
         <header class="page-header">
@@ -283,7 +283,8 @@
 
     // 실시간 칼로리 계산
     function calculateModalCalories() {
-        var userWeight = parseFloat(document.body.dataset.userWeight) || 65.0;
+        // 기본 체중은 위 data-user-weight 한 곳에서만 정한다
+        var userWeight = parseFloat(document.body.dataset.userWeight) || 0;
 
         var sportName = document.querySelector(".sport-chips .chip.active") ? document.querySelector(".sport-chips .chip.active").innerText.trim() : "헬스";
         var timeText = document.querySelector(".time-chips .chip.active") ? document.querySelector(".time-chips .chip.active").innerText.trim() : "60분";
