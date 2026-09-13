@@ -2,7 +2,7 @@ package com.moveon.service;
 
 import com.moveon.dto.CourseDTO;
 import com.moveon.dto.FacilityDTO;
-import com.moveon.dto.ProfileDTO;
+import com.moveon.dto.TraitCardDTO;
 import com.moveon.dto.ProgramDTO;
 import com.moveon.dto.RentalDTO;
 import com.moveon.dto.SportDTO;
@@ -14,7 +14,7 @@ public interface IRecommendService {
 
     // 화면 위쪽 성향 요약 카드 (성향 4축 · 나이 · BMI · 현위치 동네)
 
-    ProfileDTO getProfile(int userId, double lat, double lng) throws Exception;
+    TraitCardDTO getProfile(int userId, double lat, double lng) throws Exception;
 
     // 지속 적합도 TOP3 (화면에 보여줄 상위 3개)
 
