@@ -247,10 +247,6 @@
             }).join("");
         }
 
-        /*
-        수정 부분
-         */
-
         function finish() {
             var totalCompletedSetCount = 0;
             var totalSkippedSetCount = 0;
@@ -263,12 +259,13 @@
                 totalCompletedSetCount += completedSets;
                 totalSkippedSetCount += skippedSets;
 
-                // [수정된 표준 칼로리 공식]
-                var met = ex.metValue || 4.5;               // 기본 MET값 4.5 (중강도 운동)
-                var durationSec = ex.durationSec || 30;      // 세트당 수행시간(초)
-                var userWeight = parseFloat(document.body.dataset.userWeight) || 65;      // 사용자 기본 체중(kg)
+                // 열량 = MET x 0.0175 x 체중 x 시간(분) x 완료 세트 수
+                var met = ex.metValue || 4.5;
+                var durationSec = ex.durationSec || 30;
+                // 기본 체중은 서버(WorkoutService.DEFAULT_WEIGHT_KG)가 정한다.
+                // 여기서 또 정하면 값이 두 곳에 생긴다. 못 받았으면 아래 바닥값이 받는다
+                var userWeight = parseFloat(document.body.dataset.userWeight) || 0;
 
-                // (MET * 0.0175 * 체중 * 운동시간(분)) * 완료 세트 수
                 var durationMin = durationSec / 60.0;
                 var setCalorie = met * 0.0175 * userWeight * durationMin;
 
@@ -284,10 +281,10 @@
                 };
             });
 
-            // 운동 전체 휴식시간 및 유효 강도를 고려한 기본 베이스 칼로리 보정 (최소 분당 4kcal 보장)
+            // 위 식에는 휴식시간이 빠져 있어 너무 낮게 나온다. 세트당 4.5kcal 을 바닥으로 둔다
             var finalCalories = Math.max(
                 Math.round(totalBurnedCalories),
-                Math.round(totalCompletedSetCount * 4.5) // 세트당 최소 약 4.5kcal 집계
+                Math.round(totalCompletedSetCount * 4.5)
             );
 
             fetch(contextPath + "/workout/api/home-result", {
@@ -297,7 +294,7 @@
                     completedExerciseCount: exercises.length,
                     completedSetCount: totalCompletedSetCount,
                     skippedSetCount: totalSkippedSetCount,
-                    burnedCalories: finalCalories, // 보정된 칼로리 전달
+                    burnedCalories: finalCalories,
                     exerciseRecords: exerciseRecords
                 })
             })
