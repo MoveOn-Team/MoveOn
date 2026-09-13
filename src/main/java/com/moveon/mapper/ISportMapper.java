@@ -8,13 +8,11 @@ import java.util.List;
 
 
 /**
- * 점수 계산은 SQL이 아니라 RecommendService에서 함.
- * 여기서는 계산에 필요한 재료(성향점수 · 참여율 · 최근접거리)만 가져옴.
- * 가중치나 정규화 방식이 바뀌어도 SQL 을 안 고치게 하기 위함.
+ * 점수 계산은 RecommendService 가 한다. 여기서는 재료(성향점수 · 참여율 ·
+ * 최근접거리)만 가져온다. 가중치가 바뀌어도 SQL 을 안 고치게 하기 위함이다.
  *
- * DTO에 담아 하나로 넘길 수도 있었는데 안 한 이유는,
- * SportDTO 에 lat·lng 같은 조회 조건이 들어가면 종목 정보(결과)와 섞이기 때문임.
- * FacilityDTO 는 더 심해서, lat·lng 가 이미 시설의 좌표로 쓰이고 있어 이름까지 겹침.
+ * 조건을 DTO 로 묶지 않은 것은 SportDTO 의 lat·lng 가 이미 종목 정보로
+ * 쓰이고 있어 조회 조건과 이름이 겹치기 때문이다.
  */
 @Mapper
 public interface ISportMapper {
