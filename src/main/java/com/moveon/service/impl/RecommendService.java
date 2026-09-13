@@ -81,7 +81,7 @@ public class RecommendService implements IRecommendService {
             Map.of("OWN_PACE", "내 페이스", "ANY", "가볍게", "WIN", "승부");
 
     @Override
-    public ProfileDTO getProfile(int userId, double lat, double lng) throws Exception {
+    public TraitCardDTO getProfile(int userId, double lat, double lng) throws Exception {
 
         log.info("{}.getProfile Start!", this.getClass().getName());
 
@@ -98,7 +98,7 @@ public class RecommendService implements IRecommendService {
             return null;
         }
 
-        ProfileDTO rDTO = new ProfileDTO();
+        TraitCardDTO rDTO = new TraitCardDTO();
 
         rDTO.setAge(me.getAge());
         rDTO.setBmi(trait.getBmi());
