@@ -62,7 +62,7 @@
         <div class="line-field box-style">
           <label>키</label>
           <div class="input-group">
-            <input type="number" id="height" min="100" max="250">
+            <input type="number" id="height" min="50" max="250">
             <span class="unit">cm</span>
           </div>
         </div>
@@ -71,7 +71,7 @@
         <div class="line-field box-style">
           <label>몸무게</label>
           <div class="input-group">
-            <input type="number" id="weight" min="30" max="200">
+            <input type="number" id="weight" min="10" max="250">
             <span class="unit">kg</span>
           </div>
         </div>
