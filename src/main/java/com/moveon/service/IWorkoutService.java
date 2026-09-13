@@ -30,4 +30,7 @@ public interface IWorkoutService {
 
     HomeWorkoutPlanDTO getHomeWorkoutPlan(int userId, String intensity, int targetMin) throws Exception;
 
+    /** 홈트 소모 열량 계산에 쓸 체중. 기록이 없으면 기본값을 준다 */
+    double getUserWeight(Integer userId) throws Exception;
+
 }

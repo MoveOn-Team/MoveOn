@@ -1,14 +1,12 @@
 package com.moveon.controller;
 
 import com.moveon.dto.*;
-import com.moveon.mapper.IUserMapper;
 import com.moveon.service.IMyPageService;
 import com.moveon.service.IWorkoutService;
 import com.moveon.util.CourseRouteUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -28,9 +26,6 @@ import static com.moveon.util.UrlUtil.firstUsable;
 @RequestMapping("/workout")
 @Controller
 public class WorkoutController {
-
-    @Autowired
-    private IUserMapper userMapper;
 
     private final IWorkoutService workoutService;
 
@@ -176,35 +171,9 @@ public class WorkoutController {
             return "redirect:/workout/workoutList?tab=home";
         }
 
-        // 1. 세션에서 로그인 정보 가져오기
-        Object userNoObj = session.getAttribute("SS_USER_NO");
-        String loginId = (String) session.getAttribute("SS_USER_ID");
-
-        double userWeight = 65.0;
-
-        // 2. DB에서 유저 최신 체중 조회 (IUserMapper 직접 호출)
-        if (userNoObj != null || loginId != null) {
-            UserDTO pDTO = new UserDTO();
-
-            if (userNoObj instanceof Integer) {
-                pDTO.setUserId((Integer) userNoObj);
-            } else if (userNoObj instanceof Long) {
-                pDTO.setUserId(((Long) userNoObj).intValue());
-            }
-
-            if (loginId != null) {
-                pDTO.setLoginId(loginId);
-            }
-
-            // Mapper의 getLoginUser 직접 실행
-            UserDTO userDTO = userMapper.getLoginUser(pDTO);
-
-            if (userDTO != null && userDTO.getWeightKg() > 0) {
-                userWeight = userDTO.getWeightKg();
-            }
-        }
-
-        System.out.println("최종 적용된 체중: " + userWeight + " kg");
+        // 화면이 세트마다 소모 열량을 셀 때 쓴다
+        double userWeight = workoutService.getUserWeight(getSessionUserId(session));
+        log.info("{}.workoutPlay 체중 : {}kg", this.getClass().getName(), userWeight);
 
         model.addAttribute("userWeight", userWeight);
         model.addAttribute("homePlan", plan);
@@ -223,24 +192,9 @@ public class WorkoutController {
             return "redirect:/workout/workoutList?tab=home";
         }
 
-        // 1. 세션에서 로그인 정보 가져와 최신 체중 조회
-        Object userNoObj = session.getAttribute("SS_USER_NO");
-        String loginId = (String) session.getAttribute("SS_USER_ID");
-        double userWeight = 65.0;
+        double userWeight = workoutService.getUserWeight(getSessionUserId(session));
 
-        if (userNoObj != null || loginId != null) {
-            UserDTO pDTO = new UserDTO();
-            if (userNoObj instanceof Integer) pDTO.setUserId((Integer) userNoObj);
-            else if (userNoObj instanceof Long) pDTO.setUserId(((Long) userNoObj).intValue());
-            if (loginId != null) pDTO.setLoginId(loginId);
-
-            UserDTO userDTO = userMapper.getLoginUser(pDTO);
-            if (userDTO != null && userDTO.getWeightKg() > 0) {
-                userWeight = userDTO.getWeightKg();
-            }
-        }
-
-        // 2. 세션 칼로리 값 반영
+        // 화면에서 실제로 센 값이 있으면 그걸 쓴다
         Object burnedCalObj = session.getAttribute("burnedCalories");
         if (burnedCalObj != null) {
             int actualCalories = (Integer) burnedCalObj;

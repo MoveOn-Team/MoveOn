@@ -38,6 +38,9 @@ public class WorkoutService implements IWorkoutService {
 
     private static final int LIST_LIMIT = 10;
 
+    /** 체중 기록이 없는 회원의 열량 계산에 쓰는 값 */
+    private static final double DEFAULT_WEIGHT_KG = 65.0;
+
     @Override
     public List<FacilityDTO> getFacilities(int sportId, double lat, double lng) throws Exception {
 
@@ -347,6 +350,21 @@ public class WorkoutService implements IWorkoutService {
             return null;
         }
         return s;
+    }
+
+    /** 체중을 안 적은 회원도 열량을 보여줘야 하므로 못 찾으면 기본값을 쓴다 */
+    @Override
+    public double getUserWeight(Integer userId) throws Exception {
+
+        if (userId == null) {
+            return DEFAULT_WEIGHT_KG;
+        }
+
+        UserDTO pDTO = new UserDTO();
+        pDTO.setUserId(userId);
+        UserDTO me = userMapper.getLoginUser(pDTO);
+
+        return (me != null && me.getWeightKg() > 0) ? me.getWeightKg() : DEFAULT_WEIGHT_KG;
     }
 
 }

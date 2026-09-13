@@ -15,11 +15,9 @@
 
 <main class="auth-shell workout-shell">
 
-    <%-- 목록으로 돌아갈 때 현위치를 이어줘야 거리 표시가 그대로 유지된다.
-         history.back() 을 쓰면 주소로 바로 들어온 경우에 갈 곳이 없다.
-
-         이 화면은 두 탭이 함께 쓴다. 추천 탭의 걷기·등산에서도 여기로 온다.
-         돌아갈 곳을 한 곳으로 박아 두면 추천을 보던 사람이 즉시운동 목록에 떨어진다. --%>
+    <%-- 이 화면은 두 탭이 함께 쓴다. 추천 탭의 걷기·등산에서도 여기로 온다.
+         돌아갈 곳을 하나로 박으면 추천을 보던 사람이 즉시운동 목록에 떨어진다.
+         history.back() 은 주소로 바로 들어온 경우에 갈 곳이 없다. --%>
     <div class="detail-header">
         <c:choose>
             <c:when test="${fromRecommend}">
@@ -40,8 +38,7 @@
         <p class="detail-subtext">
             ${course.courseType eq 'HIKE' ? '산길' : '평지'}
             <c:if test="${not empty course.guName}"> · ${course.guName}</c:if>
-            <%-- 위치를 못 받았으면 '현위치' 라고 하면 안 된다.
-                 서울시청에서 잰 값을 현위치라고 하면 거리가 통째로 거짓말이 된다. --%>
+            <%-- 서울시청에서 잰 값을 '현위치' 라고 하면 거리가 거짓말이 된다 --%>
             · ${usingGps ? '현위치' : '서울시청'}에서
             <c:choose>
                 <c:when test="${course.distanceFromMe lt 1}">
@@ -54,8 +51,6 @@
         </p>
     </div>
 
-    <%-- 코스를 고를 때 가장 먼저 보는 세 가지다.
-         '얼마나 걷나 / 얼마나 걸리나 / 힘든가' --%>
     <div class="summary-card-grid">
         <div class="summary-card">
             <span class="label">코스 길이</span>
@@ -90,9 +85,8 @@
         </div>
     </div>
 
-    <%-- 아래 표는 값이 있는 줄만 그린다.
-         지금 자료에는 지하철역·특징이 한 건도 없어서, 자리를 잡아 두면
-         빈 줄만 늘어선 표가 된다. --%>
+    <%-- 값이 있는 줄만 그린다. 지하철역·특징은 자료에 한 건도 없어
+         자리를 잡아 두면 빈 줄만 늘어선 표가 된다 --%>
     <c:if test="${not empty course.loopType or not empty course.subwayInfo
                   or not empty course.features or not empty course.guName}">
         <div class="info-table-box">
@@ -125,37 +119,25 @@
         </div>
     </c:if>
 
-    <%-- 상자를 두르지 않는다. 행사 탭 상세의 같은 문구와 모양을 맞춘다.
-         상자로 감싸면 '읽어야 하는 경고' 처럼 보이는데,
-         실제로는 '자료가 바뀔 수 있다' 는 꼬리말에 가깝다. --%>
+    <%-- 상자를 두르면 경고처럼 보인다. 행사 탭 꼬리말과 모양을 맞춘다 --%>
     <p class="data-notice">
         코스 상태는 날씨·공사로 달라질 수 있습니다<br>
         비 온 뒤나 겨울에는 미끄러운 구간이 있을 수 있어요
     </p>
 
-    <%-- 코스 모양.
-
-         좌표를 카카오 지도에 얹는다. 선은 점이 넉넉할 때만 긋는다.
-
-         원본 자료는 코스마다 좌표 수가 크게 다르다.
-             청계천 길            68개
-             서서울호수공원 산책길   23개
-         점이 서너 개뿐인 코스를 이으면 공원을 가로지르는 삼각형이 된다.
-         지도 위에 있으니 '진짜 저 길' 로 읽혀서, 없는 길을 그리는 셈이 된다.
-         그럴 때는 선을 긋지 않고 지나는 자리만 찍는다. --%>
+    <%-- 선은 점이 넉넉할 때만 긋는다. 원본은 코스마다 좌표 수가 68개에서
+         스물몇까지 다른데, 서너 개뿐인 코스를 이으면 공원을 가로지르는
+         삼각형이 된다. 지도 위라 '진짜 저 길' 로 읽혀 없는 길을 그리는 셈이다 --%>
     <c:choose>
         <c:when test="${not empty kakaoMapKey and fn:length(points) >= 2}">
             <div class="course-map">
-                <%-- 좌표를 자바스크립트로 넘긴다.
-                     [[위도,경도],[위도,경도], …] 모양이라 그대로 읽어 쓰면 된다.
-                     line 이 false 면 화면이 선을 긋지 않고 점만 찍는다. --%>
+                <%-- [[위도,경도], …] 모양으로 넘긴다. line 이 false 면 점만 찍는다 --%>
                 <div id="courseMap" class="kakao-map"
                      data-loop="${course.loopType eq 'LOOP'}"
                      data-line="${fn:length(points) >= 5}"
                      data-points='[<c:forEach var="pt" items="${points}" varStatus="st"><c:if test="${not st.first}">,</c:if>[${pt.lat},${pt.lng}]</c:forEach>]'></div>
 
-                <%-- 선을 안 그은 코스는 왜 안 그었는지 밝힌다.
-                     아무 말 없이 점만 있으면 화면이 덜 만들어진 것처럼 보인다. --%>
+                <%-- 아무 말 없이 점만 있으면 화면이 덜 만들어진 것처럼 보인다 --%>
                 <c:if test="${fn:length(points) < 5}">
                     <p class="map-sub-info">
                         이 코스는 원본에 지점이 ${fn:length(points)}곳만 있어
@@ -165,9 +147,7 @@
 
             </div>
 
-            <%-- 지도 라이브러리.
-                 https 를 그대로 적는다. '//' 로 시작하면 페이지가 http 일 때
-                 http://dapi.kakao.com 을 부르는데 카카오는 https 만 받아 준다. --%>
+            <%-- '//' 로 시작하면 http 페이지에서 http 로 부르는데 카카오는 https 만 받는다 --%>
             <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapKey}"></script>
         </c:when>
 

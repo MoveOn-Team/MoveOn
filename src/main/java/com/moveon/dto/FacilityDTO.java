@@ -61,18 +61,10 @@ public class FacilityDTO {
      *  위 넷과 달리 '시설 x 종목' 단위. 같은 복합시설이라도 테니스장만 예약 대상인 곳이 있음. */
     private String reserveUrl;
 
-    /** 안내만 · 카카오 장소 페이지 (facilities.guide_url, 812곳)
-     *  좌표를 맞출 때 저장해 둔 것. 전화·주소·운영시간이 실려 있어
-     *  신청 창구가 없는 시설을 보낼 마지막 자리로 씀. */
-    private String guideUrl;
-
     /**
-     * 방문 접수만 받는 시설인지.
-     *
-     * 노인복지관·사회복지관이 여기 해당함. 강좌는 여는데 온라인 신청 창구가 없음.
-     * ('회원증 지참하여 3층 사무실 내방 신청' — 예약 주소를 가진 강좌 행이 0건)
-     * 이런 곳을 자치구 수강신청으로 보내면 눌러도 그 강좌가 없어 헛걸음이 됨.
-     * 판단 근거는 FacilityMapper 의 visitOnly 조각에 있음.
+     * 방문 접수만 받는 시설인지. 복지관류가 여기 해당한다.
+     * 강좌는 여는데 온라인 창구가 없어 자치구 수강신청으로 보내면 헛걸음이다.
+     * 판단 근거는 FacilityMapper 의 visitOnly 조각에 있다.
      */
     private boolean visitOnly;
 
