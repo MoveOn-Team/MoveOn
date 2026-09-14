@@ -31,6 +31,11 @@
                f.lat, f.lng, f.phone, f.homepage_url, f.capacity,
                f.rental_url,
                fs.reserve_url,
+               <!-- 프로그램이 하나도 없고 주소도 없으면 '그냥 가서 쓰는 곳' 이다.
+                    그런 곳에 대관 단추를 달면 구 전체 목록으로 보내 헛걸음시킨다. -->
+               (SELECT COUNT(*) FROM programs p
+                 WHERE p.facility_id = f.facility_id
+                   AND p.sport_id = #{sportId}) AS course_count,
                <include refid="visitOnly"/> AS visit_only,
                ds.site_url   AS district_url,
                ds.rental_url AS district_rental_url,
@@ -74,7 +79,7 @@
                         getPrograms 쪽은 null 이 올 일이 없어 안 적어도 된다. -->
                    AND ( #{ageBand,jdbcType=VARCHAR} IS NULL
                       OR p.target IS NULL
-                      OR p.target REGEXP '누구나|전체|제한없|일반'
+                      OR p.target REGEXP '누구나|전체|제한없|일반|없음'
                       OR (#{ageBand,jdbcType=VARCHAR} = 'ADULT'  AND p.target REGEXP '성인')
                       OR (#{ageBand,jdbcType=VARCHAR} = 'TEEN'   AND p.target REGEXP '청소년|중등|고등|초중고')
                       OR (#{ageBand,jdbcType=VARCHAR} = 'CHILD'  AND p.target REGEXP '어린이|유아|초등')
@@ -121,17 +126,22 @@
                 추천 목록이 그것만으로 채워진다.
 
                 bookableOnly = false 면(즉시운동 탭) 아무것도 안 빠진다. -->
+        <!-- 어느 탭이든 너무 먼 곳은 담지 않는다.
+             스쿼시처럼 시설이 드문 종목은 안 걸러 두면 27km 짜리가 목록에 오른다.
+             즉시운동은 '지금 나가서 할 곳' 이라 그건 답이 아니다.
+             추천 탭이 더 좁은 것은 '꾸준히 다닐 곳' 을 고르는 화면이기 때문이다. -->
         <if test="bookableOnly">
-           <!-- '가까운 시설' 이라고 적어 놓고 13km 를 보여주지 않는다.
-                점수의 접근성도 5km 를 넘으면 0점으로 매기고 있어(FAR_KM),
-                목록만 그보다 먼 곳을 담으면 화면이 스스로와 어긋난다.
-                걸러서 한 곳도 안 남으면 즉시운동 탭으로 안내한다. -->
+           <!-- 점수의 접근성도 5km 를 넘으면 0점으로 매기고 있어(FAR_KM),
+                목록만 그보다 먼 곳을 담으면 화면이 스스로와 어긋난다. -->
            AND ST_Distance_Sphere(POINT(#{lng}, #{lat}), POINT(f.lng, f.lat)) &lt;= 5000
            AND ( EXISTS (SELECT 1 FROM programs pp
                           WHERE pp.facility_id = fs.facility_id AND pp.sport_id = fs.sport_id)
               OR (f.homepage_url IS NOT NULL AND f.homepage_url &lt;&gt; '')
               OR (f.rental_url   IS NOT NULL AND f.rental_url   &lt;&gt; '')
               OR (fs.reserve_url IS NOT NULL AND fs.reserve_url &lt;&gt; '') )
+        </if>
+        <if test="!bookableOnly">
+           AND ST_Distance_Sphere(POINT(#{lng}, #{lat}), POINT(f.lng, f.lat)) &lt;= 10000
         </if>
            AND NOT (
                  EXISTS (SELECT 1 FROM programs cp
@@ -149,7 +159,7 @@
                                OR ( cp.target IS NULL
                                     AND NOT ( f.name REGEXP '청소년|어린이|유아'
                                               AND #{ageBand,jdbcType=VARCHAR} IN ('ADULT','SENIOR') ) )
-                               OR cp.target REGEXP '누구나|전체|제한없|일반'
+                               OR cp.target REGEXP '누구나|전체|제한없|일반|없음'
                                OR (#{ageBand,jdbcType=VARCHAR} = 'ADULT'  AND cp.target REGEXP '성인')
                                OR (#{ageBand,jdbcType=VARCHAR} = 'TEEN'   AND cp.target REGEXP '청소년|중등|고등|초중고')
                                OR (#{ageBand,jdbcType=VARCHAR} = 'CHILD'  AND cp.target REGEXP '어린이|유아|초등')
@@ -198,7 +208,7 @@
          WHERE p.facility_id = #{facilityId}
            AND p.sport_id = #{sportId}
            AND ( p.target IS NULL
-              OR p.target REGEXP '누구나|전체|제한없|일반'
+              OR p.target REGEXP '누구나|전체|제한없|일반|없음'
               OR (#{ageBand} = 'ADULT'  AND p.target REGEXP '성인')
               OR (#{ageBand} = 'TEEN'   AND p.target REGEXP '청소년|중등|고등|초중고')
               OR (#{ageBand} = 'CHILD'  AND p.target REGEXP '어린이|유아|초등')
