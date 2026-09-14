@@ -100,14 +100,19 @@
             길찾기
         </button>
         <%-- 즉시운동은 오늘 가서 쓰는 화면이라 대관·이용 창구로 보낸다.
-             수강신청은 추천 탭이 맡는다. --%>
+             수강신청은 추천 탭이 맡는다. 단추 이름은 보내는 곳에 맞춰 바뀐다. --%>
         <c:if test="${not empty useUrl}">
             <button type="button" id="btnFacilitySite" class="btn-primary"
                     data-target-url="${useUrl}">
-                이용 안내 보기
+                ${useLabel}
             </button>
         </c:if>
     </div>
+
+    <%-- 신청 절차가 없는 개방형 코트. 단추를 달면 눌러 보고서야 알게 된다. --%>
+    <c:if test="${openAccess}">
+        <p class="map-sub-info">예약 없이 바로 가서 이용하는 곳이에요</p>
+    </c:if>
 </main>
 
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>

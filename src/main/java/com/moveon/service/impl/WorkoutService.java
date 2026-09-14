@@ -36,7 +36,11 @@ public class WorkoutService implements IWorkoutService {
     private final IUserMapper userMapper;
     private final IHomeWorkoutMapper homeWorkoutMapper;
 
-    private static final int LIST_LIMIT = 10;
+    /** 목록에 보여줄 시설 수. 한 화면에 담기는 만큼만 둔다 */
+    private static final int FACILITY_LIMIT = 6;
+
+    /** 야외 코스는 고르는 재미가 있어야 해서 조금 더 넉넉히 둔다 */
+    private static final int COURSE_LIMIT = 10;
 
     /** 체중 기록이 없는 회원의 열량 계산에 쓰는 값 */
     private static final double DEFAULT_WEIGHT_KG = 65.0;
@@ -49,7 +53,7 @@ public class WorkoutService implements IWorkoutService {
         // 연령대 null, bookableOnly false.
         // 신청 창구가 없어 그냥 가서 쓰는 곳이야말로 이 화면이 찾아 줘야 하는 것이다.
         List<FacilityDTO> rList =
-                facilityMapper.getNearbyFacilities(sportId, lat, lng, LIST_LIMIT, null, false);
+                facilityMapper.getNearbyFacilities(sportId, lat, lng, FACILITY_LIMIT, null, false);
 
         log.info("{}.getFacilities End! {} items", this.getClass().getName(), rList.size());
 
@@ -64,7 +68,7 @@ public class WorkoutService implements IWorkoutService {
         // 주소창에 아무 값이나 넣어도 SQL 로 흘러가지 않게 여기서 막는다
         String type = "HIKE".equals(courseType) ? "HIKE" : "WALK";
 
-        List<CourseDTO> rList = courseMapper.getNearbyCourses(type, lat, lng, LIST_LIMIT);
+        List<CourseDTO> rList = courseMapper.getNearbyCourses(type, lat, lng, COURSE_LIMIT);
 
         log.info("{}.getCourses End! {} items", this.getClass().getName(), rList.size());
 

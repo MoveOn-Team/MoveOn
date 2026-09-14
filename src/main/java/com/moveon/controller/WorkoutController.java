@@ -4,6 +4,7 @@ import com.moveon.dto.*;
 import com.moveon.service.IMyPageService;
 import com.moveon.service.IWorkoutService;
 import com.moveon.util.CourseRouteUtil;
+import com.moveon.util.SportRule;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.moveon.util.UrlUtil.firstUsable;
+import static com.moveon.util.UrlUtil.isUsable;
 
 
 @Slf4j
@@ -101,13 +103,45 @@ public class WorkoutController {
             return "redirect:/workout/workoutList";
         }
 
-        String useUrl = firstUsable(facility.getRentalUrl(),
-                facility.getReserveUrl(),
-                facility.getDistrictRentalUrl(),
-                facility.getHomepageUrl());
+        // 어디로 보내는지에 따라 단추 이름이 달라야 한다.
+        // 신청 창구는 로그인부터 요구해서, '안내' 라고 적으면 속은 기분이 든다.
+        //
+        // 시설 홈페이지가 자치구 대관보다 앞이다. 자치구 대관은 그 구 시설 전체 목록이라
+        // 거기서 이 시설을 다시 찾아야 한다. 그 시설 페이지가 있으면 그쪽이 덜 헤맨다.
+        // 진짜 대관 주소(1·2순위)는 여전히 맨 앞이라 '대관 먼저' 는 그대로다.
+        // 헬스·수영처럼 가서 이용하는 종목에는 '대관' 이라는 말을 쓰지 않는다.
+        boolean court = SportRule.isCourt(sportId);
+
+        // 프로그램도 없고 제 주소도 없는 곳은 그냥 가서 쓰는 코트다.
+        // 어린이공원 농구장을 자치구 대관으로 보내면 그 목록에 없어 헛걸음이 된다.
+        boolean openAccess = facility.getCourseCount() == 0
+                && !isUsable(facility.getRentalUrl())
+                && !isUsable(facility.getReserveUrl())
+                && !isUsable(facility.getHomepageUrl());
+
+        String useUrl;
+        String useLabel;
+        if (openAccess) {
+            useUrl = null;
+            useLabel = null;
+        } else if (isUsable(facility.getRentalUrl())) {
+            useUrl = facility.getRentalUrl();
+            useLabel = court ? "대관 신청하기" : "이용 안내 보기";
+        } else if (isUsable(facility.getReserveUrl())) {
+            useUrl = facility.getReserveUrl();
+            useLabel = court ? "대관 신청하기" : "예약 신청하기";
+        } else if (isUsable(facility.getHomepageUrl())) {
+            useUrl = facility.getHomepageUrl();
+            useLabel = "이용 안내 보기";
+        } else {
+            useUrl = firstUsable(facility.getDistrictRentalUrl());
+            useLabel = court ? "대관 신청하기" : "이용 안내 보기";
+        }
 
         model.addAttribute("facility", facility);
         model.addAttribute("useUrl", useUrl);
+        model.addAttribute("useLabel", useLabel);
+        model.addAttribute("openAccess", openAccess);
         model.addAttribute("kakaoMapKey", kakaoMapKey);
         model.addAttribute("sportId", sportId);
         model.addAttribute("lat", myLat);
