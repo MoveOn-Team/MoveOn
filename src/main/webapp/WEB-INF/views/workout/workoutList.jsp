@@ -158,7 +158,7 @@
                     <div class="facility-list">
                         <c:forEach var="f" items="${facilities}" varStatus="st">
                             <a href="${pageContext.request.contextPath}/workout/workoutDetail/${f.facilityId}?sportId=${sportId}&lat=${lat}&lng=${lng}"
-                               class="facility-card ${st.first ? 'is-highlight' : ''} ${st.index >= 5 ? 'is-folded' : ''}">
+                               class="facility-card ${st.first ? 'is-highlight' : ''}">
                                 <div class="card-body">
                                     <h3 class="facility-name">${f.name}</h3>
                                     <p class="facility-address">${not empty f.roadAddr ? f.roadAddr : f.lotAddr}</p>
@@ -178,11 +178,6 @@
                         </c:forEach>
                     </div>
 
-                    <c:if test="${fn:length(facilities) > 5}">
-                        <button type="button" class="btn-more" data-more>
-                            ${fn:length(facilities) - 5}곳 더보기
-                        </button>
-                    </c:if>
                 </c:otherwise>
             </c:choose>
         </c:otherwise>
