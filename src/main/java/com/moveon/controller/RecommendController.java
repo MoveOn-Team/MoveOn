@@ -294,6 +294,12 @@ public class RecommendController {
         // 바로 옆 '길찾기' 와 같은 화면이 떠서 속은 기분이 든다.
         // 그때는 화면이 전화번호 안내로 넘어간다
         if (pick.isVisitOnly()) {
+            // 방문접수는 '강습 신청' 이야기다. 장소를 빌리는 창구는 온라인으로 열려 있을 수 있다.
+            // 포이테니스장은 대관 주소가 있는데도 여기서 막혀 단추가 통째로 비었다.
+            String rent = firstUsable(pick.getReserveUrl(), pick.getRentalUrl());
+            if (rent != null) {
+                return new Destination(rent, Go.RENT);
+            }
             return new Destination(firstUsable(pick.getHomepageUrl()), Go.INFO);
         }
 
