@@ -274,8 +274,7 @@
 }
 
 /* ---------- 시설 목록 ---------- */
-.facility-list,
-.program-list {
+.facility-list {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -338,85 +337,12 @@
     border-radius: 999px;
 }
 
-/* ---------- 강좌 목록 ---------- */
-.program-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.9375rem 1.0625rem;
-    border: 1px solid #eceff3;
-    border-radius: var(--card-radius);
-}
-
-.program-body {
-    flex: 1;
-    min-width: 0;
-}
-
-.program-name {
-    display: block;
-    font-size: var(--fs-body);
-    font-weight: 800;
-    letter-spacing: -.02em;
-}
-
-.program-meta {
-    display: block;
-    margin-top: 0.3125rem;
-    color: #a1a5ab;
-    font-size: var(--fs-cap);
-    line-height: 1.4;
-}
-
-/* 접수 기간. 원문이 여러 줄로 길어서 두 줄까지만 보여준다. */
-.program-apply {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin-top: 0.3125rem;
-    color: #8a6d1f;
-    font-size: var(--fs-tag);
-    line-height: 1.45;
-    white-space: pre-line;
-}
-
-.program-fee {
-    flex: 0 0 auto;
-    color: #2f5691;
-    font-size: var(--fs-body);
-    font-weight: 900;
-    font-variant-numeric: tabular-nums;
-}
-
-.program-fee.free {
-    color: #1c6b45;
-}
-
-/* 처음에 감춰두는 4번째 이후 강좌 */
-.program-item.is-more {
-    display: none;
-}
-
-/* 강좌 개수 표시 (구역 제목 옆) */
+/* 개수 표시 (구역 제목 옆) */
 .section-title small {
     margin-left: 0.375rem;
     color: #a1a5ab;
     font-size: var(--fs-cap);
     font-weight: 700;
-}
-
-.more-button {
-    width: 100%;
-    margin-top: 0.5rem;
-    padding: 0.75rem;
-    color: #5c6470;
-    font: inherit;
-    font-size: var(--fs-meta);
-    font-weight: 700;
-    background: #f7f8f9;
-    border: 1px solid var(--card-line);
-    border-radius: 14px;
 }
 
 /* ---------- 아래 버튼 ---------- */
@@ -431,32 +357,6 @@
     flex: 1;
     margin-top: 0;
 }
-/* 강습이 아닌 것(이용권·대관)에 붙는 작은 표시.
-   원본이 강습과 이용권을 한 표에 담아 놔서, 이름만으로는
-   '일일자유 5,000원' 이 강좌인지 입장료인지 알 수 없었다. */
-.program-kind {
-    margin-left: 0.375rem;
-    padding: 0.0625rem 0.3125rem;
-    border: 1px solid var(--card-line);
-    border-radius: 0.25rem;
-    font-size: var(--fs-tag);
-    font-weight: 500;
-    color: #6b7684;
-    vertical-align: 0.0625rem;
-    white-space: nowrap;
-}
-
-
-/* 같은 이름으로 시간대만 다른 반이 여럿일 때.
-   요금을 뺀 자리에 들어간다. 요금은 2025-09 자료라 지금과 어긋나서 화면에서 뺐다. */
-.program-count {
-    flex: none;
-    align-self: center;
-    font-size: var(--fs-meta);
-    color: #8b95a1;
-    white-space: nowrap;
-}
-
 /* 우측 상단 날씨 위젯 박스 위치 및 크기 */
 .weather-widget {
     position: absolute !important;
@@ -498,9 +398,3 @@
     top: -3px;
 }
 
-.weather-widget #summary {
-    font-size: 11px;
-    margin-top: 2px;
-    opacity: 0.95;
-    white-space: nowrap;
-}

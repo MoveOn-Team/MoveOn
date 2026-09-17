@@ -368,10 +368,6 @@
    [집에서] 탭
    ===================================================================== */
 
-.select-section {
-    margin-bottom: 1rem;
-}
-
 .home-picker {
     margin-top: 1.5rem;
 }
@@ -699,8 +695,7 @@
 .btn-main-action,
 .btn-complete,
 .btn-primary,
-.btn-make-plan,
-.btn-map-view {
+.btn-make-plan {
     flex: 1;
     /* flex 항목은 기본값(min-width: auto)이라 글자 길이만큼 최소 너비가 잡힌다.
        나란히 둔 두 버튼의 글자 수가 다르면 폭이 몇 px 씩 어긋난다. */
@@ -726,8 +721,7 @@
 .btn-main-action,
 .btn-complete,
 .btn-primary,
-.btn-make-plan,
-.btn-map-view {
+.btn-make-plan {
     background: var(--workout-accent);
     /* border: none 이 아니라 '보이지 않는 1px' 이다.
        box-sizing 이 border-box 라 flex-basis: 0 은 테두리 두께 밑으로 못 내려간다.
@@ -739,24 +733,15 @@
 .btn-main-action:active,
 .btn-complete:active,
 .btn-primary:active,
-.btn-make-plan:active,
-.btn-map-view:active {
+.btn-make-plan:active {
     background: var(--workout-accent-dark);
 }
 
 /* 혼자 한 줄을 다 쓰는 버튼 */
-.btn-make-plan,
-.btn-map-view {
-    width: 100%;
-    margin-bottom: 1.25rem;
-}
-
 .btn-make-plan {
     display: block;
-}
-
-.btn-map-view {
-    margin-top: 0.5rem;
+    width: 100%;
+    margin-bottom: 1.25rem;
 }
 
 /* 운동 이미지 전체 카드 박스 (순백색 배경 + '1' 뱃지 두께의 그린 테두리) */

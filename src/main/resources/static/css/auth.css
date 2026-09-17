@@ -652,21 +652,13 @@ button {
     overflow-y: auto !important;
 }
 
-.app-content,
 .app-shell {
     /* 스크롤바 숨김 (IE, Edge / Firefox) */
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
-.app-content::-webkit-scrollbar,
 .app-shell::-webkit-scrollbar {
     display: none; /* 스크롤바 숨김 (Chrome, Safari) */
-}
-
-.app-content {
-    flex: 1;
-    overflow-y: auto;
-    padding-bottom: 20px;
 }
 
 /* 상단 헤더 & 필터 */
@@ -726,8 +718,7 @@ button {
     transition: all 0.2s ease;
 }
 
-.gender-btn.active,
-.gender-btn.selected {
+.gender-btn.active {
     border: 2px solid #345f9f;
     background-color: #ebf3fa;
     color: #345f9f;
