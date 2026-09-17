@@ -2,6 +2,7 @@ package com.moveon.service;
 
 import com.moveon.dto.EventDTO;
 import com.moveon.dto.EventSearchDTO;
+import com.moveon.dto.WorkoutReportDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -45,5 +46,15 @@ public interface IAiService {
     List<EventSearchDTO> mergeNames(List<EventSearchDTO> names,
                                     List<String> registered,
                                     List<String> rejected);
+
+    /**
+     * 운동 리포트의 숫자를 읽고 짧은 코치 글을 쓴다.
+     *
+     * 화면에 이미 있는 값만 가지고 쓰게 한다. 없는 값을 지어내면
+     * 회원이 자기 기록이 아닌 이야기를 읽게 된다.
+     *
+     * @return 두세 문장. 키가 없거나 실패하면 null
+     */
+    String writeReportNote(WorkoutReportDTO report);
 
 }
