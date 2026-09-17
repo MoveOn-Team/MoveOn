@@ -43,6 +43,9 @@ public class MyPageController {
         List<WorkoutLogDTO> todayWorkoutList = myPageService.getTodayWorkoutList(loginUserId);
         model.addAttribute("todayWorkoutList", todayWorkoutList);
 
+        // 기록 모달의 종목 칩. 표에서 가져와야 종목이 늘어도 화면이 따라간다
+        model.addAttribute("sports", myPageService.getRecordableSports());
+
         model.addAttribute("active", "myPage");
 
         return "user/myPage";

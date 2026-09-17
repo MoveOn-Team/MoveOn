@@ -176,14 +176,14 @@
 
             <div class="form-group">
                 <label>무슨 운동을 했나요?</label>
+                <%-- 종목과 MET 값을 표에서 가져온다.
+                     화면에 적어 두면 종목이 늘어도 안 따라오고, MET 도 표와 어긋난다.
+                     실제로 수영이 화면 7.0 · 표 6.0 으로 갈려 있었다. --%>
                 <div class="chip-group sport-chips">
-                    <button type="button" class="chip active">헬스</button>
-                    <button type="button" class="chip">배드민턴</button>
-                    <button type="button" class="chip">수영</button>
-                    <button type="button" class="chip">걷기</button>
-                    <button type="button" class="chip">테니스</button>
-                    <button type="button" class="chip">농구</button>
-                    <button type="button" class="chip">골프</button>
+                    <c:forEach var="s" items="${sports}" varStatus="st">
+                        <button type="button" class="chip ${st.first ? 'active' : ''}"
+                                data-met="${s.metValue}">${s.name}</button>
+                    </c:forEach>
                 </div>
             </div>
 
@@ -263,16 +263,7 @@
         }
     }
 
-    // 운동 MET 정의
-    const SPORT_MET = {
-        '헬스': 5.0,
-        '배드민턴': 5.5,
-        '수영': 7.0,
-        '걷기': 3.5,
-        '테니스': 6.0,
-        '농구': 6.5,
-        '골프': 3.5
-    };
+    // MET 은 종목 칩의 data-met 에 실려 온다. sports 표의 met_value 다.
 
     // 강도 가중치
     const INTENSITY_FACTOR = {
@@ -286,12 +277,15 @@
         // 기본 체중은 위 data-user-weight 한 곳에서만 정한다
         var userWeight = parseFloat(document.body.dataset.userWeight) || 0;
 
-        var sportName = document.querySelector(".sport-chips .chip.active") ? document.querySelector(".sport-chips .chip.active").innerText.trim() : "헬스";
+        var sportChip = document.querySelector(".sport-chips .chip.active");
         var timeText = document.querySelector(".time-chips .chip.active") ? document.querySelector(".time-chips .chip.active").innerText.trim() : "60분";
         var intensity = document.querySelector(".intensity-chips .chip.active") ? document.querySelector(".intensity-chips .chip.active").innerText.trim() : "적당히";
 
         var durationMin = parseInt(timeText.replace(/[^0-9]/g, "")) || 60;
-        var met = SPORT_MET[sportName] || 5.0;
+        var met = sportChip ? parseFloat(sportChip.dataset.met) : 0;
+        if (!(met > 0)) {
+            met = 5.0;   // 표에 값이 없는 종목. 중강도로 본다
+        }
         var factor = INTENSITY_FACTOR[intensity] || 1.0;
 
         var calculatedKcal = Math.round((met * 3.5 * userWeight / 200) * durationMin * factor);

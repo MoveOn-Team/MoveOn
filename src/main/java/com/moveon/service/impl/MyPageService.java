@@ -1,5 +1,6 @@
 package com.moveon.service.impl;
 
+import com.moveon.dto.SportDTO;
 import com.moveon.dto.UserProfileDTO;
 import com.moveon.dto.WorkoutLogDTO;
 import com.moveon.dto.WorkoutReportDTO;
@@ -182,6 +183,11 @@ public class MyPageService implements IMyPageService {
             rList.add(dto);
         }
         return rList;
+    }
+
+    @Override
+    public List<SportDTO> getRecordableSports() {
+        return myPageMapper.selectRecordableSports();
     }
 
     // =====================================================================
