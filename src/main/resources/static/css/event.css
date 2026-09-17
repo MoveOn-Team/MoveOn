@@ -182,16 +182,6 @@
     color: var(--event-accent);
 }
 
-/* 참가비는 카드 오른쪽 아래에 붙인다.
-   margin-top:auto 로 밀어 두면 제목이 두 줄이 되어도 아래에 그대로 붙는다. */
-.event-price {
-    align-self: flex-end;
-    margin-top: auto;
-    padding-top: 0.5rem;
-    font-size: var(--fs-tag);
-    color: var(--event-muted);
-}
-
 /* 목록이 비었을 때. 추천 탭과 같은 모양을 쓴다. */
 .empty-box {
     padding: 2.25rem 1.25rem;
