@@ -172,4 +172,20 @@
         WHERE user_id = #{userId}
     </select>
 
+    <!-- 주별 운동 횟수
+
+         WEEKDAY() 는 월요일이 0 이다. 그만큼 빼면 그 날짜가 속한 주의 월요일이 된다.
+         화면의 '이번 주' 도 월요일 시작이라 기준을 맞춘다.
+
+         기록이 없는 주는 줄이 안 나온다. 빈 막대는 서비스가 채운다. -->
+    <select id="selectWeeklyCounts" resultType="map">
+        SELECT DATE_SUB(exercise_date, INTERVAL WEEKDAY(exercise_date) DAY) AS monday,
+               COUNT(*) AS cnt
+          FROM workout_logs
+         WHERE user_id = #{userId}
+           AND exercise_date &gt;= #{from}
+         GROUP BY monday
+         ORDER BY monday
+    </select>
+
 </mapper>

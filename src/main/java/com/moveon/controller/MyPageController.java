@@ -77,7 +77,33 @@ public class MyPageController {
         WorkoutReportDTO report = myPageService.getWorkoutReport(loginUserId);
         model.addAttribute("report", report);
 
+        // 코치 글은 화면이 뜬 뒤에 따로 받아 온다. 아래 api 참고.
+        model.addAttribute("aiReady", myPageService.canWriteNote(report));
+
         return "user/workoutReport"; // /WEB-INF/views/user/workoutReport.jsp 호출
+    }
+
+    /**
+     * 리포트의 AI 코치 글.
+     *
+     * 기록을 남길 때 미리 만들어 두므로 대개 바로 돌아온다.
+     * 없을 때만 그 자리에서 만드느라 2~3초 걸린다.
+     * 화면은 이 칸만 기다리고 나머지 리포트는 먼저 그린다.
+     */
+    @GetMapping("/api/reportNote")
+    @ResponseBody
+    public MsgDTO reportNote(HttpSession session) throws Exception {
+
+        MsgDTO rDTO = new MsgDTO();
+
+        Integer loginUserId = (Integer) session.getAttribute("SS_USER_NO");
+        if (loginUserId == null) {
+            return rDTO;
+        }
+
+        // 못 만들면 msg 가 비어 나가고 화면은 그 칸을 접는다
+        rDTO.setMsg(myPageService.getReportNote(loginUserId));
+        return rDTO;
     }
 
     /**

@@ -21,4 +21,15 @@ public interface IMyPageService {
     List<WorkoutLogDTO> getTodayWorkoutList(Integer userId) throws Exception;
 
     WorkoutReportDTO getWorkoutReport(Integer userId) throws Exception;
+
+    /**
+     * 리포트의 AI 코치 글.
+     *
+     * 기록을 남길 때 미리 만들어 두므로 대개 바로 돌아온다.
+     * 만들어 둔 것이 없으면 그 자리에서 만든다. 못 만들면 null.
+     */
+    String getReportNote(Integer userId) throws Exception;
+
+    /** 코치 글을 쓸 만큼 기록이 쌓였는지 */
+    boolean canWriteNote(WorkoutReportDTO report);
 }

@@ -2,6 +2,7 @@ package com.moveon.service.impl;
 
 import com.moveon.dto.EventDTO;
 import com.moveon.dto.EventSearchDTO;
+import com.moveon.dto.WorkoutReportDTO;
 import com.moveon.service.IAiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -502,6 +503,95 @@ public class AiService implements IAiService {
             return LocalDate.parse(s.substring(0, 10));
         } catch (Exception e) {
             // 모델이 "2026년 8월" 처럼 날짜가 아닌 값을 줄 때가 있다. 그때는 비워 둔다.
+            return null;
+        }
+    }
+
+
+    // =====================================================================
+    // 운동 리포트 코치 글
+    // =====================================================================
+
+    /**
+     * 프롬프트에서 가장 중요한 것은 '넘긴 숫자 말고는 쓰지 마라' 이다.
+     *
+     * 풀어 두면 없는 기록을 지어낸다. 체중이 줄었다거나 몇 달째 꾸준하다거나,
+     * 우리가 준 적 없는 이야기를 자연스럽게 섞어 쓴다.
+     * 회원이 자기 기록이 아닌 글을 읽게 되므로 값마다 못을 박는다.
+     */
+    private static final String REPORT_RULES = """
+            너는 운동 기록을 읽고 한마디 해 주는 코치다.
+            아래 숫자만 보고 한국어로 **두 문장**을 써라.
+
+            무엇을 쓸까
+            - 첫 문장 : 숫자에서 눈에 띄는 것 하나.
+            - 둘째 문장 : 다음 주에 해 볼 만한 것 하나.
+
+            종목을 볼 때
+            - 종목 이름을 보고 근력·유산소·유연성 중 무엇인지 네가 판단하라.
+              헬스·홈트는 근력, 수영·걷기·구기 종목은 유산소, 요가·체조는 유연성에 가깝다.
+            - 한쪽으로 치우쳐 있으면 모자란 쪽을 권해도 좋다.
+              "근력 운동이 없으니 홈트를 한 번 넣어 보세요" 처럼.
+            - 다만 치우쳤다고 단정하지 마라. 우리가 보는 것은 이번 주 기록뿐이다.
+
+            반드시 지켜라
+            - 이번 주 횟수·시간은 화면 바로 위에 이미 적혀 있다. 그대로 되풀이하지 마라.
+              "5회 132분 하셨네요" 같은 문장은 쓸모가 없다.
+            - 준 숫자 말고는 아무것도 쓰지 마라. 체중·건강 상태·지난 몇 달은 모르는 일이다.
+            - 의학적인 판단을 하지 마라. 아프다거나 위험하다는 말을 쓰지 마라.
+            - 숫자를 바꾸지 마라. 5회면 5회다.
+            - 존댓말. 느낌표와 이모지는 쓰지 마라.
+            - 두 문장 합쳐 80자 안쪽.
+
+            {"text":"여기에 글"} 형태의 JSON 하나만 답하라.
+            """;
+
+    @Override
+    public String writeReportNote(WorkoutReportDTO report) {
+
+        if (!isReady() || report == null) {
+            return null;
+        }
+
+        StringBuilder facts = new StringBuilder(REPORT_RULES);
+        facts.append("\n[이번 주 기록]\n")
+             .append("기간 : ").append(report.getWeekRangeText()).append('\n')
+             .append("운동 횟수 : ").append(report.getThisWeekCount()).append("회\n")
+             .append("운동 시간 : ").append(report.getThisWeekDurationMin()).append("분\n")
+             .append("지난주 대비 : ").append(report.getWeekDiffCount()).append("회\n")
+             .append("소모 칼로리 : ").append(report.getTotalCalories()).append("kcal\n")
+             .append("연속 출석 : ").append(report.getCurrentStreak()).append("일\n")
+             .append("누적 기록 : ").append(report.getTotalWorkoutCount()).append("회\n");
+
+        if (report.getTopSports() != null && !report.getTopSports().isEmpty()) {
+            facts.append("많이 한 종목 : ");
+            for (WorkoutReportDTO.SportStatDTO s : report.getTopSports()) {
+                facts.append(s.getSportName()).append(' ')
+                     .append(s.getCount()).append("회(").append(s.getPercentage()).append("%) ");
+            }
+            facts.append('\n');
+        }
+        if (report.getMaxDurationSportName() != null) {
+            facts.append("가장 오래 한 운동 : ").append(report.getMaxDurationSportName())
+                 .append(' ').append(report.getMaxDurationMin()).append("분\n");
+        }
+
+        String res = ask(facts.toString());
+        if (res == null) {
+            log.warn("리포트 코치 글을 받지 못했다");
+            return null;
+        }
+
+        try {
+            Map<String, Object> v = objectMapper.readValue(res, Map.class);
+            String text = str(v.get("text"));
+            if (text == null) {
+                return null;
+            }
+            // 모델이 가끔 따옴표나 줄바꿈을 섞어 보낸다. 한 문단으로 만든다.
+            return text.replaceAll("\\s+", " ").trim();
+        } catch (Exception e) {
+            log.warn("리포트 코치 글 읽기 실패 : {}", e.getMessage());
             return null;
         }
     }

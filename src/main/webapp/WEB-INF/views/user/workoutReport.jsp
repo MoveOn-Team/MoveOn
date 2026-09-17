@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <c:set var="active" value="myPage" scope="request" />
 <!DOCTYPE html>
 <html lang="ko">
@@ -9,6 +10,97 @@
   <title>운동 리포트 - MOVE:ON</title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
   <style>
+    /* 배너 간격.
+       h2·p 의 브라우저 기본 여백이 flex gap 위에 얹혀서 줄 사이가 벌어져 있었다.
+       여백은 여기서만 정한다. */
+    .report-banner-card {
+      gap: 0;
+      padding: 18px 20px 20px;
+    }
+    .report-banner-card .banner-sub {
+      font-size: 12.5px;
+      opacity: 0.75;
+    }
+    .report-banner-card .banner-title {
+      margin: 4px 0 0;
+      font-size: 26px;
+      line-height: 1.25;
+    }
+    .report-banner-card .banner-desc {
+      margin: 4px 0 0;
+      font-size: 12.5px;
+      opacity: 0.85;
+    }
+
+    /* 코치 글 묶음. 선 하나로 '여기부터 다른 이야기' 를 알린다 */
+    .banner-ai {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    /* AI 가 쓴 글임을 밝힌다. 사람이 쓴 안내와 섞이면 안 된다 */
+    .ai-tag {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #6C5CE7;
+    }
+    .ai-text {
+      margin: 9px 0 0;
+      font-size: 14px;
+      line-height: 1.75;
+      color: rgba(255, 255, 255, 0.96);
+      word-break: keep-all;
+    }
+
+    /* 글을 받아오는 동안. 멈춰 있는 게 아니라는 표시만 하면 된다 */
+    .ai-text.is-loading {
+      opacity: 0.6;
+      animation: aiPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes aiPulse {
+      0%, 100% { opacity: 0.45; }
+      50%      { opacity: 0.8; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ai-text.is-loading { animation: none; }
+    }
+
+    /* 막대 위 숫자. 막대 길이만 보고는 몇 번인지 알 수 없다 */
+    .bar-count {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9CA3AF;
+      min-height: 14px;
+    }
+    .bar-group.active .bar-count { color: #6C5CE7; }
+
+    /* 막대가 바닥에서 올라온다.
+       높이를 처음부터 넣어 두면 transition 이 걸리지 않으므로,
+       실제 높이는 --h 에 담아 두고 차트가 보일 때 is-drawn 을 붙여 옮긴다.
+       --d 는 막대마다 조금씩 늦추는 값. 왼쪽부터 차례로 올라온다. */
+    .bar-chart-container .bar {
+      height: 0;
+      transition: height 0.55s cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms);
+    }
+    .bar-chart-container .bar-count {
+      opacity: 0;
+      transition: opacity 0.3s ease var(--d, 0ms);
+    }
+    .bar-chart-container.is-drawn .bar { height: var(--h); }
+    .bar-chart-container.is-drawn .bar-count { opacity: 1; }
+
+    /* 움직임을 줄여 달라고 설정해 둔 사람에게는 그냥 그려 준다 */
+    @media (prefers-reduced-motion: reduce) {
+      .bar-chart-container .bar,
+      .bar-chart-container .bar-count { transition: none; }
+    }
+
     /* 피그마 목업 스타일 라운드 더보기 버튼 */
     .btn-more-sports {
       width: 100%;
@@ -41,20 +133,29 @@
     <!-- 이번주 요약 하이라이트 카드 -->
     <section class="report-banner-card">
       <span class="banner-sub">이번주 (${report.weekRangeText})</span>
+
       <h2 class="banner-title">${report.thisWeekCount}회 · ${report.thisWeekDurationMin}분</h2>
+
       <p class="banner-desc">
         <c:choose>
-          <c:when test="${report.weekDiffCount > 0}">
-            지난주보다 ${report.weekDiffCount}회 늘었어요
-          </c:when>
-          <c:when test="${report.weekDiffCount < 0}">
-            지난주보다 ${Math.abs(report.weekDiffCount)}회 줄었어요
-          </c:when>
-          <c:otherwise>
-            지난주와 동일하게 운동했어요
-          </c:otherwise>
+          <c:when test="${report.weekDiffCount > 0}">지난주보다 ${report.weekDiffCount}회 늘었어요</c:when>
+          <c:when test="${report.weekDiffCount < 0}">지난주보다 ${-report.weekDiffCount}회 줄었어요</c:when>
+          <c:otherwise>지난주와 같은 횟수예요</c:otherwise>
         </c:choose>
       </p>
+
+      <%-- 코치 글은 이 배너 안에 붙인다. 배너가 이미 이번 주 숫자를 말하고 있어서
+           따로 카드를 두면 같은 이야기를 두 번 하게 된다.
+
+           화면이 뜬 뒤에 따로 받아 온다. Gemini 가 2~3초 걸려서
+           여기서 기다리면 리포트 전체가 늦게 뜬다.
+           받지 못하면 이 칸만 사라지고 배너는 그대로 남는다. --%>
+      <c:if test="${aiReady}">
+        <div class="banner-ai" id="aiNoteBox">
+          <span class="ai-tag">AI 코치</span>
+          <p class="ai-text" id="aiNoteText">이번 주 기록을 읽고 있어요</p>
+        </div>
+      </c:if>
     </section>
 
     <!-- 3종 실적 통계 -->
@@ -73,18 +174,25 @@
       </div>
     </section>
 
-    <!-- 최근 8주 운동 횟수 차트 -->
+    <%-- 최근 6주 운동 횟수.
+         막대 높이는 그 기간 최대 횟수를 100% 로 잡아 견준다.
+         고정 기준(예: 7회)으로 하면 주 2회쯤 하는 사람은 막대가 늘 바닥에 붙는다. --%>
+    <c:set var="maxWeek" value="1" />
+    <c:forEach var="w" items="${report.weeklyStats}">
+      <c:if test="${w.count > maxWeek}"><c:set var="maxWeek" value="${w.count}" /></c:if>
+    </c:forEach>
+
     <section class="card chart-card">
-      <h3 class="card-title">최근 8주 운동 횟수</h3>
-      <div class="bar-chart-container">
-        <div class="bar-group"><div class="bar" style="height: 0%;"></div><span>6/15</span></div>
-        <div class="bar-group"><div class="bar" style="height: 0%;"></div><span>6/22</span></div>
-        <div class="bar-group"><div class="bar" style="height: 0%;"></div><span>6/29</span></div>
-        <div class="bar-group"><div class="bar" style="height: 0%;"></div><span>7/6</span></div>
-        <div class="bar-group"><div class="bar" style="height: 0%;"></div><span>7/13</span></div>
-        <div class="bar-group"><div class="bar" style="height: 0%;"></div><span>7/20</span></div>
-        <div class="bar-group"><div class="bar" style="height: 0%;"></div><span>7/27</span></div>
-        <div class="bar-group active"><div class="bar" style="height: 80%;"></div><span>이번</span></div>
+      <h3 class="card-title">최근 ${fn:length(report.weeklyStats)}주 운동 횟수</h3>
+      <div class="bar-chart-container" id="weekChart">
+        <c:forEach var="w" items="${report.weeklyStats}" varStatus="st">
+          <div class="bar-group ${st.last ? 'active' : ''}"
+               style="--h: ${w.count == 0 ? 3 : (w.count * 100 / maxWeek)}%; --d: ${st.index * 70}ms;">
+            <span class="bar-count">${w.count > 0 ? w.count : ''}</span>
+            <div class="bar"></div>
+            <span>${w.weekLabel}</span>
+          </div>
+        </c:forEach>
       </div>
     </section>
 
@@ -190,6 +298,54 @@
       btn.textContent = '접기 ∧';
     }
   }
+
+  // 막대 올리기.
+  // 차트가 화면에 들어왔을 때 시작한다. 접힌 화면에서는 아래쪽에 있어서
+  // 페이지가 뜨자마자 올리면 다 끝난 뒤에 스크롤이 닿는다.
+  (function () {
+    var chart = document.getElementById('weekChart');
+    if (!chart) {
+      return;
+    }
+    var draw = function () { chart.classList.add('is-drawn'); };
+
+    if (!('IntersectionObserver' in window)) {
+      draw();
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          draw();
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.35 });
+    io.observe(chart);
+  })();
+
+  // 코치 글 받아오기. 못 받으면 칸을 통째로 없앤다.
+  // 빈 칸이 남아 있는 것보다 아예 없는 편이 낫다.
+  (function () {
+    var box = document.getElementById('aiNoteBox');
+    var line = document.getElementById('aiNoteText');
+    if (!box || !line) {
+      return;
+    }
+    line.classList.add('is-loading');
+
+    fetch('${pageContext.request.contextPath}/user/api/reportNote')
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data && data.msg) {
+          line.classList.remove('is-loading');
+          line.textContent = data.msg;
+        } else {
+          box.remove();
+        }
+      })
+      .catch(function () { box.remove(); });
+  })();
 </script>
 </body>
 </html>

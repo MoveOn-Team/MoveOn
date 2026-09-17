@@ -4,6 +4,7 @@ import com.moveon.dto.UserProfileDTO;
 import com.moveon.dto.WorkoutLogDTO;
 import com.moveon.dto.WorkoutReportDTO;
 import com.moveon.mapper.IMyPageMapper;
+import com.moveon.service.IAiService;
 import com.moveon.service.IMyPageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,8 +15,12 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +28,16 @@ import java.util.Map;
 public class MyPageService implements IMyPageService {
 
     private final IMyPageMapper myPageMapper;
+    private final IAiService aiService;
+
+    /** 코치 글을 뒤에서 만드는 데 쓴다. ExternalApiConfig 가 만들어 준다 */
+    private final ExecutorService searchExecutor;
+
+    /** 코치 글을 쓰려면 기록이 이만큼은 있어야 한다. 한두 번 가지고는 할 말이 없다 */
+    private static final int MIN_LOGS = 3;
+
+    /** 회원 x 주 단위로 담아 둔다. 기록을 남길 때 미리 채워 둔다 */
+    private final Map<String, String> noteCache = new ConcurrentHashMap<>();
 
     @Override
     public UserProfileDTO getUserProfile(Integer userId) {
@@ -48,6 +63,10 @@ public class MyPageService implements IMyPageService {
         log.info(this.getClass().getName() + ".insertWorkoutLog Start!");
 
         int res = myPageMapper.insertWorkoutLog(workoutLogDTO);
+
+        if (res > 0) {
+            refreshNote(workoutLogDTO.getUserId());
+        }
 
         log.info(this.getClass().getName() + ".insertWorkoutLog End!");
         return res;
@@ -123,8 +142,112 @@ public class MyPageService implements IMyPageService {
         report.setFirstRecordDate(firstDate != null ? firstDate : "기록 없음");
         report.setMaxStreakDays(0); // 최장 연속 출석 기본값
 
+        report.setWeeklyStats(weeklyStats(userId, monday));
+
         return report;
     }
+
+    /** 차트에 그릴 주 수. 여덟 주는 막대가 얇아져 읽히지 않는다 */
+    private static final int CHART_WEEKS = 6;
+
+    /**
+     * 최근 몇 주의 주별 운동 횟수.
+     *
+     * 기록이 없는 주는 조회 결과에 아예 없다. 그대로 쓰면 막대가 빠져
+     * 주 간격이 들쭉날쭉해지므로, 여기서 주 목록을 먼저 만들고 값을 얹는다.
+     *
+     * @param monday 이번 주 월요일
+     */
+    private List<WorkoutReportDTO.WeeklyStatDTO> weeklyStats(Integer userId, LocalDate monday) {
+
+        LocalDate from = monday.minusWeeks(CHART_WEEKS - 1L);
+
+        // 월요일 -> 횟수
+        Map<LocalDate, Integer> counts = new HashMap<>();
+        for (Map<String, Object> row : myPageMapper.selectWeeklyCounts(userId, from)) {
+            Object d = row.get("monday");
+            LocalDate key = (d instanceof java.sql.Date sd) ? sd.toLocalDate() : LocalDate.parse(d.toString());
+            counts.put(key, ((Number) row.get("cnt")).intValue());
+        }
+
+        DateTimeFormatter label = DateTimeFormatter.ofPattern("M/d");
+        List<WorkoutReportDTO.WeeklyStatDTO> rList = new ArrayList<>();
+
+        for (int i = 0; i < CHART_WEEKS; i++) {
+            LocalDate week = from.plusWeeks(i);
+            WorkoutReportDTO.WeeklyStatDTO dto = new WorkoutReportDTO.WeeklyStatDTO();
+            // 마지막 칸은 날짜 대신 '이번' 이라고 적는다. 어디가 지금인지 한눈에 보인다
+            dto.setWeekLabel(i == CHART_WEEKS - 1 ? "이번" : week.format(label));
+            dto.setCount(counts.getOrDefault(week, 0));
+            rList.add(dto);
+        }
+        return rList;
+    }
+
+    // =====================================================================
+    // AI 코치 글
+    // =====================================================================
+
+    @Override
+    public boolean canWriteNote(WorkoutReportDTO report) {
+        return aiService.isReady() && report != null && report.getTotalWorkoutCount() >= MIN_LOGS;
+    }
+
+    @Override
+    public String getReportNote(Integer userId) throws Exception {
+
+        WorkoutReportDTO report = getWorkoutReport(userId);
+        if (!canWriteNote(report)) {
+            return null;
+        }
+
+        String key = noteKey(userId, report);
+        String hit = noteCache.get(key);
+        if (hit != null) {
+            return hit;
+        }
+
+        // 미리 만들어 둔 것이 없을 때만 여기서 만든다. 화면이 2~3초 기다린다.
+        String note = aiService.writeReportNote(report);
+        if (note != null) {
+            noteCache.put(key, note);
+        }
+        return note;
+    }
+
+    /**
+     * 기록이 하나 늘면 글도 달라진다. 기록을 남기는 김에 미리 만들어 둔다.
+     *
+     * 뒤에서 돌리는 까닭은 저장 응답을 붙잡지 않기 위해서다.
+     * 운동을 끝낸 사람이 Gemini 를 기다릴 이유가 없다.
+     * 여기서 실패해도 리포트를 열 때 다시 만들므로 조용히 넘어간다.
+     */
+    private void refreshNote(int userId) {
+        if (!aiService.isReady()) {
+            return;
+        }
+        searchExecutor.submit(() -> {
+            try {
+                WorkoutReportDTO report = getWorkoutReport(userId);
+                if (!canWriteNote(report)) {
+                    return;
+                }
+                String note = aiService.writeReportNote(report);
+                if (note != null) {
+                    noteCache.put(noteKey(userId, report), note);
+                    log.info("코치 글을 미리 만들어 두었다. userId : {}", userId);
+                }
+            } catch (Exception e) {
+                log.warn("코치 글 미리 만들기 실패 : {}", e.getMessage());
+            }
+        });
+    }
+
+    /** 주가 바뀌면 열쇠가 달라져 지난주 글은 쓰이지 않는다 */
+    private String noteKey(Integer userId, WorkoutReportDTO report) {
+        return userId + "|" + report.getWeekRangeText();
+    }
+
 
     /**
      * 홈트 완료 기록.
@@ -139,6 +262,10 @@ public class MyPageService implements IMyPageService {
         log.info("{}.addHomeWorkoutLog Start! userId : {}", this.getClass().getName(), userId);
 
         int res = myPageMapper.insertHomeWorkoutLog(userId, durationMin, intensity, caloriesKcal, memo);
+
+        if (res > 0) {
+            refreshNote(userId);
+        }
 
         log.info("{}.addHomeWorkoutLog End! {}분 / {}kcal", this.getClass().getName(),
                 durationMin, caloriesKcal);

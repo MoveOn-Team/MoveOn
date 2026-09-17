@@ -69,4 +69,16 @@ public interface IMyPageMapper {
 
     // 첫 기록 날짜 (YYYY-MM-DD)
     String selectFirstRecordDate(@Param("userId") Integer userId);
+
+    /**
+     * 최근 몇 주간 주별 운동 횟수.
+     *
+     * 기록이 없는 주는 줄이 안 나온다. 빈 주도 막대 자리를 잡아야 하므로
+     * 서비스에서 주 목록을 만들어 두고 여기 값을 얹는다.
+     *
+     * @param from 첫 주의 월요일
+     * @return monday(월요일 날짜) · cnt(그 주 횟수)
+     */
+    List<Map<String, Object>> selectWeeklyCounts(@Param("userId") Integer userId,
+                                                 @Param("from") java.time.LocalDate from);
 }
