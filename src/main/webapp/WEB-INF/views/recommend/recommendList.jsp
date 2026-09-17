@@ -36,22 +36,23 @@
                 <span><b>강도</b>${profile.intensityLabel}</span>
             </div>
 
-            <!-- 날씨 위젯 영역 -->
-            <div class="weather-widget">
-                <div class="weather-icon-box">
-                    <img id="weather-icon"
-                         data-context-path="${pageContext.request.contextPath}"
-                         data-api-key="${weatherApiKey}"
-                         src="${pageContext.request.contextPath}/resources/images/weather/day.svg"
-                         alt="날씨 아이콘">
+            <%-- 날씨는 화면이 뜬 뒤에 /recommend/api/weather 로 따로 받는다.
+                 키는 서버에만 두고 여기로 내려보내지 않는다. --%>
+            <c:if test="${weatherReady}">
+                <div class="weather-widget" id="weatherBox">
+                    <div class="weather-icon-box">
+                        <img id="weather-icon"
+                             data-context-path="${pageContext.request.contextPath}"
+                             src="${pageContext.request.contextPath}/resources/images/weather/day.svg"
+                             alt="날씨 아이콘">
+                    </div>
+                    <div class="details">
+                        <div class="temp"><span id="weather-temp">--</span><span>°C</span></div>
+                    </div>
                 </div>
-                <div class="details">
-                    <div class="temp"><span id="weather-temp">--</span><span>°C</span></div>
-                </div>
-            </div>
 
-            <!-- JS 호출 -->
-            <script src="${pageContext.request.contextPath}/js/weather-anim.js"></script>
+                <script src="${pageContext.request.contextPath}/js/weather-anim.js"></script>
+            </c:if>
 
             <p class="profile-foot">
                 만 ${profile.age}세

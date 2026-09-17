@@ -5,13 +5,14 @@ import com.moveon.dto.FacilityDTO;
 import com.moveon.dto.ProgramDTO;
 import com.moveon.dto.RentalDTO;
 import com.moveon.dto.SportDTO;
+import com.moveon.dto.WeatherDTO;
 import com.moveon.service.IRecommendService;
+import com.moveon.service.IWeatherService;
 import jakarta.servlet.http.HttpSession;
 import static com.moveon.util.UrlUtil.firstUsable;
 import static com.moveon.util.UrlUtil.isUsable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -38,6 +40,7 @@ import java.util.List;
 public class RecommendController {
 
     private final IRecommendService recommendService;
+    private final IWeatherService weatherService;
 
     /** GPS 를 못 받았을 때 쓸 기본 좌표 (서울시청) */
     private static final double DEFAULT_LAT = 37.5665;
@@ -45,10 +48,6 @@ public class RecommendController {
 
     /** 목록 하나에 보여줄 개수. 시설·코스·대관 모두 이 값을 쓴다. */
     private static final int LIST_SIZE = 3;
-
-    /** 추천 목록 위에 오늘 날씨를 띄우는 데 쓴다. 화면(JS)이 직접 부른다 */
-    @Value("${weather.api.key:}")
-    private String weatherApiKey;
 
     /** 우리 시설을 서울시 예약 자료와 한 목록에 섞기 위해 그릇을 맞춘다 */
     private RentalDTO asRental(FacilityDTO f, String sportName) {
@@ -97,11 +96,28 @@ public class RecommendController {
         model.addAttribute("lat", myLat);
         model.addAttribute("lng", myLng);
         model.addAttribute("usingGps", lat != null && lng != null);
-        model.addAttribute("weatherApiKey", weatherApiKey);
+
+        // 날씨는 화면이 뜬 뒤에 아래 api 로 따로 받아 온다. 키는 서버에만 둔다.
+        model.addAttribute("weatherReady", weatherService.isReady());
 
         log.info("{}.recommend End!", this.getClass().getName());
 
         return "recommend/recommendList";
+    }
+
+    /**
+     * 추천 탭 날씨 위젯.
+     *
+     * 전에는 화면이 키를 들고 openweathermap.org 를 직접 불렀다.
+     * 소스 보기 한 번이면 키가 나왔다. 서버가 대신 부르고 숫자만 내려준다.
+     *
+     * 못 받으면 빈 값이 나가고 화면은 위젯을 접는다.
+     */
+    @GetMapping("/api/weather")
+    @ResponseBody
+    public WeatherDTO weather() {
+        WeatherDTO rDTO = weatherService.now();
+        return rDTO != null ? rDTO : new WeatherDTO();
     }
 
     /** 종목 상세. 가까운 시설을 '배우는 곳' 과 '빌리는 곳' 으로 갈라 보여준다 */
