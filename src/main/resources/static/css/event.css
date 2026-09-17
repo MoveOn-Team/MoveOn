@@ -200,7 +200,7 @@
     font-size: var(--fs-meta);
     line-height: 1.6;
     background: #f7f8f9;
-    border-radius: 1rem;
+    border-radius: var(--card-radius);
 }
 
 

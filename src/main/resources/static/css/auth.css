@@ -5,6 +5,9 @@
     --auth-error: #e2464f;
     --auth-ok: #438f62;
 
+    /* BMI 막대의 저체중~고도비만 그라데이션. 온보딩·내 정보 수정 화면이 함께 쓴다 */
+    --bmi-gauge-gradient: linear-gradient(to right, #8cb3dd 0%, #7dbd92 35%, #e1b96f 70%, #e07272 100%);
+
     /* ---------- 화면 폭 ----------
        안드로이드 WebView 로 감싸면 실제로는 늘 기기 폭(100%)이다.
        이 값은 PC 브라우저에서 볼 때만 쓰인다. 여기서 더 넓어지면
@@ -649,16 +652,21 @@ button {
     overflow-y: auto !important;
 }
 
+.app-content,
+.app-shell {
+    /* 스크롤바 숨김 (IE, Edge / Firefox) */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.app-content::-webkit-scrollbar,
+.app-shell::-webkit-scrollbar {
+    display: none; /* 스크롤바 숨김 (Chrome, Safari) */
+}
+
 .app-content {
     flex: 1;
     overflow-y: auto;
     padding-bottom: 20px;
-    /* 스크롤바 숨김 */
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-.app-content::-webkit-scrollbar {
-    display: none;
 }
 
 /* 상단 헤더 & 필터 */
@@ -739,12 +747,12 @@ button {
     align-items: center;
 }
 
-.bmi-title {
+.bmi-card .bmi-title {
     font-size: 0.6875rem;
     color: #8c939d;
 }
 
-.bmi-status-badge {
+.bmi-card .bmi-status-badge {
     background-color: #345f9f;
     color: #ffffff;
     font-size: 0.625rem;
@@ -768,10 +776,10 @@ button {
 .bmi-bar {
     height: 0.5rem;
     border-radius: 4px;
-    background: linear-gradient(to right, #8cb3dd 0%, #7dbd92 35%, #e1b96f 70%, #e07272 100%);
+    background: var(--bmi-gauge-gradient);
 }
 
-.bmi-pointer {
+.bmi-card .bmi-pointer {
     position: absolute;
     top: 50%;
     left: 0;
@@ -785,7 +793,7 @@ button {
     transition: left 0.3s ease;
 }
 
-.bmi-labels {
+.bmi-card .bmi-labels {
     display: flex;
     justify-content: space-between;
     font-size: 0.5625rem;
@@ -1009,18 +1017,6 @@ button {
 }
 
 /* '수정' 은 카드가 아니라 알약이다. 추천 탭의 .chip-button 과 같은 모양이다. */
-.btn-edit-profile {
-    flex: none;
-    padding: 0.4375rem 0.875rem;
-    background: #ffffff;
-    border: 1px solid var(--card-line);
-    border-radius: 999px;
-    font-size: var(--fs-cap);
-    font-weight: 700;
-    color: #5c6470;
-    cursor: pointer;
-}
-
 /* ---------- 키 · 몸무게 · BMI ---------- */
 .body-stats-grid {
     display: grid;
@@ -1230,16 +1226,6 @@ button {
 /* =========================================================
    마이페이지 스크롤 및 모달 레이어 스타일
    ========================================================= */
-/* 스크롤 및 하단 잘림 해결 */
-.app-shell {
-    overflow-y: auto !important;
-    padding-bottom: 90px !important; /* 하단 탭바에 가려지지 않도록 조절 */
-    -ms-overflow-style: none; /* IE, Edge 스크롤바 숨김 */
-    scrollbar-width: none; /* Firefox 스크롤바 숨김 */
-}
-.app-shell::-webkit-scrollbar {
-    display: none; /* Chrome, Safari 스크롤바 숨김 */
-}
 
 /* 3. 모달 레이어 위치 맞춤 */
 .modal-overlay {
@@ -1498,12 +1484,6 @@ body::-webkit-scrollbar {
     box-sizing: border-box;
 }
 
-.myPage-shell,
-.detail-shell {
-    padding-top: 1.75rem;
-    padding-bottom: calc(var(--tabbar-h, 60px) + 1.25rem);
-}
-
 /* =========================================================
    내 정보 메인 - 수정 버튼 스타일 (테두리 적용)
    ========================================================= */
@@ -1612,13 +1592,13 @@ body::-webkit-scrollbar {
     align-items: center;
 }
 
-.bmi-title {
+.bmi-result-card .bmi-title {
     font-size: 13px;
     font-weight: 700;
     color: #6c5ce7;
 }
 
-.bmi-status-badge {
+.bmi-result-card .bmi-status-badge {
     background-color: #6c5ce7;
     color: #ffffff;
     font-size: 11px;
@@ -1644,11 +1624,11 @@ body::-webkit-scrollbar {
     width: 100%;
     height: 0.5rem;
     border-radius: 4px;
-    background: linear-gradient(to right, #8cb3dd 0%, #7dbd92 35%, #e1b96f 70%, #e07272 100%);
+    background: var(--bmi-gauge-gradient);
     margin-bottom: 8px;
 }
 
-.bmi-pointer {
+.bmi-result-card .bmi-pointer {
     position: absolute;
     top: 50%;
     left: 35%;
@@ -1656,13 +1636,13 @@ body::-webkit-scrollbar {
     width: 14px;
     height: 14px;
     background-color: #ffffff;
-    border: 3px solid #3b82f6;
+    border: 3px solid #6c5ce7;
     border-radius: 50%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     transition: left 0.3s ease;
 }
 
-.bmi-labels {
+.bmi-result-card .bmi-labels {
     display: flex;
     justify-content: space-between;
     font-size: 11px;
@@ -1741,4 +1721,106 @@ body::-webkit-scrollbar {
 
 .geo-notice-btn:hover {
     background: #fff3d6;
+}
+
+
+/*저작권 관련 css*/
+
+
+/* 저작권 페이지 전용 스타일 */
+.copyright-shell {
+    padding: 20px 16px 80px;
+}
+
+.copyright-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    /* 여백 조정 (고정 시 본문과 겹침 방지) */
+    padding: 16px 0 20px 0;
+    margin-bottom: 8px;
+
+    /* 하얀색(#ffffff)에서 아래로 갈수록 투명해지는 그라데이션 배경 */
+    background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 1) 0%,
+            rgba(255, 255, 255, 0.95) 70%,
+            rgba(255, 255, 255, 0) 100%
+    );
+}
+
+.copyright-header .page-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+/* 뒤로가기 버튼 스타일 (필요 시 클릭 영역 확보) */
+.copyright-header .back-button {
+    font-size: 24px;
+    color: #333333;
+    text-decoration: none;
+    line-height: 1;
+}
+
+.copyright-intro {
+    background-color: #f4f6f8;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    color: #666666;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.copyright-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.section-category {
+    font-size: 15px;
+    font-weight: 700;
+    color: #4E9F76; /* 메인 테마 그린 색상 */
+    margin-bottom: 12px;
+}
+
+.copyright-card {
+    background-color: #ffffff;
+    border: 1px solid #e1e4e8;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.card-item-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #222222;
+    margin: 0 0 8px 0;
+}
+
+.card-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.card-info-list li {
+    font-size: 13px;
+    color: #555555;
+    line-height: 1.6;
+}
+
+.card-info-list .info-label {
+    font-weight: 500;
+    color: #888888;
+    margin-right: 4px;
 }
