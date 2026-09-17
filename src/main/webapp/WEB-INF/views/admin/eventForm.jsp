@@ -53,7 +53,7 @@
                     </c:when>
                     <c:otherwise>사이트를 찾았습니다 →</c:otherwise>
                 </c:choose>
-                <a href="${event.homepageUrl}" target="_blank" rel="noopener">${event.homepageUrl}</a>
+                <a href="${event.homepageUrl}" target="_blank" rel="noopener noreferrer">${event.homepageUrl}</a>
                 <br>
                 <c:choose>
                     <c:when test="${autoFilled}">

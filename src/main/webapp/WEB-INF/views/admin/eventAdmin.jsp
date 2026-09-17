@@ -118,7 +118,7 @@
                                     </a>
                                     <c:if test="${fn:startsWith(e.homepageUrl, 'http')}">
                                         <a class="ext" href="${fn:escapeXml(e.homepageUrl)}" target="_blank"
-                                           rel="noopener" title="공식 사이트 열기">↗</a>
+                                           rel="noopener noreferrer" title="공식 사이트 열기">↗</a>
                                     </c:if>
                                 </td>
                                 <td>${e.startDate}</td>
