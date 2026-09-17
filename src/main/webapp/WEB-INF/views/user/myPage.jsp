@@ -154,8 +154,8 @@
                 <span>운동 리포트 보기</span>
                 <span class="arrow">›</span>
             </a>
-            <a href="#" class="menu-item">
-                <span>알림 · 위치 권한 설정</span>
+            <a href="${pageContext.request.contextPath}/user/copyright" class="menu-item">
+                <span>오픈소스 및 저작권 정보</span>
                 <span class="arrow">›</span>
             </a>
             <a href="${pageContext.request.contextPath}/user/login" class="menu-item logout-item">

@@ -86,6 +86,11 @@ public class MyPageController {
         return "user/workoutReport"; // /WEB-INF/views/user/workoutReport.jsp 호출
     }
 
+    @GetMapping("/copyright")
+    public String copyrightPage() {
+        return "user/copyright"; // WEB-INF/views/user/copyright.jsp 호출
+    }
+
     /**
      * 리포트의 AI 코치 글.
      *

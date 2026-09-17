@@ -460,9 +460,6 @@ a { color: var(--ad-brand); }
     background: #fff;
 }
 
-/* 비어 있어 손봐야 하는 자리 */
-.warn { color: #b42318; font-weight: 700; }
-
 /* 주소 세 자리의 순서를 보여주는 작은 표.
    고르는 것이 아니라 폭포라는 걸 글로만 말하면 안 읽힌다. */
 .order-table { margin-bottom: 14px; }

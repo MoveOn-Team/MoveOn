@@ -221,11 +221,9 @@
                 ? exercises[exerciseIndex + 1].name + " · " + volume(exercises[exerciseIndex + 1])
                 : "마지막 동작";
 
-            if (exercise.mediaUrl) {
-                mediaPlaceholder.innerHTML = '<img class="exercise-media-img" src="' + esc(exercise.mediaUrl) + '" alt="' + esc(exercise.name) + '">';
-            } else {
-                mediaPlaceholder.innerText = exercise.name + " 동작 이미지";
-            }
+            var imgId = exercise.exerciseId || exercise.id;
+            var imgUrl = contextPath + '/resources/images/workout/' + imgId + '.png';
+            mediaPlaceholder.innerHTML = '<img class="exercise-media-img" src="' + imgUrl + '" alt="' + esc(exercise.name) + '" onerror="if(this.src.endsWith(\'.png\')){this.src=this.src.replace(\'.png\',\'.jpg\');}">';
 
             progressBarGroup.querySelectorAll(".progress-step").forEach(function (step, idx) {
                 step.classList.toggle("is-active", idx <= exerciseIndex);
