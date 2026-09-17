@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <c:set var="active" value="myPage" scope="request" />
 <!DOCTYPE html>
 <html lang="ko">
@@ -135,16 +136,15 @@
         <section class="card streak-card">
             <div class="card-header-row">
                 <h3 class="card-title">연속 출석</h3>
-                <span class="streak-count">${streakDays != null ? streakDays : 0}일째</span>
+                <span class="streak-count">${streak.current}일째</span>
             </div>
+            <%-- 월~일 일곱 칸. 서비스가 이번 주 기록을 보고 채운 값이다.
+                 전에는 월·화·수·목이 켜진 채로 박혀 있어서 새 계정도 그렇게 보였다. --%>
+            <c:set var="dayNames" value="월,화,수,목,금,토,일" />
             <div class="week-days">
-                <span class="day-chip active">월</span>
-                <span class="day-chip active">화</span>
-                <span class="day-chip active">수</span>
-                <span class="day-chip active">목</span>
-                <span class="day-chip">금</span>
-                <span class="day-chip">토</span>
-                <span class="day-chip">일</span>
+                <c:forEach var="done" items="${streak.week}" varStatus="st">
+                    <span class="day-chip ${done ? 'active' : ''}">${fn:split(dayNames, ',')[st.index]}</span>
+                </c:forEach>
             </div>
         </section>
 

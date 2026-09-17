@@ -85,4 +85,7 @@ public interface IMyPageMapper {
 
     /** 손으로 적을 수 있는 종목. 홈트는 자동으로 기록되므로 뺀다 */
     List<SportDTO> selectRecordableSports();
+
+    /** 운동한 날짜를 최근 순으로. 하루에 두 번 해도 하루로 접는다 */
+    List<java.time.LocalDate> selectExerciseDates(@Param("userId") Integer userId);
 }
