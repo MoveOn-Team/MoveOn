@@ -4,18 +4,13 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.0/TweenMax.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.4.1/snap.svg-min.js"></script>
-    <!-- 1. jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- 4. 커스텀 JS 파일 (body 맨 밑 또는 head 하단) -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MOVE:ON 맞춤 운동 추천</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/recommend.css?v=1.1">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.9/css/weather-icons.min.css">
+    <%-- 날씨 위젯이 jQuery 를 쓴다 --%>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body class="auth-page">
 <main class="auth-shell recommend-shell">
@@ -52,7 +47,6 @@
                 </div>
                 <div class="details">
                     <div class="temp"><span id="weather-temp">--</span><span>°C</span></div>
-                    <div id="summary">불러오는 중...</div>
                 </div>
             </div>
 

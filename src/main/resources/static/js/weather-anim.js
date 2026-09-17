@@ -16,9 +16,6 @@ $(document).ready(function () {
                 const temp = Math.round(data.main.temp);
                 $('#weather-temp').text(temp);
 
-                const description = data.weather[0].description;
-                $('#summary').text(description);
-
                 const iconCode = data.weather[0].icon;
                 const svgFileName = getMatchingSvg(iconCode);
 
@@ -27,7 +24,6 @@ $(document).ready(function () {
             },
             error: function (err) {
                 console.error("날씨 정보 불러오기 실패:", err);
-                $('#summary').text("날씨 정보 오류");
             }
         });
     }
