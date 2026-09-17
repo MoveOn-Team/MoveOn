@@ -547,6 +547,7 @@ public class AiService implements IAiService {
             """;
 
     @Override
+    @SuppressWarnings("unchecked")
     public String writeReportNote(WorkoutReportDTO report) {
 
         if (!isReady() || report == null) {

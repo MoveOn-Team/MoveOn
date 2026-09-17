@@ -1,6 +1,7 @@
 package com.moveon.service.impl;
 
 import com.moveon.dto.SportDTO;
+import com.moveon.dto.StreakDTO;
 import com.moveon.dto.UserProfileDTO;
 import com.moveon.dto.WorkoutLogDTO;
 import com.moveon.dto.WorkoutReportDTO;
@@ -18,8 +19,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
@@ -114,8 +117,9 @@ public class MyPageService implements IMyPageService {
         report.setTotalCalories(myPageMapper.selectThisWeekCalories(userId));
         report.setTotalWorkoutCount(myPageMapper.selectTotalWorkoutCount(userId));
 
-        // 연속 출석일 계산 (추후 출석 로직 연동, 기본 0일 처리)
-        report.setCurrentStreak(0);
+        // 연속 출석. 아래 최장 기록과 같은 조회를 쓰므로 한 번만 센다
+        StreakDTO streak = getStreak(userId);
+        report.setCurrentStreak(streak.getCurrent());
 
         // 5. 많이 한 종목 Top 4 & 비율 계산
         List<WorkoutReportDTO.SportStatDTO> topSports = myPageMapper.selectTopSports(userId);
@@ -141,7 +145,7 @@ public class MyPageService implements IMyPageService {
 
         String firstDate = myPageMapper.selectFirstRecordDate(userId);
         report.setFirstRecordDate(firstDate != null ? firstDate : "기록 없음");
-        report.setMaxStreakDays(0); // 최장 연속 출석 기본값
+        report.setMaxStreakDays(streak.getMax());
 
         report.setWeeklyStats(weeklyStats(userId, monday));
 
@@ -188,6 +192,71 @@ public class MyPageService implements IMyPageService {
     @Override
     public List<SportDTO> getRecordableSports() {
         return myPageMapper.selectRecordableSports();
+    }
+
+    // =====================================================================
+    // 연속 출석
+    // =====================================================================
+
+    /**
+     * 운동한 날짜를 훑어 연속 일수를 센다.
+     *
+     * 오늘 아직 안 했다고 기록이 끊긴 것은 아니다. 하루는 기다려 준다.
+     * 어제까지 이어졌으면 그 수를 그대로 보여주고, 그제부터 비었으면 0 이다.
+     * 저녁에 운동하는 사람이 아침에 열었을 때 0 이 뜨면 그만두게 된다.
+     */
+    @Override
+    public StreakDTO getStreak(Integer userId) {
+
+        StreakDTO rDTO = new StreakDTO();
+
+        // 최근 순으로 온다. 하루에 두 번 했어도 한 줄이다
+        List<LocalDate> days = myPageMapper.selectExerciseDates(userId);
+
+        LocalDate today = LocalDate.now();
+        LocalDate monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        // 월~일 일곱 칸
+        Set<LocalDate> set = new HashSet<>(days);
+        List<Boolean> week = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            week.add(set.contains(monday.plusDays(i)));
+        }
+        rDTO.setWeek(week);
+
+        if (days.isEmpty()) {
+            return rDTO;
+        }
+
+        // 지금 이어지는 날 수
+        LocalDate latest = days.get(0);
+        if (!latest.isBefore(today.minusDays(1))) {
+            int n = 1;
+            LocalDate prev = latest;
+            for (int i = 1; i < days.size(); i++) {
+                if (!days.get(i).equals(prev.minusDays(1))) {
+                    break;
+                }
+                prev = days.get(i);
+                n++;
+            }
+            rDTO.setCurrent(n);
+        }
+
+        // 가장 길었던 날 수
+        int best = 1;
+        int run = 1;
+        for (int i = 1; i < days.size(); i++) {
+            if (days.get(i).equals(days.get(i - 1).minusDays(1))) {
+                run++;
+            } else {
+                run = 1;
+            }
+            best = Math.max(best, run);
+        }
+        rDTO.setMax(best);
+
+        return rDTO;
     }
 
     // =====================================================================

@@ -1,6 +1,7 @@
 package com.moveon.service;
 
 import com.moveon.dto.SportDTO;
+import com.moveon.dto.StreakDTO;
 import com.moveon.dto.UserProfileDTO;
 import com.moveon.dto.WorkoutLogDTO;
 import com.moveon.dto.WorkoutReportDTO;
@@ -25,6 +26,9 @@ public interface IMyPageService {
 
     /** 기록 화면에서 고를 수 있는 종목 */
     List<SportDTO> getRecordableSports();
+
+    /** 연속 출석. 기록이 없으면 0일과 빈 일주일이 돌아온다 */
+    StreakDTO getStreak(Integer userId);
 
     /**
      * 리포트의 AI 코치 글.

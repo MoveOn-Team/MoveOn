@@ -185,6 +185,18 @@
          ORDER BY category, sport_id
     </select>
 
+    <!-- 운동한 날짜 (최근 순, 중복 없이)
+
+         연속 출석은 SQL 로 세지 않는다. 날짜가 끊겼는지 보는 일이라
+         한 줄씩 훑어야 하는데, 그건 자바에서 세는 편이 읽기 쉽다.
+         하루에 두 번 해도 하루로 치므로 DISTINCT 로 접는다. -->
+    <select id="selectExerciseDates" resultType="java.time.LocalDate">
+        SELECT DISTINCT exercise_date
+          FROM workout_logs
+         WHERE user_id = #{userId}
+         ORDER BY exercise_date DESC
+    </select>
+
     <!-- 주별 운동 횟수
 
          WEEKDAY() 는 월요일이 0 이다. 그만큼 빼면 그 날짜가 속한 주의 월요일이 된다.
