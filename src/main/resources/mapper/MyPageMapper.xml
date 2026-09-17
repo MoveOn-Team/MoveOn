@@ -172,6 +172,19 @@
         WHERE user_id = #{userId}
     </select>
 
+    <!-- 손으로 적을 수 있는 종목
+
+         홈트는 뺀다. 운동을 끝내면 자동으로 기록되므로 여기서 또 고르면 두 번 쌓인다.
+         met_value 도 함께 준다. 화면이 예상 칼로리를 그 값으로 센다.
+         JS 에 따로 적어 두면 표와 어긋난다. 실제로 수영이 7.0 과 6.0 으로 갈려 있었다. -->
+    <select id="selectRecordableSports" resultType="SportDTO">
+        SELECT sport_id AS sportId, name, met_value AS metValue
+          FROM sports
+         WHERE is_active = 1
+           AND category &lt;&gt; 'HOME'
+         ORDER BY category, sport_id
+    </select>
+
     <!-- 주별 운동 횟수
 
          WEEKDAY() 는 월요일이 0 이다. 그만큼 빼면 그 날짜가 속한 주의 월요일이 된다.

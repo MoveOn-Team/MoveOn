@@ -1,5 +1,6 @@
 package com.moveon.mapper;
 
+import com.moveon.dto.SportDTO;
 import com.moveon.dto.UserProfileDTO;
 import com.moveon.dto.WorkoutLogDTO;
 import com.moveon.dto.WorkoutReportDTO;
@@ -81,4 +82,7 @@ public interface IMyPageMapper {
      */
     List<Map<String, Object>> selectWeeklyCounts(@Param("userId") Integer userId,
                                                  @Param("from") java.time.LocalDate from);
+
+    /** 손으로 적을 수 있는 종목. 홈트는 자동으로 기록되므로 뺀다 */
+    List<SportDTO> selectRecordableSports();
 }

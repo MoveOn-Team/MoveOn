@@ -1,5 +1,6 @@
 package com.moveon.service;
 
+import com.moveon.dto.SportDTO;
 import com.moveon.dto.UserProfileDTO;
 import com.moveon.dto.WorkoutLogDTO;
 import com.moveon.dto.WorkoutReportDTO;
@@ -21,6 +22,9 @@ public interface IMyPageService {
     List<WorkoutLogDTO> getTodayWorkoutList(Integer userId) throws Exception;
 
     WorkoutReportDTO getWorkoutReport(Integer userId) throws Exception;
+
+    /** 기록 화면에서 고를 수 있는 종목 */
+    List<SportDTO> getRecordableSports();
 
     /**
      * 리포트의 AI 코치 글.
