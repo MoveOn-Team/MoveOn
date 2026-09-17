@@ -53,7 +53,7 @@
             btnLocation.addEventListener("click", function () {
                 var mapUrl = this.dataset.mapUrl;
                 if (mapUrl) {
-                    window.open(mapUrl, "_blank", "noopener");
+                    window.open(mapUrl, "_blank", "noopener,noreferrer");
                 } else {
                     alert("이 행사는 위치 정보가 아직 없어요.");
                 }
@@ -67,7 +67,7 @@
 
                 // window.open 은 javascript: 주소를 그 자리에서 실행한다. 저장할 때도 막지만 여기서도 본다
                 if (/^https?:\/\//i.test(targetUrl || "")) {
-                    window.open(targetUrl, "_blank", "noopener");
+                    window.open(targetUrl, "_blank", "noopener,noreferrer");
                 } else {
                     alert("이 행사는 안내 사이트가 등록되어 있지 않아요.");
                 }

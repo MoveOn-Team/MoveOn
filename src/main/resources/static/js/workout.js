@@ -425,7 +425,7 @@
 
             // PC 는 네이버 앱이 있을 수 없으니 기다리지 않고 바로 카카오로 간다
             if (!naver || !isPhone()) {
-                window.open(kakao, "_blank", "noopener");
+                window.open(kakao, "_blank", "noopener,noreferrer");
                 return;
             }
 
@@ -438,7 +438,7 @@
             setTimeout(function () {
                 document.removeEventListener("visibilitychange", gone);
                 if (!left && !document.hidden) {
-                    window.open(kakao, "_blank", "noopener");
+                    window.open(kakao, "_blank", "noopener,noreferrer");
                 }
             }, 1500);
         });
@@ -451,7 +451,7 @@
         el.addEventListener("click", function () {
             var url = el.dataset[attr];
             if (url) {
-                window.open(url, "_blank", "noopener");
+                window.open(url, "_blank", "noopener,noreferrer");
             } else {
                 alert(emptyMsg);
             }

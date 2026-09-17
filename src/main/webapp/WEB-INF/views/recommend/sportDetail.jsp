@@ -305,10 +305,10 @@
                          여기서 이름은 도착지에 붙는 이름표일 뿐이라 엉뚱한 곳을 찍지 않는다. --%>
                     <a class="outline-button"
                        href="https://map.kakao.com/link/to/${pickName},${pickLat},${pickLng}"
-                       target="_blank" rel="noopener">길찾기</a>
+                       target="_blank" rel="noopener noreferrer">길찾기</a>
 
                     <c:if test="${not empty linkUrl}">
-                        <a class="primary-button" href="${linkUrl}" target="_blank" rel="noopener">${linkLabel}</a>
+                        <a class="primary-button" href="${linkUrl}" target="_blank" rel="noopener noreferrer">${linkLabel}</a>
                     </c:if>
                 </div>
             </c:if>
