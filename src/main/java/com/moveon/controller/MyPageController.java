@@ -80,6 +80,11 @@ public class MyPageController {
         return "user/workoutReport"; // /WEB-INF/views/user/workoutReport.jsp 호출
     }
 
+    @GetMapping("/copyright")
+    public String copyrightPage() {
+        return "user/copyright"; // WEB-INF/views/user/copyright.jsp 호출
+    }
+
     /**
      * 회원 정보 수정 요청 처리 (POST)
      */
