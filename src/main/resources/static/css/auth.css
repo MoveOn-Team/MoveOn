@@ -1815,3 +1815,11 @@ body::-webkit-scrollbar {
     color: #888888;
     margin-right: 4px;
 }
+
+/* 라이선스 원문으로 나가는 링크. 목록의 다른 줄과 섞이면 안 눌러 보므로 밑줄을 둔다 */
+.card-info-list .license-link {
+    color: #4E9F76;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
