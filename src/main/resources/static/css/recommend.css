@@ -360,7 +360,7 @@
 /* 우측 상단 날씨 위젯 박스 위치 및 크기 */
 .weather-widget {
     position: absolute !important;
-    top: 10px !important;       /* 여백 확보를 위해 위치 살짝 올림 */
+    top: 5px !important;        /* 카드 위쪽에 바짝 붙인다 */
     right: 10px !important;
     display: flex;
     flex-direction: column;

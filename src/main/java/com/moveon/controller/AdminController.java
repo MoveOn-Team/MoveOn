@@ -3,7 +3,6 @@ package com.moveon.controller;
 import com.moveon.dto.AdminDTO;
 import com.moveon.dto.EventDTO;
 import com.moveon.dto.EventSearchDTO;
-import com.moveon.dto.FacilityDTO;
 import com.moveon.service.IAdminService;
 import com.moveon.service.IEventSearchService;
 import jakarta.servlet.http.HttpSession;

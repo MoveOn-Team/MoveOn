@@ -10,6 +10,9 @@ import java.math.BigDecimal;
 @Setter
 public class HomeExerciseDTO implements Serializable {
 
+    /** 세션에 담기는 DTO 다. 값을 늘려도 이미 담긴 것을 못 읽는 일이 없게 못 박는다 */
+    private static final long serialVersionUID = 1L;
+
     private int exerciseId;
     private String name;
     private String bodyPart;

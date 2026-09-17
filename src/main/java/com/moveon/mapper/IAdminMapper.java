@@ -2,12 +2,10 @@ package com.moveon.mapper;
 
 import com.moveon.dto.AdminDTO;
 import com.moveon.dto.EventDTO;
-import com.moveon.dto.FacilityDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-import java.util.Map;
 
 
 /**
