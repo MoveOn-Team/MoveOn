@@ -349,13 +349,27 @@
 .detail-actions {
     display: flex;
     gap: 0.625rem;
-    margin-top: 1.5rem;
+    /* 목록 끝과 붙어 보여서 벌린다. 목록 안의 카드 간격이 0.5rem 이라
+       그보다 확실히 넓어야 '목록이 끝났다' 로 읽힌다.
+       구역 제목의 위 여백(1.5rem)보다도 넓게 둔다 */
+    margin-top: 4rem;
 }
 
 .detail-actions .primary-button,
 .detail-actions .outline-button {
     flex: 1;
     margin-top: 0;
+}
+
+/* 길찾기는 부차적인 단추다. 파란 테두리를 두르면 옆의 '대관 신청하기' 와
+   같은 무게로 읽혀 어디를 눌러야 할지 흐려진다.
+   즉시운동 탭의 같은 자리(.btn-outline)와 색을 맞춘다.
+
+   .outline-button 은 로그인·아이디찾기에서도 쓰는데 거기서는 파란
+   기본 단추와 짝이라 지금이 맞다. 그래서 이 줄 안에서만 바꾼다. */
+.detail-actions .outline-button {
+    color: #45484d;
+    border-color: var(--card-line);
 }
 /* 우측 상단 날씨 위젯 박스 위치 및 크기 */
 .weather-widget {
