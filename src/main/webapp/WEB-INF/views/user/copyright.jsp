@@ -123,6 +123,7 @@
                 <ul class="card-info-list">
                     <li><span class="info-label">제공:</span> NAVER Corp.</li>
                     <li><span class="info-label">용도:</span> 코스 길안내를 네이버지도 앱으로 넘김</li>
+                    <li><span class="info-label">저작권:</span> Copyright © NAVER Corp. All Rights Reserved.</li>
                 </ul>
             </div>
         </div>
