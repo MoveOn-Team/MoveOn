@@ -1265,6 +1265,24 @@ button {
 /* 칩 버튼 그룹 */
 .form-group label { font-size: 14px; font-weight: 700; display: block; margin-bottom: 8px; }
 .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* '직접입력' 을 골랐을 때만 나오는 칸. hidden 속성으로 껐다 켠다 */
+.custom-min-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+}
+.custom-min-box[hidden] { display: none; }
+.custom-min-box input {
+    width: 84px;
+    padding: 8px 12px;
+    border: 1px solid var(--card-line);
+    border-radius: 12px;
+    font-size: 13px;
+    text-align: right;
+}
+.custom-min-box span { font-size: 13px; color: #4B5563; }
 .chip-group .chip {
     padding: 8px 16px;
     border-radius: 999px;

@@ -10,6 +10,13 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * '오늘' 과 '이번 주 월요일' 은 자바가 정해서 넘긴다.
+ *
+ * 전에는 CURDATE() 를 썼는데, DB 서버 시계가 사흘 뒤처져 있던 날
+ * 연속 출석(자바 기준)에는 오늘 기록이 잡히고 오늘 목록(DB 기준)에는
+ * 안 잡혔다. 기준이 둘이면 어느 쪽이 맞는지 화면만 보고는 알 수 없다.
+ */
 @Mapper
 public interface IMyPageMapper {
 
@@ -36,6 +43,7 @@ public interface IMyPageMapper {
      * source 는 HOME_WORKOUT 이라 리포트에서 손으로 적은 것과 구분된다.
      */
     int insertHomeWorkoutLog(@Param("userId") int userId,
+                             @Param("today") java.time.LocalDate today,
                              @Param("durationMin") int durationMin,
                              @Param("intensity") String intensity,
                              @Param("caloriesKcal") int caloriesKcal,
@@ -44,20 +52,24 @@ public interface IMyPageMapper {
     /**
      * 오늘 운동 완료 목록 조회 [추가]
      */
-    List<WorkoutLogDTO> selectTodayWorkoutList(@Param("userId") Integer userId);
+    List<WorkoutLogDTO> selectTodayWorkoutList(@Param("userId") Integer userId,
+                                               @Param("today") java.time.LocalDate today);
 
 
 
 
 
     // 이번 주 총 횟수 및 총 소요시간 (월~일 기준)
-    Map<String, Object> selectThisWeekSummary(@Param("userId") Integer userId);
+    Map<String, Object> selectThisWeekSummary(@Param("userId") Integer userId,
+                                              @Param("monday") java.time.LocalDate monday);
 
     // 지난 주 총 횟수
-    int selectLastWeekCount(@Param("userId") Integer userId);
+    int selectLastWeekCount(@Param("userId") Integer userId,
+                            @Param("monday") java.time.LocalDate monday);
 
     // 이번 주 소모 칼로리
-    int selectThisWeekCalories(@Param("userId") Integer userId);
+    int selectThisWeekCalories(@Param("userId") Integer userId,
+                               @Param("monday") java.time.LocalDate monday);
 
     // 전체 누적 운동 횟수
     int selectTotalWorkoutCount(@Param("userId") Integer userId);

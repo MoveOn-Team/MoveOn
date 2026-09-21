@@ -187,22 +187,29 @@
                 </div>
             </div>
 
+            <%-- 값을 data 속성에 싣는다. 글자를 읽어 쓰면 문구를 다듬는 순간
+                 조용히 엉뚱한 값이 저장된다. 즉시운동 탭도 이 방식이다. --%>
             <div class="form-group">
                 <label>얼마나 했나요?</label>
                 <div class="chip-group time-chips">
-                    <button type="button" class="chip">30분</button>
-                    <button type="button" class="chip active">60분</button>
-                    <button type="button" class="chip">90분</button>
-                    <button type="button" class="chip">직접입력</button>
+                    <button type="button" class="chip" data-min="30">30분</button>
+                    <button type="button" class="chip active" data-min="60">60분</button>
+                    <button type="button" class="chip" data-min="90">90분</button>
+                    <button type="button" class="chip" data-min="custom">직접입력</button>
+                </div>
+                <div class="custom-min-box" id="customMinBox" hidden>
+                    <input type="number" id="customMin" min="1" max="600"
+                           inputmode="numeric" placeholder="분">
+                    <span>분</span>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>얼마나 힘들었나요?</label>
                 <div class="chip-group intensity-chips">
-                    <button type="button" class="chip">가볍게</button>
-                    <button type="button" class="chip active">적당히</button>
-                    <button type="button" class="chip">숨차게</button>
+                    <button type="button" class="chip" data-value="LIGHT">가볍게</button>
+                    <button type="button" class="chip active" data-value="MODERATE">적당히</button>
+                    <button type="button" class="chip" data-value="HARD">숨차게</button>
                 </div>
             </div>
 
@@ -265,12 +272,31 @@
 
     // MET 은 종목 칩의 data-met 에 실려 온다. sports 표의 met_value 다.
 
-    // 강도 가중치
-    const INTENSITY_FACTOR = {
-        '가볍게': 0.8,
-        '적당히': 1.0,
-        '숨차게': 1.25
-    };
+    // 강도 가중치. 열쇠는 화면 글자가 아니라 칩의 data-value 다
+    const INTENSITY_FACTOR = { LIGHT: 0.8, MODERATE: 1.0, HARD: 1.25 };
+
+    /** 고른 강도. 못 고르면 중간 */
+    function readIntensity() {
+        var chip = document.querySelector(".intensity-chips .chip.active");
+        return chip ? chip.dataset.value : "MODERATE";
+    }
+
+    /**
+     * 고른 시간(분). '직접입력' 을 골랐는데 안 적었으면 0 을 준다.
+     * 전에는 '직접입력' 글자에서 숫자를 뽑다가 빈 값이 나와 말없이 60분이 됐다.
+     */
+    function readDuration() {
+        var chip = document.querySelector(".time-chips .chip.active");
+        if (!chip) {
+            return 60;
+        }
+        if (chip.dataset.min === "custom") {
+            var box = document.getElementById("customMin");
+            var n = box ? parseInt(box.value, 10) : NaN;
+            return n > 0 ? n : 0;
+        }
+        return parseInt(chip.dataset.min, 10);
+    }
 
     // 실시간 칼로리 계산
     function calculateModalCalories() {
@@ -278,10 +304,9 @@
         var userWeight = parseFloat(document.body.dataset.userWeight) || 0;
 
         var sportChip = document.querySelector(".sport-chips .chip.active");
-        var timeText = document.querySelector(".time-chips .chip.active") ? document.querySelector(".time-chips .chip.active").innerText.trim() : "60분";
-        var intensity = document.querySelector(".intensity-chips .chip.active") ? document.querySelector(".intensity-chips .chip.active").innerText.trim() : "적당히";
+        var intensity = readIntensity();
 
-        var durationMin = parseInt(timeText.replace(/[^0-9]/g, "")) || 60;
+        var durationMin = readDuration();
         var met = sportChip ? parseFloat(sportChip.dataset.met) : 0;
         if (!(met > 0)) {
             met = 5.0;   // 표에 값이 없는 종목. 중강도로 본다
@@ -353,33 +378,62 @@
                 var parent = this.parentElement;
                 parent.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
                 this.classList.add("active");
+                toggleCustomMin();
                 calculateModalCalories();
             });
         });
+
+        // '직접입력' 을 골랐을 때만 입력칸을 보여준다
+        function toggleCustomMin() {
+            var box = document.getElementById("customMinBox");
+            if (!box) {
+                return;
+            }
+            var chip = document.querySelector(".time-chips .chip.active");
+            var on = chip && chip.dataset.min === "custom";
+            box.hidden = !on;
+            if (on) {
+                document.getElementById("customMin").focus();
+            }
+        }
+
+        var customMin = document.getElementById("customMin");
+        if (customMin) {
+            customMin.addEventListener("input", calculateModalCalories);
+        }
 
         // [기록하기] 버튼 이벤트
         var submitBtn = document.querySelector(".btn-modal-submit");
         if (submitBtn) {
             submitBtn.onclick = function () {
-                var sportName = document.querySelector(".sport-chips .chip.active") ? document.querySelector(".sport-chips .chip.active").innerText.trim() : "헬스";
-                var timeText = document.querySelector(".time-chips .chip.active") ? document.querySelector(".time-chips .chip.active").innerText.trim() : "60분";
-                var intensity = document.querySelector(".intensity-chips .chip.active") ? document.querySelector(".intensity-chips .chip.active").innerText.trim() : "적당히";
-                var durationMin = parseInt(timeText.replace(/[^0-9]/g, "")) || 60;
+                var sportChip = document.querySelector(".sport-chips .chip.active");
+                var durationMin = readDuration();
+
+                // '직접입력' 을 골라 놓고 안 적은 경우. 말없이 60분으로 넘기지 않는다
+                if (!(durationMin > 0)) {
+                    alert("운동 시간을 입력해 주세요.");
+                    var box = document.getElementById("customMin");
+                    if (box) {
+                        box.focus();
+                    }
+                    return;
+                }
+                if (!sportChip) {
+                    alert("운동 종목을 골라 주세요.");
+                    return;
+                }
 
                 var calText = document.getElementById("modalCalorieText") ? document.getElementById("modalCalorieText").innerText : "0";
                 var caloriesBurned = parseInt(calText.replace(/[^0-9]/g, "")) || 0;
                 var memo = document.querySelector("#workoutModal textarea") ? document.querySelector("#workoutModal textarea").value : "";
 
-                var now = new Date();
-                var offset = now.getTimezoneOffset() * 60000;
-                var todayIso = new Date(now.getTime() - offset).toISOString().substring(0, 10);
-
+                // 날짜는 보내지 않는다. 서버가 자기 시계로 오늘을 정한다.
+                // 셋(브라우저·서버·DB)이 각자 오늘을 알면 하나만 틀어져도 기록이 샌다.
                 var requestData = {
-                    sportName: sportName,
+                    sportName: sportChip.innerText.trim(),
                     durationMin: durationMin,
-                    intensity: intensity,
+                    intensity: readIntensity(),
                     caloriesBurned: caloriesBurned,
-                    workoutDate: todayIso,
                     memo: memo
                 };
 

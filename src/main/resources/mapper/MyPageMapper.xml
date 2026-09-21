@@ -51,11 +51,7 @@
                      (SELECT sport_id FROM sports WHERE name = #{sportName} LIMIT 1),
             STR_TO_DATE(#{workoutDate}, '%Y-%m-%d'),
             #{durationMin},
-            CASE
-                WHEN #{intensity} = '가볍게' THEN 'LIGHT'
-                WHEN #{intensity} = '숨차게' THEN 'HARD'
-                ELSE 'MODERATE'
-                END,
+            #{intensity},
             #{caloriesBurned},
             #{memo},
             'MANUAL',
@@ -68,14 +64,14 @@
            종목   이름으로 찾지 않고 '홈트'(12) 로 못 박는다
            강도   화면 값이 아니라 계획이 들고 있는 LIGHT/MODERATE/HARD 를 그대로 쓴다
            출처   HOME_WORKOUT. 리포트에서 손으로 적은 것과 구분할 수 있어야 한다
-         날짜는 서버 기준 오늘로 넣는다. 운동을 끝낸 순간이 곧 그날이다. -->
+           날짜   자바가 정해서 넘긴다. CURDATE() 를 쓰면 DB 시계에 끌려간다 -->
     <insert id="insertHomeWorkoutLog">
         INSERT INTO workout_logs
                (user_id, sport_id, exercise_date, duration_min,
                 intensity, calories_kcal, memo, source, created_at)
         VALUES (#{userId},
                 (SELECT sport_id FROM sports WHERE category = 'HOME' LIMIT 1),
-                CURDATE(),
+                #{today},
                 #{durationMin},
                 #{intensity},
                 #{caloriesKcal},
@@ -84,7 +80,8 @@
                 NOW())
     </insert>
 
-    <select id="selectTodayWorkoutList" parameterType="int" resultType="com.moveon.dto.WorkoutLogDTO">
+    <!-- 오늘은 자바가 정해서 넘긴다. 값을 둘 받으므로 parameterType 을 쓰지 않는다 -->
+    <select id="selectTodayWorkoutList" resultType="com.moveon.dto.WorkoutLogDTO">
         SELECT
             w.log_id AS logId,
             w.user_id AS userId,
@@ -99,7 +96,7 @@
         FROM workout_logs w
                  LEFT JOIN sports s ON w.sport_id = s.sport_id
         WHERE w.user_id = #{userId}
-          AND w.exercise_date = CURDATE()
+          AND w.exercise_date = #{today}
         ORDER BY w.created_at DESC
     </select>
 
@@ -112,8 +109,7 @@
             IFNULL(SUM(duration_min), 0) AS weekDuration
         FROM workout_logs
         WHERE user_id = #{userId}
-          AND exercise_date BETWEEN DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-            AND DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY)
+          AND exercise_date BETWEEN #{monday} AND DATE_ADD(#{monday}, INTERVAL 6 DAY)
     </select>
 
     <!-- 지난 주 운동 횟수 -->
@@ -121,8 +117,8 @@
         SELECT IFNULL(COUNT(*), 0)
         FROM workout_logs
         WHERE user_id = #{userId}
-          AND exercise_date BETWEEN DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
-            AND DATE_SUB(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 1 DAY)
+          AND exercise_date BETWEEN DATE_SUB(#{monday}, INTERVAL 7 DAY)
+            AND DATE_SUB(#{monday}, INTERVAL 1 DAY)
     </select>
 
     <!-- 이번 주 소모 칼로리 -->
@@ -130,8 +126,7 @@
         SELECT IFNULL(SUM(calories_kcal), 0)
         FROM workout_logs
         WHERE user_id = #{userId}
-          AND exercise_date BETWEEN DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-            AND DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY)
+          AND exercise_date BETWEEN #{monday} AND DATE_ADD(#{monday}, INTERVAL 6 DAY)
     </select>
 
     <!-- 전체 누적 운동 횟수 -->
