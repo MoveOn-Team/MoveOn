@@ -62,9 +62,21 @@ public class MyPageService implements IMyPageService {
         return result > 0;
     }
 
+    /** 강도는 이 셋뿐이다. 화면에서 다른 값이 와도 표에는 못 들어가게 막는다 */
+    private static final Set<String> INTENSITIES = Set.of("LIGHT", "MODERATE", "HARD");
+
     @Override
     public int insertWorkoutLog(WorkoutLogDTO workoutLogDTO) throws Exception {
         log.info(this.getClass().getName() + ".insertWorkoutLog Start!");
+
+        // 날짜는 화면 말을 듣지 않고 서버가 정한다.
+        // 브라우저·서버·DB 가 각자 오늘을 알면 시계 하나만 틀어져도 기록이 샌다.
+        workoutLogDTO.setWorkoutDate(LocalDate.now().toString());
+
+        if (!INTENSITIES.contains(workoutLogDTO.getIntensity())) {
+            log.warn("모르는 강도라 중간으로 둔다 : {}", workoutLogDTO.getIntensity());
+            workoutLogDTO.setIntensity("MODERATE");
+        }
 
         int res = myPageMapper.insertWorkoutLog(workoutLogDTO);
 
@@ -82,7 +94,7 @@ public class MyPageService implements IMyPageService {
     @Override
     public List<WorkoutLogDTO> getTodayWorkoutList(Integer userId) throws Exception {
         log.info(this.getClass().getName() + ".getTodayWorkoutList Start!");
-        return myPageMapper.selectTodayWorkoutList(userId);
+        return myPageMapper.selectTodayWorkoutList(userId, LocalDate.now());
     }
 
     @Override
@@ -98,7 +110,7 @@ public class MyPageService implements IMyPageService {
         report.setWeekRangeText(monday.format(formatter) + " ~ " + sunday.format(formatter));
 
         // 2. 이번 주 요약 데이터 조회
-        Map<String, Object> thisWeekSummary = myPageMapper.selectThisWeekSummary(userId);
+        Map<String, Object> thisWeekSummary = myPageMapper.selectThisWeekSummary(userId, monday);
         int thisWeekCount = 0;
         int thisWeekDurationMin = 0;
 
@@ -110,11 +122,11 @@ public class MyPageService implements IMyPageService {
         report.setThisWeekDurationMin(thisWeekDurationMin);
 
         // 3. 지난주 대비 증감 횟수
-        int lastWeekCount = myPageMapper.selectLastWeekCount(userId);
+        int lastWeekCount = myPageMapper.selectLastWeekCount(userId, monday);
         report.setWeekDiffCount(thisWeekCount - lastWeekCount);
 
         // 4. 주요 요약 통계 (칼로리, 연속출석, 전체횟수)
-        report.setTotalCalories(myPageMapper.selectThisWeekCalories(userId));
+        report.setTotalCalories(myPageMapper.selectThisWeekCalories(userId, monday));
         report.setTotalWorkoutCount(myPageMapper.selectTotalWorkoutCount(userId));
 
         // 연속 출석. 아래 최장 기록과 같은 조회를 쓰므로 한 번만 센다
@@ -336,7 +348,8 @@ public class MyPageService implements IMyPageService {
 
         log.info("{}.addHomeWorkoutLog Start! userId : {}", this.getClass().getName(), userId);
 
-        int res = myPageMapper.insertHomeWorkoutLog(userId, durationMin, intensity, caloriesKcal, memo);
+        int res = myPageMapper.insertHomeWorkoutLog(userId, LocalDate.now(),
+                durationMin, intensity, caloriesKcal, memo);
 
         if (res > 0) {
             refreshNote(userId);
