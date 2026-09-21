@@ -98,6 +98,16 @@ public interface IMyPageMapper {
     /** 손으로 적을 수 있는 종목. 홈트는 자동으로 기록되므로 뺀다 */
     List<SportDTO> selectRecordableSports();
 
+    /**
+     * 기록 지우기.
+     *
+     * user_id 를 같이 건다. 화면이 보낸 번호만 믿고 지우면
+     * 남의 기록 번호를 넣어 지울 수 있다.
+     *
+     * @return 지운 줄 수. 0 이면 남의 것이거나 이미 없는 것이다
+     */
+    int deleteWorkoutLog(@Param("logId") int logId, @Param("userId") int userId);
+
     /** 운동한 날짜를 최근 순으로. 하루에 두 번 해도 하루로 접는다 */
     List<java.time.LocalDate> selectExerciseDates(@Param("userId") Integer userId);
 }

@@ -206,6 +206,28 @@ public class MyPageService implements IMyPageService {
         return myPageMapper.selectRecordableSports();
     }
 
+    /**
+     * 잘못 넣은 기록 지우기.
+     *
+     * 고치는 기능은 두지 않는다. 지우고 다시 넣으면 결과가 같은데,
+     * 고치려면 모달을 채워 열고 칼로리를 다시 세고 코치 글도 다시 만들어야 한다.
+     */
+    @Override
+    public boolean deleteWorkoutLog(int logId, int userId) throws Exception {
+
+        int res = myPageMapper.deleteWorkoutLog(logId, userId);
+
+        if (res > 0) {
+            // 기록이 하나 줄었으니 코치 글도 달라진다
+            refreshNote(userId);
+            return true;
+        }
+
+        // 내 기록이 아니거나 이미 없다. 어느 쪽인지는 화면에 알리지 않는다
+        log.warn("지울 기록을 찾지 못했다. logId : {} / userId : {}", logId, userId);
+        return false;
+    }
+
     // =====================================================================
     // 연속 출석
     // =====================================================================

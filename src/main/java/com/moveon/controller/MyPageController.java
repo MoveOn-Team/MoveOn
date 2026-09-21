@@ -145,6 +145,39 @@ public class MyPageController {
         return "redirect:/user/myPage";
     }
     /**
+     * 잘못 넣은 기록 지우기.
+     *
+     * 번호는 화면이 보낸 값이라 그대로 믿지 않는다. 세션의 회원 번호를
+     * 같이 걸어서, 남의 기록 번호를 넣어도 지워지지 않게 한다.
+     */
+    @ResponseBody
+    @PostMapping("/deleteWorkout")
+    public MsgDTO deleteWorkout(@RequestBody WorkoutLogDTO pDTO, HttpSession session) {
+
+        MsgDTO rDTO = new MsgDTO();
+
+        Integer userId = (Integer) session.getAttribute("SS_USER_NO");
+        if (userId == null) {
+            rDTO.setMsg("로그인이 필요한 서비스입니다.");
+            return rDTO;
+        }
+        if (pDTO == null || pDTO.getLogId() == null) {
+            rDTO.setMsg("지울 기록을 찾지 못했습니다.");
+            return rDTO;
+        }
+
+        try {
+            boolean done = myPageService.deleteWorkoutLog(pDTO.getLogId(), userId);
+            rDTO.setMsg(done ? "삭제되었습니다." : "기록을 찾지 못했습니다.");
+        } catch (Exception e) {
+            log.error("운동 기록 삭제 중 오류 발생", e);
+            rDTO.setMsg("서버 오류가 발생했습니다.");
+        }
+
+        return rDTO;
+    }
+
+    /**
      * 운동 기록 등록 (AJAX 모달 제출)
      */
     @ResponseBody

@@ -104,6 +104,11 @@
                             </c:choose>
                         </p>
                     </div>
+                    <%-- 고치는 단추는 두지 않는다. 지우고 다시 넣으면 결과가 같다.
+                         번호는 서버가 세션의 회원 번호와 함께 확인한다. --%>
+                    <button type="button" class="btn-del-log"
+                            data-log-id="${workout.logId}"
+                            aria-label="${workout.sportName} 기록 지우기">✕</button>
                 </div>
             </c:forEach>
 
@@ -400,6 +405,38 @@
         var customMin = document.getElementById("customMin");
         if (customMin) {
             customMin.addEventListener("input", calculateModalCalories);
+        }
+
+        // 기록 지우기.
+        // 목록에 위임한다. 항목마다 걸면 '더보기' 로 나중에 드러난 줄은 안 걸린다.
+        var todayList = document.getElementById("todayWorkoutList");
+        if (todayList) {
+            todayList.addEventListener("click", function (e) {
+                var btn = e.target.closest(".btn-del-log");
+                if (!btn) {
+                    return;
+                }
+                if (!confirm("이 기록을 지울까요?")) {
+                    return;
+                }
+                btn.disabled = true;   // 두 번 눌러 두 번 부르는 것을 막는다
+
+                fetch("${pageContext.request.contextPath}/user/deleteWorkout", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ logId: parseInt(btn.dataset.logId, 10) })
+                })
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                        alert(data.msg);
+                        // 지우면 연속 출석·리포트까지 달라지므로 화면을 다시 받는다
+                        location.reload();
+                    })
+                    .catch(function () {
+                        btn.disabled = false;
+                        alert("서버 오류가 발생했습니다.");
+                    });
+            });
         }
 
         // [기록하기] 버튼 이벤트
