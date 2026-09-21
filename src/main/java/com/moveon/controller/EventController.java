@@ -3,6 +3,7 @@ package com.moveon.controller;
 import com.moveon.dto.EventDTO;
 import com.moveon.service.IEventService;
 import jakarta.servlet.http.HttpSession;
+import com.moveon.util.GeoPoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -28,9 +29,6 @@ public class EventController {
 
     private final IEventService eventService;
 
-    /** GPS 를 못 받았을 때 쓸 기본 좌표 (서울시청) */
-    private static final double DEFAULT_LAT = 37.5665;
-    private static final double DEFAULT_LNG = 126.9780;
 
     /**
      * 행사 목록
@@ -49,8 +47,8 @@ public class EventController {
             return "redirect:/user/login";
         }
 
-        double myLat = (lat == null) ? DEFAULT_LAT : lat;
-        double myLng = (lng == null) ? DEFAULT_LNG : lng;
+        double myLat = GeoPoint.lat(lat);
+        double myLng = GeoPoint.lng(lng);
 
         String order = IEventService.SORT_DEADLINE.equals(sort)
                 ? IEventService.SORT_DEADLINE : IEventService.SORT_NEAR;
@@ -99,8 +97,8 @@ public class EventController {
             return "redirect:/user/login";
         }
 
-        double myLat = (lat == null) ? DEFAULT_LAT : lat;
-        double myLng = (lng == null) ? DEFAULT_LNG : lng;
+        double myLat = GeoPoint.lat(lat);
+        double myLng = GeoPoint.lng(lng);
 
         EventDTO event = eventService.getEvent(eventId, myLat, myLng);
 

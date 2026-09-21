@@ -100,12 +100,22 @@
     </c:choose>
 
 
-    <p style="position: relative; top: 280px; text-align:center; font-size: 12px;">
-        <FONT COLOR="gray">Weather data provided by <B>
-            <u><a href="https://openweathermap.org/"
-                  target="_blank" rel="noopener noreferrer">OpenWeather</a></u></B>
-        </FONT>
-    </p>
+    <%-- 날씨 출처. OpenWeather 가 요구하는 세 가지를 다 담는다.
+         'Weather data provided by OpenWeather' 문구 · 홈페이지 링크 · 로고.
+         화면에서 뺄 수 없는 표시다.
+
+         맨 아래에 붙이는 일은 auto 마진이 맡는다. 280px 을 밀어 두면
+         추천 종목이 셋이 아닐 때 겹치거나 떠 버린다. --%>
+    <div class="weather-credit">
+        <a href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer">
+            <img src="${pageContext.request.contextPath}/resources/images/weather/openweather-logo.png"
+                 alt="OpenWeather">
+        </a>
+        <p>Weather data provided by
+            <a href="https://openweathermap.org/"
+               target="_blank" rel="noopener noreferrer">OpenWeather</a>
+        </p>
+    </div>
 
 </main>
 

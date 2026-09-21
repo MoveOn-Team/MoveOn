@@ -16,6 +16,34 @@
     padding-bottom: calc(var(--tabbar-h) + 1.25rem);
 }
 
+/* 날씨 출처 표시. 목록이 길든 짧든 맨 아래에 붙는다.
+   .auth-shell 이 세로 flex 라 auto 마진이 남는 높이를 다 먹는다.
+   px 로 밀어 두면 추천 종목 수가 달라질 때 겹치거나 뜬다. */
+.weather-credit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+    margin: auto 0 0;
+    padding-top: 1.5rem;
+    color: #a1a5ab;
+    font-size: var(--fs-tag);
+    text-align: center;
+}
+/* 로고는 600x340 원본을 줄여 쓴다. 비율은 높이를 auto 로 두어 지킨다 */
+.weather-credit img {
+    width: 6.25rem;
+    height: auto;
+}
+.weather-credit p {
+    margin: 0;
+}
+.weather-credit p a {
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 
 /* =====================================================================
    목록 화면
@@ -49,6 +77,8 @@
 /* ---------- 성향 요약 카드 ---------- */
 .profile-card {
     position: relative;
+    /* 이 카드 폭을 기준으로 cqw 를 센다 */
+    container-type: inline-size;
     padding: 1.25rem 1.25rem 1.125rem;
     color: #ffffff;
     background: #345f9f;
@@ -101,15 +131,6 @@
     color: rgba(255, 255, 255, .82);
     font-size: var(--fs-tag);
     border-top: 1px solid rgba(255, 255, 255, .22);
-}
-
-.profile-card {
-    position: relative;
-    container-type: inline-size;   /* 추가: 이 카드의 폭을 기준으로 cqw 계산 */
-    padding: 1.25rem 1.25rem 1.125rem;
-    color: #ffffff;
-    background: #345f9f;
-    border-radius: var(--card-radius);
 }
 
 /* ---------- 구역 제목 ---------- */
