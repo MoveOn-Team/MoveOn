@@ -6,6 +6,7 @@ import com.moveon.service.IWorkoutService;
 import com.moveon.util.CourseRouteUtil;
 import com.moveon.util.SportRule;
 import jakarta.servlet.http.HttpSession;
+import com.moveon.util.GeoPoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,8 +38,6 @@ public class WorkoutController {
     @Value("${kakao.javascript.key:}")
     private String kakaoMapKey;
 
-    private static final double DEFAULT_LAT = 37.5665;
-    private static final double DEFAULT_LNG = 126.9780;
     private static final String HOME_PLAN_SESSION = "HOME_WORKOUT_PLAN";
     private static final String HOME_RESULT_SESSION = "HOME_WORKOUT_RESULT";
 
@@ -53,8 +52,8 @@ public class WorkoutController {
                               HttpSession session,
                               ModelMap model) throws Exception {
 
-        double myLat = lat != null ? lat : DEFAULT_LAT;
-        double myLng = lng != null ? lng : DEFAULT_LNG;
+        double myLat = GeoPoint.lat(lat);
+        double myLng = GeoPoint.lng(lng);
 
         if ("outdoor".equals(tab)) {
             String courseType = "HIKE".equals(type) ? "HIKE" : "WALK";
@@ -96,8 +95,8 @@ public class WorkoutController {
                                 @RequestParam(value = "lng", required = false) Double lng,
                                 ModelMap model) throws Exception {
 
-        double myLat = lat != null ? lat : DEFAULT_LAT;
-        double myLng = lng != null ? lng : DEFAULT_LNG;
+        double myLat = GeoPoint.lat(lat);
+        double myLng = GeoPoint.lng(lng);
         FacilityDTO facility = workoutService.getFacility(facilityId, sportId, myLat, myLng);
         if (facility == null) {
             return "redirect:/workout/workoutList";
@@ -164,8 +163,8 @@ public class WorkoutController {
                                @RequestParam(value = "sportId", defaultValue = "0") int sportId,
                                ModelMap model) throws Exception {
 
-        double myLat = lat != null ? lat : DEFAULT_LAT;
-        double myLng = lng != null ? lng : DEFAULT_LNG;
+        double myLat = GeoPoint.lat(lat);
+        double myLng = GeoPoint.lng(lng);
         CourseDTO course = workoutService.getCourse(courseId, myLat, myLng);
         if (course == null) {
             return "redirect:/workout/workoutList?tab=outdoor";

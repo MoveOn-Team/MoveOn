@@ -11,6 +11,7 @@ import com.moveon.service.IWeatherService;
 import jakarta.servlet.http.HttpSession;
 import static com.moveon.util.UrlUtil.firstUsable;
 import static com.moveon.util.UrlUtil.isUsable;
+import com.moveon.util.GeoPoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -42,9 +43,6 @@ public class RecommendController {
     private final IRecommendService recommendService;
     private final IWeatherService weatherService;
 
-    /** GPS 를 못 받았을 때 쓸 기본 좌표 (서울시청) */
-    private static final double DEFAULT_LAT = 37.5665;
-    private static final double DEFAULT_LNG = 126.9780;
 
     /** 목록 하나에 보여줄 개수. 시설·코스·대관 모두 이 값을 쓴다. */
     private static final int LIST_SIZE = 3;
@@ -81,8 +79,8 @@ public class RecommendController {
             return "redirect:/user/login";
         }
 
-        double myLat = (lat == null) ? DEFAULT_LAT : lat;
-        double myLng = (lng == null) ? DEFAULT_LNG : lng;
+        double myLat = GeoPoint.lat(lat);
+        double myLng = GeoPoint.lng(lng);
 
         log.info("userId : {} / lat : {} / lng : {}", userId, myLat, myLng);
 
@@ -138,8 +136,8 @@ public class RecommendController {
             return "redirect:/user/login";
         }
 
-        double myLat = (lat == null) ? DEFAULT_LAT : lat;
-        double myLng = (lng == null) ? DEFAULT_LNG : lng;
+        double myLat = GeoPoint.lat(lat);
+        double myLng = GeoPoint.lng(lng);
 
         SportDTO sport = recommendService.getSportScore(userId, sportId, myLat, myLng);
 
