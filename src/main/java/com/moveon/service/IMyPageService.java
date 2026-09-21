@@ -27,6 +27,9 @@ public interface IMyPageService {
     /** 기록 화면에서 고를 수 있는 종목 */
     List<SportDTO> getRecordableSports();
 
+    /** 잘못 넣은 기록 지우기. 내 기록이 아니면 false */
+    boolean deleteWorkoutLog(int logId, int userId) throws Exception;
+
     /** 연속 출석. 기록이 없으면 0일과 빈 일주일이 돌아온다 */
     StreakDTO getStreak(Integer userId);
 

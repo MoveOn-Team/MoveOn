@@ -192,6 +192,16 @@
          ORDER BY exercise_date DESC
     </select>
 
+    <!-- 기록 지우기
+
+         user_id 를 같이 건다. 번호만 보고 지우면 남의 기록 번호를 넣어
+         지울 수 있다. 화면이 보낸 번호는 믿을 것이 못 된다. -->
+    <delete id="deleteWorkoutLog">
+        DELETE FROM workout_logs
+         WHERE log_id = #{logId}
+           AND user_id = #{userId}
+    </delete>
+
     <!-- 주별 운동 횟수
 
          WEEKDAY() 는 월요일이 0 이다. 그만큼 빼면 그 날짜가 속한 주의 월요일이 된다.
