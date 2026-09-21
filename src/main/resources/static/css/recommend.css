@@ -103,6 +103,15 @@
     border-top: 1px solid rgba(255, 255, 255, .22);
 }
 
+.profile-card {
+    position: relative;
+    container-type: inline-size;   /* 추가: 이 카드의 폭을 기준으로 cqw 계산 */
+    padding: 1.25rem 1.25rem 1.125rem;
+    color: #ffffff;
+    background: #345f9f;
+    border-radius: var(--card-radius);
+}
+
 /* ---------- 구역 제목 ---------- */
 .section-title {
     margin: 1.5rem 0 0.75rem;
@@ -365,12 +374,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 75px;                /* 아이콘이 커진 만큼 영역 확대 */
+    width: clamp(50px, 20cqw, 75px);                /* 아이콘이 커진 만큼 영역 확대 */
 }
 
 .weather-icon-box {
-    width: 100px;
-    height: 100px;
+    width: clamp(60px, 25cqw, 100px);
+    height: clamp(60px,25cqw, 100px);
 }
 
 .weather-icon-box img {
@@ -386,13 +395,13 @@
 }
 
 .weather-widget .temp {
-    font-size: 20px;            /* 기온 폰트도 살짝 가독성 개선 */
+    font-size: clamp(14px, 5cqw, 20px);            /* 기온 폰트도 살짝 가독성 개선 */
     font-weight: bold;
     line-height: 1.2;
 }
 
 .weather-widget .temp span:last-child {
-    font-size: 14px;
+    font-size: clamp(10px, 3.5cqw, 14px);
     margin-left: 2px;
     position:relative;
     top: -3px;

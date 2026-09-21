@@ -99,6 +99,14 @@
         </c:otherwise>
     </c:choose>
 
+
+    <p style="position: relative; top: 280px; text-align:center; font-size: 12px;">
+        <FONT COLOR="gray">Weather data provided by <B>
+            <u><a href="https://openweathermap.org/"
+                  target="_blank" rel="noopener noreferrer">OpenWeather</a></u></B>
+        </FONT>
+    </p>
+
 </main>
 
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
