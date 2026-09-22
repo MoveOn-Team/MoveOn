@@ -223,7 +223,28 @@
 
             var imgId = exercise.exerciseId || exercise.id;
             var imgUrl = contextPath + '/resources/images/workout/' + imgId + '.png';
-            mediaPlaceholder.innerHTML = '<img class="exercise-media-img" src="' + imgUrl + '" alt="' + esc(exercise.name) + '" onerror="if(this.src.endsWith(\'.png\')){this.src=this.src.replace(\'.png\',\'.jpg\');}">';
+            var videoUrl = contextPath + '/resources/videos/workout/' + imgId + '.mp4';
+
+            var video = document.createElement("video");
+            video.className = "exercise-media-vid";
+            video.src = videoUrl;
+            video.autoplay = true;
+            video.muted = true;
+            video.loop = true;
+            video.playsInline = true;
+            video.onerror = function () {
+                var img = document.createElement("img");
+                img.className = "exercise-media-img";
+                img.alt = exercise.name;
+                img.src = imgUrl;
+                img.onerror = function () {
+                    if (img.src.endsWith(".png")) img.src = img.src.replace(".png", ".jpg");
+                };
+                mediaPlaceholder.innerHTML = "";
+                mediaPlaceholder.appendChild(img);
+            };
+            mediaPlaceholder.innerHTML = "";
+            mediaPlaceholder.appendChild(video);
 
             progressBarGroup.querySelectorAll(".progress-step").forEach(function (step, idx) {
                 step.classList.toggle("is-active", idx <= exerciseIndex);
