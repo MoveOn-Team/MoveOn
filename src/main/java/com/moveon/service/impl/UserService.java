@@ -263,19 +263,15 @@ public class UserService implements IUserService {
 
     private void sendWelcomeMail(UserDTO pDTO) {
 
-        try {
-            MailDTO mailDTO = new MailDTO();
-            mailDTO.setToMail(pDTO.getEmail());
-            mailDTO.setTitle("[MOVE:ON] 회원가입이 완료되었습니다.");
-            mailDTO.setContents(
-                "<h2>MOVE:ON 회원가입 완료</h2>" +
-                "<p>" + pDTO.getName() + "님, 회원가입을 환영합니다.</p>"
-            );
-            mailService.doSendMail(mailDTO);
+        MailDTO mailDTO = new MailDTO();
+        mailDTO.setToMail(pDTO.getEmail());
+        mailDTO.setTitle("[MOVE:ON] 회원가입이 완료되었습니다.");
+        mailDTO.setContents(
+            "<h2>MOVE:ON 회원가입 완료</h2>" +
+            "<p>" + pDTO.getName() + "님, 회원가입을 환영합니다.</p>"
+        );
 
-        } catch (Exception e) {
-            // 가입 자체는 성공했으므로 안내 메일 실패만 로그로 남긴다.
-            log.warn("회원가입 안내 메일 발송 실패", e);
-        }
+        // 가입 자체는 이미 끝났다. 안내 메일은 기다리지 않고, 실패해도 로그만 남는다
+        mailService.doSendMailAsync(mailDTO);
     }
 }
