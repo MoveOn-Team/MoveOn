@@ -2,6 +2,7 @@ package com.moveon.service.impl;
 
 import com.moveon.service.IRegionService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -28,9 +29,11 @@ public class RegionService implements IRegionService {
 
     private final String kakaoKey;
 
-    public RegionService(@Value("${kakao.rest.key:}") String kakaoKey) {
+    /** 추천 화면이 뜨기 전에 부르므로 ExternalApiConfig 의 시간 제한이 있는 것을 쓴다 */
+    public RegionService(@Qualifier("externalRestClient") RestClient restClient,
+                         @Value("${kakao.rest.key:}") String kakaoKey) {
+        this.restClient = restClient;
         this.kakaoKey = kakaoKey;
-        this.restClient = RestClient.create();
     }
 
     @Override
