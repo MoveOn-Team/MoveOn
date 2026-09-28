@@ -116,7 +116,14 @@ public class RecommendController {
     @GetMapping("/api/weather")
     @ResponseBody
     public WeatherDTO weather(@RequestParam(value = "lat", required = false) Double lat,
-                              @RequestParam(value = "lng", required = false) Double lng) {
+                              @RequestParam(value = "lng", required = false) Double lng,
+                              HttpSession session) {
+
+        // 로그인 전이면 빈 값. 화면은 위젯을 접는다
+        if (getSessionUserId(session) == null) {
+            return new WeatherDTO();
+        }
+
         WeatherDTO rDTO = weatherService.now(GeoPoint.lat(lat), GeoPoint.lng(lng));
         return rDTO != null ? rDTO : new WeatherDTO();
     }

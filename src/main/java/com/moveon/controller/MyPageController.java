@@ -90,7 +90,10 @@ public class MyPageController {
     }
 
     @GetMapping("/copyright")
-    public String copyrightPage() {
+    public String copyrightPage(HttpSession session) {
+        if (session.getAttribute("SS_USER_NO") == null) {
+            return "redirect:/user/login";
+        }
         return "user/copyright"; // WEB-INF/views/user/copyright.jsp 호출
     }
 
