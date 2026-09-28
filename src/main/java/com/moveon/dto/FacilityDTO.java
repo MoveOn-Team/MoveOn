@@ -29,7 +29,6 @@ public class FacilityDTO {
 
     private String phone; // 전화번호
 
-    private Integer capacity; // 동시 수용 인원. 1,378곳 중 64곳만 값이 있어 화면에서는 있을 때만 보여줌
 
     /* -----------------------------------------------------------------
        회원을 밖으로 내보낼 주소 넷.

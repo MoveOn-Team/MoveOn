@@ -89,6 +89,24 @@
     display: none;
 }
 
+/* 스크롤바를 숨겨 두어 뒤에 종목이 더 있는지 알 수 없었다.
+   넘치는 쪽 끝을 흐리게 한다. 잘린 단추가 흐려지면 뒤에 더 있는 것으로 읽힌다.
+   어느 쪽이 넘치는지는 workoutList.jsp 의 스크립트가 클래스로 알려 준다 */
+.sub-tag-scroll.fade-right .sub-tag-group {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 3rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 3rem), transparent);
+}
+
+.sub-tag-scroll.fade-left .sub-tag-group {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 2rem);
+    mask-image: linear-gradient(to right, transparent, #000 2rem);
+}
+
+.sub-tag-scroll.fade-left.fade-right .sub-tag-group {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 2rem, #000 calc(100% - 3rem), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 2rem, #000 calc(100% - 3rem), transparent);
+}
+
 
 .sub-tag-btn {
     flex: none;

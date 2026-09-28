@@ -28,7 +28,7 @@
          목록에서 본 거리와 상세에서 본 거리가 다르면 안 되기 때문이다. -->
     <select id="getFacility" resultType="FacilityDTO">
         SELECT f.facility_id, f.name, f.gu_name, f.road_addr, f.lot_addr,
-               f.lat, f.lng, f.phone, f.homepage_url, f.capacity,
+               f.lat, f.lng, f.phone, f.homepage_url,
                f.rental_url,
                fs.reserve_url,
                <!-- 프로그램이 하나도 없고 주소도 없으면 '그냥 가서 쓰는 곳' 이다.
@@ -52,7 +52,7 @@
     <!-- 해당 종목을 할 수 있는 가까운 시설 -->
     <select id="getNearbyFacilities" resultType="FacilityDTO">
         SELECT f.facility_id, f.name, f.gu_name, f.road_addr, f.lot_addr,
-               f.lat, f.lng, f.phone, f.homepage_url, f.capacity,
+               f.lat, f.lng, f.phone, f.homepage_url,
                f.rental_url,
                <!-- 강습을 두 가지로 센다. 묻는 것이 서로 다르기 때문이다.
 
