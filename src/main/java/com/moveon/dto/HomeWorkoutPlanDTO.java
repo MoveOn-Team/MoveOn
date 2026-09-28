@@ -35,6 +35,8 @@ public class HomeWorkoutPlanDTO implements Serializable {
     private int completedExerciseCount;
     private int completedSetCount;
     private int skippedSetCount;
+    /** 실제로 한 시간(분). 계획 시간을 완료 세트 비율만큼 줄인 값이다 */
+    private int completedMin;
     private LocalDate exerciseDate;
 
     private List<HomeExerciseDTO> warmups = new ArrayList<>();
