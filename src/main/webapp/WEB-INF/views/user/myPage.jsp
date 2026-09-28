@@ -33,15 +33,6 @@
             background-color: #e9ecef;
         }
 
-        .tab-item.active {
-            color: #6c5ce7; /* 또는 메인 브랜드 컬러 */
-        }
-        .tab-item.active svg,
-        .tab-item.active i {
-            fill: #6c5ce7;
-            stroke: #6c5ce7;
-        }
-
     </style>
 </head>
 <body class="auth-page" data-context-path="${pageContext.request.contextPath}" data-user-weight="${user.weightKg != null and user.weightKg > 0 ? user.weightKg : 65}">
@@ -360,17 +351,6 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        // 1. 하단 탭바 활성화 (추가된 코드)
-        const currentPath = window.location.pathname;
-        const navItems = document.querySelectorAll('.tab-bar .tab-item');
-
-        navItems.forEach(item => {
-            const href = item.getAttribute('href');
-            if (href && currentPath.includes(href)) {
-                item.classList.add('active');
-            }
-        });
-
         // 메인 카드 헤더 날짜 세팅
         var todayCardDate = document.getElementById("todayCardDate");
         if (todayCardDate) {

@@ -90,7 +90,7 @@
         <%-- link/map 은 그 자리를 지도에 띄우기만 한다. 단추 이름이 '길찾기' 이므로
              link/to 로 바꿔 도착지를 정해 주고, 출발지는 카카오맵이 현위치로 잡게 한다. --%>
         <button type="button" id="btnFacilityMap" class="btn-outline"
-                data-map-url="https://map.kakao.com/link/to/${facility.name},${facility.lat},${facility.lng}">
+                data-map-url="https://map.kakao.com/link/to/${fn:escapeXml(fn:replace(facility.name, ',', ' '))},${facility.lat},${facility.lng}">
             길찾기
         </button>
         <%-- 즉시운동은 오늘 가서 쓰는 화면이라 대관·이용 창구로 보낸다.

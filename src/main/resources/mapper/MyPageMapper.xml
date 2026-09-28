@@ -136,7 +136,8 @@
         WHERE user_id = #{userId}
     </select>
 
-    <!-- 많이 한 종목 Top 4 -->
+    <!-- 많이 한 종목
+         LIMIT 을 걸지 않는다. 리포트가 네 개를 보이고 나머지는 '더보기' 로 편다 -->
     <select id="selectTopSports" resultType="com.moveon.dto.WorkoutReportDTO$SportStatDTO">
         SELECT
             s.name AS sportName,

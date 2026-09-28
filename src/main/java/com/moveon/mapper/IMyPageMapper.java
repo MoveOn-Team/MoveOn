@@ -74,7 +74,7 @@ public interface IMyPageMapper {
     // 전체 누적 운동 횟수
     int selectTotalWorkoutCount(@Param("userId") Integer userId);
 
-    // 많이 한 종목 Top 4 (종목명, 횟수)
+    // 많이 한 종목 전부 (종목명, 횟수). 화면이 네 개를 보이고 나머지는 '더보기' 로 편다
     List<WorkoutReportDTO.SportStatDTO> selectTopSports(@Param("userId") Integer userId);
 
     // 가장 오래 한 운동 (종목명, 시간)
