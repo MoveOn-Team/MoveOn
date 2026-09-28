@@ -216,27 +216,17 @@ public class WorkoutController {
 
     @GetMapping("/workoutResult")
     public String workoutResult(HttpSession session, ModelMap model) throws Exception {
+        // 끝내지 않은 계획으로는 보여줄 결과가 없다.
+        // 전에는 계획을 대신 띄워 '0분' 이나 예상 열량이 결과처럼 보였다
         HomeWorkoutPlanDTO result = (HomeWorkoutPlanDTO) session.getAttribute(HOME_RESULT_SESSION);
-        HomeWorkoutPlanDTO plan = result != null
-                ? result
-                : (HomeWorkoutPlanDTO) session.getAttribute(HOME_PLAN_SESSION);
-
-        if (plan == null || plan.isEmpty()) {
+        if (result == null || result.isEmpty()) {
             return "redirect:/workout/workoutList?tab=home";
         }
 
         double userWeight = workoutService.getUserWeight(getSessionUserId(session));
 
-        // 화면에서 실제로 센 값이 있으면 그걸 쓴다
-        Object burnedCalObj = session.getAttribute("burnedCalories");
-        if (burnedCalObj != null) {
-            int actualCalories = (Integer) burnedCalObj;
-            plan.setTotalKcal(actualCalories);
-        }
-
-        // 3. 모델에 userWeight 전달 (★ 핵심!)
         model.addAttribute("userWeight", userWeight);
-        model.addAttribute("homePlan", plan);
+        model.addAttribute("homePlan", result);
         model.addAttribute("active", "workout");
         return "workout/workoutResult";
     }
@@ -275,26 +265,25 @@ public class WorkoutController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PLAN_REQUIRED");
         }
 
-        // 1. 기존 카운트 데이터 수집
-        plan.setCompletedExerciseCount(intValue(body.get("completedExerciseCount")));
-        plan.setCompletedSetCount(intValue(body.get("completedSetCount")));
-        plan.setSkippedSetCount(intValue(body.get("skippedSetCount")));
-
-        // 2. JS에서 실시간 계산하여 보낸 칼로리 값 추출
+        int completedSets = intValue(body.get("completedSetCount"));
         int burnedCalories = intValue(body.get("burnedCalories"));
+        int minutes = doneMinutes(plan, completedSets);
 
-        // HomeWorkoutPlanDTO에 burnedCalories 필드가 있다면 set, 없다면 세션에 별도 저장
+        // 화면이 보내는 completedExerciseCount 는 동작 수 전체라, 세트 기록을 보고 다시 센다
+        plan.setCompletedExerciseCount(countDoneExercises(body.get("exerciseRecords")));
+        plan.setCompletedSetCount(completedSets);
+        plan.setSkippedSetCount(intValue(body.get("skippedSetCount")));
+        plan.setCompletedMin(minutes);
         plan.setTotalKcal(burnedCalories);
-        session.setAttribute("burnedCalories", burnedCalories);
 
-        // 4. 리포트에 자동으로 남긴다.
+        // 리포트에 자동으로 남긴다.
         // HOME_RESULT_SESSION 이 있으면 이미 넣은 것이라 건너뛴다. 계획 하나에 기록 하나.
+        // 한 세트도 안 했으면 남기지 않는다. 남기면 연속 출석까지 이어진다.
         // 기록에 실패해도 결과 화면은 보여준다.
         boolean already = session.getAttribute(HOME_RESULT_SESSION) != null;
         Integer userId = getSessionUserId(session);
-        if (!already && userId != null) {
+        if (!already && userId != null && completedSets > 0) {
             try {
-                int minutes = plan.getTotalMin() > 0 ? plan.getTotalMin() : plan.getTargetMin();
                 myPageService.addHomeWorkoutLog(userId, minutes, plan.getIntensity(),
                         burnedCalories, "홈트 " + plan.getIntensityLabel());
             } catch (Exception e) {
@@ -302,7 +291,6 @@ public class WorkoutController {
             }
         }
 
-        // 5. 업데이트된 plan 세션 재저장
         session.setAttribute(HOME_RESULT_SESSION, plan);
 
         Map<String, Object> res = new HashMap<>();
@@ -328,6 +316,30 @@ public class WorkoutController {
             return targetMin;
         }
         return 20;
+    }
+
+    /** 계획 시간을 완료한 세트 비율만큼 줄인다. 한 세트도 안 했으면 0 */
+    private int doneMinutes(HomeWorkoutPlanDTO plan, int completedSets) {
+        int planned = plan.getTotalMin() > 0 ? plan.getTotalMin() : plan.getTargetMin();
+        if (completedSets <= 0 || plan.getTotalSets() <= 0) {
+            return 0;
+        }
+        double ratio = Math.min(completedSets, plan.getTotalSets()) / (double) plan.getTotalSets();
+        return Math.max(1, (int) Math.round(planned * ratio));
+    }
+
+    /** 한 세트라도 끝낸 동작 수 */
+    private int countDoneExercises(Object records) {
+        if (!(records instanceof List<?> list)) {
+            return 0;
+        }
+        int n = 0;
+        for (Object o : list) {
+            if (o instanceof Map<?, ?> r && intValue(r.get("completedSets")) > 0) {
+                n++;
+            }
+        }
+        return n;
     }
 
     private int intValue(Object value) {

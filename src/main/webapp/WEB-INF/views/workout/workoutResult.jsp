@@ -14,8 +14,17 @@
     <div class="result-date">${homePlan.exerciseDate}</div>
 
     <div class="result-summary-banner">
-        <span class="banner-sub">오늘의 운동 완료</span>
-        <h2 class="banner-title">${homePlan.totalMin}분 · ${homePlan.totalKcal}kcal</h2>
+        <c:choose>
+            <c:when test="${homePlan.completedSetCount > 0}">
+                <span class="banner-sub">오늘의 운동 완료</span>
+                <h2 class="banner-title">${homePlan.completedMin}분 · ${homePlan.totalKcal}kcal</h2>
+            </c:when>
+            <%-- 한 세트도 안 했으면 리포트에 남기지 않았다. 완료라고 말하면 안 된다 --%>
+            <c:otherwise>
+                <span class="banner-sub">모두 건너뛰었어요</span>
+                <h2 class="banner-title">이번 운동은 기록하지 않았어요</h2>
+            </c:otherwise>
+        </c:choose>
     </div>
 
     <div class="result-stats-grid">
