@@ -16,6 +16,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,9 @@ public class WorkoutController {
 
     private static final String HOME_PLAN_SESSION = "HOME_WORKOUT_PLAN";
     private static final String HOME_RESULT_SESSION = "HOME_WORKOUT_RESULT";
+
+    /** 시설 탭을 처음 열 때 고르는 종목 */
+    private static final String DEFAULT_SPORT = "헬스";
 
     @GetMapping("/workoutList")
     public String workoutList(@RequestParam(value = "tab", defaultValue = "facility") String tab,
@@ -69,7 +73,16 @@ public class WorkoutController {
             model.addAttribute("targetMin", normalizeTargetMin(targetMin));
 
         } else {
-            List<SportDTO> sports = workoutService.getSports("FACILITY");
+            // 헬스를 맨 앞에 두고 기본으로 고른다.
+            // 처음 열면 왼쪽 끝에서 시작해 오른쪽으로 넘겨 보게 된다
+            List<SportDTO> sports = new ArrayList<>(workoutService.getSports("FACILITY"));
+            sports.stream()
+                    .filter(s -> DEFAULT_SPORT.equals(s.getName()))
+                    .findFirst()
+                    .ifPresent(s -> {
+                        sports.remove(s);
+                        sports.add(0, s);
+                    });
             model.addAttribute("sports", sports);
 
             int pickId = sportId != null ? sportId : (sports.isEmpty() ? 0 : sports.get(0).getSportId());

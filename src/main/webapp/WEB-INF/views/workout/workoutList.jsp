@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>즉시 운동하기</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.4">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.5">
 </head>
 <body class="auth-page" data-context-path="${pageContext.request.contextPath}"
       data-lat="${lat}" data-lng="${lng}">
@@ -140,11 +140,13 @@
         </c:when>
 
         <c:otherwise>
-            <div class="sub-tag-group">
-                <c:forEach var="s" items="${sports}">
-                    <a href="?tab=facility&sportId=${s.sportId}${pos}"
-                       class="sub-tag-btn ${sportId eq s.sportId ? 'is-active' : ''}">${s.name}</a>
-                </c:forEach>
+            <div class="sub-tag-scroll" id="sportTagScroll">
+                <div class="sub-tag-group">
+                    <c:forEach var="s" items="${sports}">
+                        <a href="?tab=facility&sportId=${s.sportId}${pos}"
+                           class="sub-tag-btn ${sportId eq s.sportId ? 'is-active' : ''}">${s.name}</a>
+                    </c:forEach>
+                </div>
             </div>
 
             <c:choose>
@@ -188,5 +190,32 @@
 
 <script src="${pageContext.request.contextPath}/js/geo.js"></script>
 <script src="${pageContext.request.contextPath}/js/workout.js?v=1.4"></script>
+<script>
+    // 종목 단추 줄. 넘치는 쪽을 클래스로 알려 css 가 그쪽 끝을 흐린다
+    (function () {
+        var wrap = document.getElementById("sportTagScroll");
+        if (!wrap) {
+            return;
+        }
+        var group = wrap.querySelector(".sub-tag-group");
+
+        function update() {
+            var max = group.scrollWidth - group.clientWidth;
+            wrap.classList.toggle("fade-left", group.scrollLeft > 1);
+            wrap.classList.toggle("fade-right", group.scrollLeft < max - 1);
+        }
+
+        // 고른 종목이 화면 밖이면 가운데로 끌어온다. 안 보이면 무엇을 골랐는지 모른다
+        var active = group.querySelector(".is-active");
+        if (active) {
+            var left = active.offsetLeft - (group.clientWidth - active.offsetWidth) / 2;
+            group.scrollLeft = Math.max(0, left - group.offsetLeft);
+        }
+
+        group.addEventListener("scroll", update, {passive: true});
+        window.addEventListener("resize", update);
+        update();
+    })();
+</script>
 </body>
 </html>
