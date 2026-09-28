@@ -193,8 +193,13 @@
                                     <c:set var="on" value="${r.facilityId == pick.facilityId and empty pickPlace}"/>
                                 </c:when>
                                 <c:otherwise>
-                                    <c:set var="href"
-                                           value="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}?place=${r.placeName}&lat=${lat}&lng=${lng}"/>
+                                    <%-- 장소 이름은 서울시 자료의 글자 그대로라 & · + · # 이 들어올 수 있다.
+                                         이어 붙이면 거기서 값이 끊겨 고른 줄이 안 켜진다. c:param 이 인코딩한다 --%>
+                                    <c:url var="href" value="/recommend/sportDetail/${sport.sportId}">
+                                        <c:param name="place" value="${r.placeName}"/>
+                                        <c:param name="lat" value="${lat}"/>
+                                        <c:param name="lng" value="${lng}"/>
+                                    </c:url>
                                     <c:set var="on" value="${r.placeName eq pickPlace}"/>
                                 </c:otherwise>
                             </c:choose>
