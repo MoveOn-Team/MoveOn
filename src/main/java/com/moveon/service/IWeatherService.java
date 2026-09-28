@@ -8,9 +8,10 @@ public interface IWeatherService {
     boolean isReady();
 
     /**
-     * 지금 서울 날씨.
+     * 그 좌표의 지금 날씨.
      *
      * 못 받으면 null. 날씨는 없어도 추천이 돌아가므로 예외를 올리지 않는다.
+     * 위치를 못 받았을 때 쓸 좌표는 GeoPoint 가 정한다.
      */
-    WeatherDTO now();
+    WeatherDTO now(double lat, double lon);
 }
