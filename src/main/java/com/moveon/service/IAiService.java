@@ -21,7 +21,8 @@ public interface IAiService {
      * 대회 홈페이지 글에서 행사 정보를 뽑음.
      *
      * @param eventName 한 페이지에 여러 대회가 적힌 곳이 있어 함께 넘김
-     * @return 뽑아낸 값만 담긴 EventDTO. 실패하면 빈 DTO
+     * @return 뽑아낸 값만 담긴 EventDTO. 답을 못 받았으면 null.
+     *         빈 DTO 와 구분해야 한다. 빈 DTO 는 '읽어 봤는데 없었다' 이다
      */
     EventDTO extractEvent(String pageText, String eventName);
 

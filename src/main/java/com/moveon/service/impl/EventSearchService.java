@@ -432,9 +432,13 @@ public class EventSearchService implements IEventSearchService {
         // "빈 칸만 채운다" 가 아니라 통째로 갈아 끼운다.
         // 규칙은 기념품 값·환불 수수료를 참가비로, 환불일자를 마감일로 집어 온다.
         // 어느 숫자가 참가비인지는 앞뒤 문장을 읽어야 알 수 있어서 규칙이 못 한다.
-        if (aiService.isReady()) {
-            EventDTO ai = aiService.extractEvent(text, eventName);
-
+        //
+        // 다만 Gemini 가 답을 못 했으면(null) 규칙이 찾은 값을 그대로 둔다.
+        // 갈아 끼우면 전부 비어, 관리자가 날짜와 참가비를 처음부터 다시 찾게 된다.
+        EventDTO ai = aiService.isReady() ? aiService.extractEvent(text, eventName) : null;
+        if (ai == null) {
+            log.info("Gemini 답이 없어 규칙으로 찾은 값을 쓴다");
+        } else {
             rDTO.setStartDate(ai.getStartDate());
             rDTO.setEndDate(ai.getEndDate());
             rDTO.setApplyStart(ai.getApplyStart());

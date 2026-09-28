@@ -90,11 +90,11 @@ public class AiService implements IAiService {
     @SuppressWarnings("unchecked")
     public EventDTO extractEvent(String pageText, String eventName) {
 
-        EventDTO rDTO = new EventDTO();
-
         if (!isReady() || pageText == null || pageText.isBlank()) {
-            return rDTO;
+            return null;
         }
+
+        EventDTO rDTO = new EventDTO();
 
         try {
             String text = pageText.length() > MAX_TEXT
@@ -102,7 +102,7 @@ public class AiService implements IAiService {
 
             String json = ask(PROMPT.formatted(eventName, text));
             if (json == null) {
-                return rDTO;
+                return null;
             }
 
             Map<String, Object> v = objectMapper.readValue(json, Map.class);
@@ -137,8 +137,9 @@ public class AiService implements IAiService {
                     rDTO.getStartDate(), rDTO.getPlaceName(), rDTO.getFeeText());
 
         } catch (Exception e) {
-            // 실패해도 관리자 화면은 열려야 한다. 사람이 넣으면 된다.
+            // 실패해도 관리자 화면은 열려야 한다. 반쯤 채운 값은 버리고 null 을 준다
             log.warn("Gemini 호출 실패 : {}", e.getMessage());
+            return null;
         }
 
         return rDTO;
