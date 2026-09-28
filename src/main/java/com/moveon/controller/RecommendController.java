@@ -110,11 +110,14 @@ public class RecommendController {
      * 소스 보기 한 번이면 키가 나왔다. 서버가 대신 부르고 숫자만 내려준다.
      *
      * 못 받으면 빈 값이 나가고 화면은 위젯을 접는다.
+     *
+     * 좌표는 화면이 붙여 보낸다. 안 오면 다른 탭과 같은 기준점을 쓴다.
      */
     @GetMapping("/api/weather")
     @ResponseBody
-    public WeatherDTO weather() {
-        WeatherDTO rDTO = weatherService.now();
+    public WeatherDTO weather(@RequestParam(value = "lat", required = false) Double lat,
+                              @RequestParam(value = "lng", required = false) Double lng) {
+        WeatherDTO rDTO = weatherService.now(GeoPoint.lat(lat), GeoPoint.lng(lng));
         return rDTO != null ? rDTO : new WeatherDTO();
     }
 

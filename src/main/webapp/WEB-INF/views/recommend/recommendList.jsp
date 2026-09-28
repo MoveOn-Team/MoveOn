@@ -43,6 +43,7 @@
                     <div class="weather-icon-box">
                         <img id="weather-icon"
                              data-context-path="${pageContext.request.contextPath}"
+                             data-lat="${lat}" data-lng="${lng}"
                              src="${pageContext.request.contextPath}/resources/images/weather/day.svg"
                              alt="날씨 아이콘">
                     </div>
