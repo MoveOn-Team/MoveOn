@@ -31,8 +31,19 @@ public class UserController {
     private static final String EMAIL_ADDRESS = "EMAIL_ADDRESS_"; // 세션에 저장할 이메일 키
     private static final String EMAIL_EXPIRES_AT = "EMAIL_EXPIRES_AT_"; // 세션에 저장할 만료 시각 키
     private static final String EMAIL_VERIFIED = "EMAIL_VERIFIED_"; // 세션에 저장할 인증 완료 키
+    private static final String EMAIL_FAILS = "EMAIL_FAILS_"; // 세션에 저장할 틀린 횟수 키
+    private static final String EMAIL_SENT_AT = "EMAIL_SENT_AT_"; // 세션에 저장할 마지막 발송 시각 키
+    // 마지막으로 보낸 주소. EMAIL_ADDRESS 와 따로 둔다. 저쪽은 다섯 번 틀리면 지워져 대기를 건너뛰게 된다
+    private static final String EMAIL_SENT_TO = "EMAIL_SENT_TO_";
 
     private static final long EMAIL_CODE_VALID_MILLIS = 5 * 60 * 1000L; // 인증번호 유효시간 5분
+
+    // 여섯 자리는 제한 없이 넣어 보면 5분 안에 맞힐 수 있다. 이만큼 틀리면 번호를 버린다
+    private static final int EMAIL_MAX_FAILS = 5;
+
+    // 같은 주소로는 이만큼 다시 보내지 않는다. 남의 주소로 메일을 퍼붓지 못하게 한다.
+    // 주소를 고쳐 보내는 것은 막지 않는다. 오타를 낸 사람이 기다릴 이유는 없다
+    private static final long EMAIL_RESEND_WAIT_MILLIS = 30 * 1000L;
 
     // 비밀번호는 8자리 이상이며 영문, 숫자, 특수문자를 각각 하나 이상 포함함.
     private static final Pattern PASSWORD_PATTERN = Pattern.compile(
@@ -168,6 +179,16 @@ public class UserController {
             return message("이메일과 인증 목적을 확인해 주세요.");
         }
 
+        // 화면은 '발송' 이 든 문구를 성공으로 읽는다. 여기 문구에는 그 말을 쓰지 않는다
+        Long sentAt = (Long) session.getAttribute(EMAIL_SENT_AT + purpose);
+        boolean sameEmail = pDTO.getEmail().equals(session.getAttribute(EMAIL_SENT_TO + purpose));
+        long waited = (sentAt == null || !sameEmail) ? Long.MAX_VALUE : System.currentTimeMillis() - sentAt;
+        if (waited < EMAIL_RESEND_WAIT_MILLIS) {
+            long leftSec = (EMAIL_RESEND_WAIT_MILLIS - waited + 999) / 1000;
+            log.info("{}.sendEmailCode End! 다시 보내기 대기 {}초", this.getClass().getName(), leftSec);
+            return message(leftSec + "초 뒤에 다시 요청해 주세요.");
+        }
+
         MsgDTO validationResult = validateEmailRequest(pDTO, purpose);
         if (validationResult != null) {
             log.info("{}.sendEmailCode End!", this.getClass().getName());
@@ -183,7 +204,10 @@ public class UserController {
                     EMAIL_EXPIRES_AT + purpose,
                     System.currentTimeMillis() + EMAIL_CODE_VALID_MILLIS
             );
+            session.setAttribute(EMAIL_SENT_AT + purpose, System.currentTimeMillis());
+            session.setAttribute(EMAIL_SENT_TO + purpose, pDTO.getEmail());
             session.removeAttribute(EMAIL_VERIFIED + purpose);
+            session.removeAttribute(EMAIL_FAILS + purpose);
 
             log.info("{}.sendEmailCode End!", this.getClass().getName());
             return message("인증번호를 발송했습니다.");
@@ -226,8 +250,19 @@ public class UserController {
         }
 
         if (!savedEmail.equals(pDTO.getEmail()) || !savedCode.equals(pDTO.getEmailCode())) {
-            log.info("{}.verifyEmailCode End!", this.getClass().getName());
-            return message("인증번호가 일치하지 않습니다.");
+            Integer before = (Integer) session.getAttribute(EMAIL_FAILS + purpose);
+            int fails = (before == null ? 0 : before) + 1;
+
+            // 화면은 '완료' 가 든 문구를 성공으로 읽는다. 여기 문구에는 그 말을 쓰지 않는다
+            if (fails >= EMAIL_MAX_FAILS) {
+                clearEmailSession(session, purpose);
+                log.info("{}.verifyEmailCode End! {}번 틀려 번호를 버림", this.getClass().getName(), fails);
+                return message(EMAIL_MAX_FAILS + "번 틀려 인증번호를 지웠어요. 인증번호를 다시 요청해 주세요.");
+            }
+
+            session.setAttribute(EMAIL_FAILS + purpose, fails);
+            log.info("{}.verifyEmailCode End! 틀림 {}/{}", this.getClass().getName(), fails, EMAIL_MAX_FAILS);
+            return message("인증번호가 일치하지 않습니다. (" + fails + "/" + EMAIL_MAX_FAILS + ")");
         }
 
         session.setAttribute(EMAIL_VERIFIED + purpose, savedEmail);
@@ -562,6 +597,7 @@ public class UserController {
         session.removeAttribute(EMAIL_ADDRESS + purpose);
         session.removeAttribute(EMAIL_EXPIRES_AT + purpose);
         session.removeAttribute(EMAIL_VERIFIED + purpose);
+        session.removeAttribute(EMAIL_FAILS + purpose);
     }
 
     /** 비밀번호가 화면에서 정한 형식에 맞는지 확인. */
