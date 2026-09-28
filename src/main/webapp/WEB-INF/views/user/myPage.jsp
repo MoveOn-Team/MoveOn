@@ -163,9 +163,9 @@
                 <span>오픈소스 및 저작권 정보</span>
                 <span class="arrow">›</span>
             </a>
-            <a href="${pageContext.request.contextPath}/user/login" class="menu-item logout-item">
+            <button type="button" class="menu-item logout-item" id="btnLogout">
                 <span>로그아웃</span>
-            </a>
+            </button>
         </section>
 
 </main>
@@ -435,6 +435,18 @@
                     .catch(function () {
                         btn.disabled = false;
                         alert("서버 오류가 발생했습니다.");
+                    });
+            });
+        }
+
+        // 세션을 지워야 로그아웃이다. 로그인 화면으로 옮기기만 하면 그대로 로그인돼 있다
+        var logoutBtn = document.getElementById("btnLogout");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", function () {
+                logoutBtn.disabled = true;
+                moveOnAuth.post("${pageContext.request.contextPath}/user/logout", {})
+                    .finally(function () {
+                        location.replace("${pageContext.request.contextPath}/user/login");
                     });
             });
         }
