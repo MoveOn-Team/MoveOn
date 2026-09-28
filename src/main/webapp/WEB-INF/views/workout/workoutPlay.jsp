@@ -60,6 +60,6 @@
 
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
-<script src="${pageContext.request.contextPath}/js/workout.js?v=1.4"></script>
+<script src="${pageContext.request.contextPath}/js/workout.js?v=1.5"></script>
 </body>
 </html>

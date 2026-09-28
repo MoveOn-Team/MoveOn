@@ -328,7 +328,7 @@ public class WorkoutService implements IWorkoutService {
     }
 
     private int estimateKcal(double totalMetMin, double weightKg) {
-        double useWeight = weightKg > 0 ? weightKg : 60;
+        double useWeight = weightKg > 0 ? weightKg : DEFAULT_WEIGHT_KG;
         return (int) Math.round(totalMetMin * 3.5 * useWeight / 200);
     }
 
@@ -366,7 +366,7 @@ public class WorkoutService implements IWorkoutService {
 
         UserDTO pDTO = new UserDTO();
         pDTO.setUserId(userId);
-        UserDTO me = userMapper.getLoginUser(pDTO);
+        UserDTO me = userMapper.getUserBody(pDTO);
 
         return (me != null && me.getWeightKg() > 0) ? me.getWeightKg() : DEFAULT_WEIGHT_KG;
     }
