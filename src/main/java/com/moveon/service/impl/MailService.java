@@ -21,25 +21,30 @@ public class MailService implements IMailService {
     @Value("${spring.mail.username:}")
     private String fromMail;
 
+    @Override
+    public void doSendMail(MailDTO pDTO) throws Exception {
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+
+        if (fromMail != null && !fromMail.isBlank()) {
+            helper.setFrom(fromMail);
+        }
+
+        helper.setTo(pDTO.getToMail());
+        helper.setSubject(pDTO.getTitle());
+        helper.setText(pDTO.getContents(), true);
+
+        mailSender.send(message);
+        log.info("메일 발송 완료 : {}", pDTO.getToMail());
+    }
+
     @Async
     @Override
-    public void doSendMail(MailDTO pDTO) {
+    public void doSendMailAsync(MailDTO pDTO) {
 
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
-
-            if (fromMail != null && !fromMail.isBlank()) {
-                helper.setFrom(fromMail);
-            }
-
-            helper.setTo(pDTO.getToMail());
-            helper.setSubject(pDTO.getTitle());
-            helper.setText(pDTO.getContents(), true);
-
-            mailSender.send(message);
-            log.info("메일 발송 완료 : {}", pDTO.getToMail());
-
+            doSendMail(pDTO);
         } catch (Exception e) {
             log.error("메일 발송 실패 : {}", pDTO.getToMail(), e);
         }
