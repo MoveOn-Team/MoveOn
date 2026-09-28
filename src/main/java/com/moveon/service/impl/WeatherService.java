@@ -16,33 +16,28 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 추천 탭 날씨. OpenWeather One Call 3.0.
+ * 추천 탭 날씨. OpenWeather Current Weather 2.5.
  *
  * 전에는 화면이 키를 들고 openweathermap.org 를 직접 불렀다.
  * 소스 보기 한 번이면 키가 나왔다. 서버가 대신 부르고 숫자만 내려준다.
  *
- * 2.5 의 weather 는 도시 이름(q=Seoul)으로 불러 어디서 열든 서울 기온이었다.
- * 3.0 의 onecall 은 좌표만 받으므로 화면이 넘겨준 자리의 날씨가 나온다.
+ * 좌표(lat, lon)로 부르므로 화면이 넘겨준 자리의 날씨가 나온다.
+ * 예전에 어디서 열든 서울 기온이었던 것은 2.5 라서가 아니라 q=Seoul 로 불렀기 때문이다.
+ *
+ * One Call 3.0 을 쓰지 않는 까닭은 요금이다. 3.0 은 카드를 걸어 두고 하루 1000번을
+ * 넘기면 부르는 만큼 청구된다. 이 주소는 로그인 없이 열려 있어 누가 좌표를 바꿔 가며
+ * 부르면 그대로 돈이 나간다. 2.5 무료 등급은 한도를 넘기면 막힐 뿐 청구되지 않는다.
  */
 @Service
 @Slf4j
 public class WeatherService implements IWeatherService {
 
-    private static final String URL = "https://api.openweathermap.org/data/3.0/onecall";
-
-    /**
-     * 안 받을 것들.
-     *
-     * onecall 은 분 단위 예보부터 8일치까지 한꺼번에 준다. 위젯에 쓰는 것은
-     * 지금 기온과 아이콘 둘뿐이라 나머지는 받아 봐야 버린다.
-     */
-    private static final String EXCLUDE = "minutely,hourly,daily,alerts";
+    private static final String URL = "https://api.openweathermap.org/data/2.5/weather";
 
     /**
      * 받아 둔 날씨를 이만큼 다시 쓴다.
      *
-     * One Call 3.0 은 하루 1000번까지 무료고 그 위로는 부르는 만큼 돈이 나간다.
-     * 사람이 추천 탭을 열 때마다 부르면 발표처럼 여럿이 몰릴 때 청구서가 튄다.
+     * 무료 등급은 분당 60번까지다. 발표처럼 여럿이 한꺼번에 추천 탭을 열면 넘길 수 있다.
      * 자료 자체도 10분마다 바뀌므로 그보다 자주 물을 이유가 없다.
      */
     private static final Duration TTL = Duration.ofMinutes(10);
@@ -84,7 +79,6 @@ public class WeatherService implements IWeatherService {
         return URL
                 + "?lat=" + BigDecimal.valueOf(lat).toPlainString()
                 + "&lon=" + BigDecimal.valueOf(lon).toPlainString()
-                + "&exclude=" + EXCLUDE
                 + "&units=metric&lang=kr&appid=" + apiKey;
     }
 
@@ -134,31 +128,30 @@ public class WeatherService implements IWeatherService {
     }
 
     /**
-     * onecall 응답에서 위젯에 쓸 두 값만 꺼낸다. 꺼낼 게 없으면 null.
+     * 응답에서 위젯에 쓸 두 값만 꺼낸다. 꺼낼 게 없으면 null.
      *
-     * 2.5 는 기온을 main 에 두었는데 3.0 은 current 안에 있다.
-     * 지금 날씨 말고 예보도 같이 오므로 한 칸 들어가야 한다.
-     * 2.5 때 자리에서 그대로 읽으면 화면은 멀쩡한데 값만 늘 빈다.
+     * 기온은 main.temp, 아이콘은 weather[0].icon 에 있다.
+     * 3.0 은 둘 다 current 안에 있어 자리가 다르다. 다른 쪽 자리에서 읽으면
+     * 화면은 멀쩡한데 값만 늘 빈다.
      */
     @SuppressWarnings("unchecked")
     WeatherDTO parse(Map<String, Object> body) {
 
-        Map<String, Object> current =
-                (body == null) ? null : (Map<String, Object>) body.get("current");
+        Map<String, Object> main =
+                (body == null) ? null : (Map<String, Object>) body.get("main");
 
-        if (current == null) {
+        if (main == null) {
             return null;
         }
 
         WeatherDTO rDTO = new WeatherDTO();
 
-        if (current.get("temp") instanceof Number t) {
+        if (main.get("temp") instanceof Number t) {
             rDTO.setTemp((int) Math.round(t.doubleValue()));
         }
 
-        // weather 는 배열이다. 첫 번째가 지금 날씨다.
-        // 아이콘 코드는 2.5 와 같아서 아래 svg() 는 그대로 쓴다
-        if (current.get("weather") instanceof java.util.List<?> list && !list.isEmpty()
+        // weather 는 배열이다. 첫 번째가 지금 날씨다
+        if (body.get("weather") instanceof java.util.List<?> list && !list.isEmpty()
                 && list.get(0) instanceof Map<?, ?> w) {
             rDTO.setIcon(svg(String.valueOf(w.get("icon"))));
         }
