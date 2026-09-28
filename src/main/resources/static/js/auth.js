@@ -593,25 +593,4 @@
         isValidPassword: isValidPassword,
         getPasswordMessage: getPasswordMessage
     };
-
-    // DOM 로드 완료 시 실행 리스트에 추가
-    document.addEventListener("DOMContentLoaded", initOnboarding);
-
-    // auth.js 하단에 추가
-
-// 운동 기록 모달 열기 함수 (전역)
-    function openWorkoutModal() {
-        const modal = document.getElementById("workoutModal");
-        if (modal) {
-            modal.classList.add("show");
-        }
-    }
-
-// 운동 기록 모달 닫기 함수 (전역)
-    function closeWorkoutModal() {
-        const modal = document.getElementById("workoutModal");
-        if (modal) {
-            modal.classList.remove("show");
-        }
-    }
 }());
