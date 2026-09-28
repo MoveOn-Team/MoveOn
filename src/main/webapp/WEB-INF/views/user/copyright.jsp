@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>오픈소스 및 저작권 정보</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.5">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.6">
 </head>
 <body class="auth-page">
 <main class="auth-shell copyright-shell">

@@ -791,17 +791,6 @@
     background-color: #ffffff
 }
 
-/* 운동 이미지 스타일 */
-.exercise-media-img {
-    max-width: 85%;
-    max-height: 85%;
-    width: auto;
-    height: auto;
-    object-fit: contain; /* 1:1 비율을 유지하며 카드 중앙에 맞춤 */
-    display: block;
-    border-radius: var(--card-radius);
-}
-
 /* 운동 영상 스타일: 그린 테두리 박스를 꽉 채움 */
 .exercise-media-vid {
     width: 100%;
