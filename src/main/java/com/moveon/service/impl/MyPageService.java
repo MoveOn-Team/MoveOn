@@ -168,7 +168,7 @@ public class MyPageService implements IMyPageService {
         StreakDTO streak = getStreak(userId);
         report.setCurrentStreak(streak.getCurrent());
 
-        // 5. 많이 한 종목 Top 4 & 비율 계산
+        // 5. 많이 한 종목 & 비율 계산
         List<WorkoutReportDTO.SportStatDTO> topSports = myPageMapper.selectTopSports(userId);
         int totalCount = report.getTotalWorkoutCount();
 

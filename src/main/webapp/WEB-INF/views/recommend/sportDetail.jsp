@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -252,7 +253,7 @@
                      노인복지관·사회복지관이 여기 해당한다. --%>
                 <c:when test="${visitOnly}">
                     <p class="data-notice">
-                        여기는 직접 찾아가 접수하는 곳이에요.</br>
+                        여기는 직접 찾아가 접수하는 곳이에요.<br>
                         <c:choose>
                             <c:when test="${not empty linkUrl}">아래에서 어떤 프로그램이 있는지 먼저 보세요.</c:when>
                             <%-- 온라인 창구가 없으면 남는 답은 전화뿐이다.
@@ -278,7 +279,7 @@
 
                 <c:when test="${not empty linkUrl}">
                     <p class="data-notice">
-                        여는 강좌와 요금은 자주 바뀌어요.</br>
+                        여는 강좌와 요금은 자주 바뀌어요.<br>
                         아래에서 지금 열리는 것을 확인해 주세요.
                     </p>
                 </c:when>
@@ -310,7 +311,7 @@
                          예) '반월공원' 으로 검색하면 26km 떨어진 안산 반월공원이 나온다.
                          여기서 이름은 도착지에 붙는 이름표일 뿐이라 엉뚱한 곳을 찍지 않는다. --%>
                     <a class="outline-button"
-                       href="https://map.kakao.com/link/to/${pickName},${pickLat},${pickLng}"
+                       href="https://map.kakao.com/link/to/${fn:escapeXml(fn:replace(pickName, ',', ' '))},${pickLat},${pickLng}"
                        target="_blank" rel="noopener noreferrer">길찾기</a>
 
                     <c:if test="${not empty linkUrl}">
