@@ -56,6 +56,11 @@ public class WorkoutController {
                               HttpSession session,
                               ModelMap model) throws Exception {
 
+        // 전에는 홈트 탭만 로그인을 봤다. 시설·야외 탭은 주소만 알면 열렸다
+        if (getSessionUserId(session) == null) {
+            return "redirect:/user/login";
+        }
+
         double myLat = GeoPoint.lat(lat);
         double myLng = GeoPoint.lng(lng);
 
@@ -66,9 +71,6 @@ public class WorkoutController {
             model.addAttribute("courseType", courseType);
 
         } else if ("home".equals(tab)) {
-            if (getSessionUserId(session) == null) {
-                return "redirect:/user/login";
-            }
             model.addAttribute("intensity", normalizeIntensityParam(intensity));
             model.addAttribute("targetMin", normalizeTargetMin(targetMin));
 
@@ -106,7 +108,12 @@ public class WorkoutController {
                                 @RequestParam(value = "sportId", defaultValue = "0") int sportId,
                                 @RequestParam(value = "lat", required = false) Double lat,
                                 @RequestParam(value = "lng", required = false) Double lng,
+                                HttpSession session,
                                 ModelMap model) throws Exception {
+
+        if (getSessionUserId(session) == null) {
+            return "redirect:/user/login";
+        }
 
         double myLat = GeoPoint.lat(lat);
         double myLng = GeoPoint.lng(lng);
@@ -174,7 +181,12 @@ public class WorkoutController {
                                @RequestParam(value = "lng", required = false) Double lng,
                                @RequestParam(value = "from", required = false) String from,
                                @RequestParam(value = "sportId", defaultValue = "0") int sportId,
+                               HttpSession session,
                                ModelMap model) throws Exception {
+
+        if (getSessionUserId(session) == null) {
+            return "redirect:/user/login";
+        }
 
         double myLat = GeoPoint.lat(lat);
         double myLng = GeoPoint.lng(lng);
@@ -212,6 +224,10 @@ public class WorkoutController {
 
     @GetMapping("/workoutPlay")
     public String workoutPlay(HttpSession session, ModelMap model) throws Exception {
+        if (getSessionUserId(session) == null) {
+            return "redirect:/user/login";
+        }
+
         HomeWorkoutPlanDTO plan = (HomeWorkoutPlanDTO) session.getAttribute(HOME_PLAN_SESSION);
         if (plan == null || plan.isEmpty()) {
             return "redirect:/workout/workoutList?tab=home";
@@ -229,6 +245,10 @@ public class WorkoutController {
 
     @GetMapping("/workoutResult")
     public String workoutResult(HttpSession session, ModelMap model) throws Exception {
+        if (getSessionUserId(session) == null) {
+            return "redirect:/user/login";
+        }
+
         // 끝내지 않은 계획으로는 보여줄 결과가 없다.
         // 전에는 계획을 대신 띄워 '0분' 이나 예상 열량이 결과처럼 보였다
         HomeWorkoutPlanDTO result = (HomeWorkoutPlanDTO) session.getAttribute(HOME_RESULT_SESSION);
@@ -265,6 +285,10 @@ public class WorkoutController {
     @ResponseBody
     @GetMapping("/api/home-plan")
     public HomeWorkoutPlanDTO getHomePlan(HttpSession session) {
+        if (getSessionUserId(session) == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "LOGIN_REQUIRED");
+        }
+
         HomeWorkoutPlanDTO plan = (HomeWorkoutPlanDTO) session.getAttribute(HOME_PLAN_SESSION);
         return plan != null ? plan : new HomeWorkoutPlanDTO();
     }
@@ -273,6 +297,10 @@ public class WorkoutController {
     @PostMapping("/api/home-result")
     public Map<String, Object> saveHomeResult(@RequestBody Map<String, Object> body,
                                               HttpSession session) {
+        if (getSessionUserId(session) == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "LOGIN_REQUIRED");
+        }
+
         HomeWorkoutPlanDTO plan = (HomeWorkoutPlanDTO) session.getAttribute(HOME_PLAN_SESSION);
         if (plan == null || plan.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PLAN_REQUIRED");
