@@ -55,8 +55,8 @@
         <section class="card profile-card">
             <div class="profile-main">
                 <div class="profile-info">
-                    <h2 class="user-name">${user.name}</h2>
-                    <p class="user-sub">${user.email}</p>
+                    <h2 class="user-name">${fn:escapeXml(user.name)}</h2>
+                    <p class="user-sub">${fn:escapeXml(user.email)}</p>
                 </div>
                 <a href="${pageContext.request.contextPath}/user/profileEdit" class="btn-edit-profile">수정</a>
             </div>
@@ -96,7 +96,7 @@
                         <p>
                             <c:choose>
                                 <c:when test="${not empty workout.memo}">
-                                    ${workout.memo} · ${workout.caloriesBurned} kcal
+                                    ${fn:escapeXml(workout.memo)} · ${workout.caloriesBurned} kcal
                                 </c:when>
                                 <c:otherwise>
                                     직접 기록함 · ${workout.caloriesBurned} kcal

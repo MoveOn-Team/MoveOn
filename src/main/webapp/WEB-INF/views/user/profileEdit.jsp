@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <c:set var="active" value="myPage" scope="request" />
 <!DOCTYPE html>
 <html lang="ko">
@@ -34,7 +35,7 @@
             <h2 class="group-title">기본 정보</h2>
             <div class="edit-input-card">
                 <label class="card-label">이름</label>
-                <input type="text" name="name" id="userName" class="card-input" value="${user.name}" placeholder="이름 입력" required>
+                <input type="text" name="name" id="userName" class="card-input" value="${fn:escapeXml(user.name)}" placeholder="이름 입력" required>
             </div>
         </div>
 

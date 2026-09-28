@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -21,7 +22,7 @@
     <form method="post" action="${pageContext.request.contextPath}/admin/eventForm" class="panel">
 
         <input type="hidden" name="eventId" value="${event.eventId}">
-        <input type="hidden" name="source" value="${empty event.source ? 'MANUAL' : event.source}">
+        <input type="hidden" name="source" value="${empty event.source ? 'MANUAL' : fn:escapeXml(event.source)}">
 
         <%-- 검색 단계에서 지역을 잘못 봐서 다른 지역 대회가 통과하는 일이 있다 --%>
         <c:if test="${event.outsideArea}">
@@ -53,7 +54,7 @@
                     </c:when>
                     <c:otherwise>사이트를 찾았습니다 →</c:otherwise>
                 </c:choose>
-                <a href="${event.homepageUrl}" target="_blank" rel="noopener noreferrer">${event.homepageUrl}</a>
+                <a href="${fn:escapeXml(event.homepageUrl)}" target="_blank" rel="noopener noreferrer">${fn:escapeXml(event.homepageUrl)}</a>
                 <br>
                 <c:choose>
                     <c:when test="${autoFilled}">
@@ -90,18 +91,18 @@
 
             <label class="full">
                 <span>대회명 *</span>
-                <input type="text" name="title" value="${event.title}" required>
+                <input type="text" name="title" value="${fn:escapeXml(event.title)}" required>
             </label>
 
             <label>
                 <span>종목</span>
-                <input type="text" name="eventType" value="${event.eventType}"
+                <input type="text" name="eventType" value="${fn:escapeXml(event.eventType)}"
                        placeholder="마라톤 / 걷기 / 자전거">
             </label>
 
             <label>
                 <span>거리 종목</span>
-                <input type="text" name="distances" value="${event.distances}"
+                <input type="text" name="distances" value="${fn:escapeXml(event.distances)}"
                        placeholder="5km,10km,하프">
             </label>
 
@@ -130,7 +131,7 @@
                 <span>장소 *</span>
                 <span class="with-btn">
                     <input type="text" id="placeName" name="placeName"
-                           value="${event.placeName}" required
+                           value="${fn:escapeXml(event.placeName)}" required
                            placeholder="여의도 한강공원 물빛광장">
                     <button type="button" id="btnFindPlace" class="btn-line">좌표 찾기</button>
                 </span>
@@ -138,7 +139,7 @@
 
             <label>
                 <span>자치구</span>
-                <input type="text" id="sigungu" name="sigungu" value="${event.sigungu}" readonly>
+                <input type="text" id="sigungu" name="sigungu" value="${fn:escapeXml(event.sigungu)}" readonly>
             </label>
 
             <%-- 좌표 0 이면 빈 칸으로. "0.0" 을 두면 값이 있는 셈이라 required 가 통과시킨다 --%>
@@ -158,29 +159,29 @@
 
             <label class="full">
                 <span>참가비</span>
-                <input type="text" name="feeText" value="${event.feeText}"
+                <input type="text" name="feeText" value="${fn:escapeXml(event.feeText)}"
                        placeholder="하프 80,000원 / 10km 70,000원">
             </label>
 
             <label>
                 <span>참가 대상</span>
-                <input type="text" name="target" value="${event.target}"
+                <input type="text" name="target" value="${fn:escapeXml(event.target)}"
                        placeholder="비우면 '제한 없음' 으로 보입니다">
             </label>
 
             <label>
                 <span>문의처</span>
-                <input type="text" name="contact" value="${event.contact}">
+                <input type="text" name="contact" value="${fn:escapeXml(event.contact)}">
             </label>
 
             <label class="full">
                 <span>공식 홈페이지</span>
-                <input type="url" name="homepageUrl" value="${event.homepageUrl}">
+                <input type="url" name="homepageUrl" value="${fn:escapeXml(event.homepageUrl)}">
             </label>
 
             <label class="full">
                 <span>확인한 곳 (source_url)</span>
-                <input type="url" name="sourceUrl" value="${event.sourceUrl}"
+                <input type="url" name="sourceUrl" value="${fn:escapeXml(event.sourceUrl)}"
                        placeholder="값을 어디서 보고 넣었는지. 대회 공식 홈페이지를 적습니다">
             </label>
         </div>
