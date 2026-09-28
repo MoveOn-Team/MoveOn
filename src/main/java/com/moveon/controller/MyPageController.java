@@ -205,6 +205,9 @@ public class MyPageController {
             } else {
                 msgDTO.setMsg("운동 기록 저장에 실패했습니다.");
             }
+        } catch (IllegalArgumentException e) {
+            // 종목·시간이 받을 수 없는 값. 무엇을 고치면 되는지 그대로 알려 준다
+            msgDTO.setMsg(e.getMessage());
         } catch (Exception e) {
             log.error("운동 기록 저장 중 오류 발생", e);
             msgDTO.setMsg("서버 오류가 발생했습니다.");

@@ -187,6 +187,7 @@
                 <div class="chip-group sport-chips">
                     <c:forEach var="s" items="${sports}" varStatus="st">
                         <button type="button" class="chip ${st.first ? 'active' : ''}"
+                                data-sport-id="${s.sportId}"
                                 data-met="${s.metValue}">${s.name}</button>
                     </c:forEach>
                 </div>
@@ -472,19 +473,21 @@
                     return;
                 }
 
-                var calText = document.getElementById("modalCalorieText") ? document.getElementById("modalCalorieText").innerText : "0";
-                var caloriesBurned = parseInt(calText.replace(/[^0-9]/g, "")) || 0;
                 var memo = document.querySelector("#workoutModal textarea") ? document.querySelector("#workoutModal textarea").value : "";
 
                 // 날짜는 보내지 않는다. 서버가 자기 시계로 오늘을 정한다.
                 // 셋(브라우저·서버·DB)이 각자 오늘을 알면 하나만 틀어져도 기록이 샌다.
+                // 열량도 보내지 않는다. 서버가 같은 식으로 다시 센다. 위 미리보기는 보여주기만 한다.
+                // 종목은 이름이 아니라 번호로 보낸다. 이름을 다듬는 순간 엉뚱한 종목이 저장된다.
                 var requestData = {
-                    sportName: sportChip.innerText.trim(),
+                    sportId: parseInt(sportChip.dataset.sportId, 10),
                     durationMin: durationMin,
                     intensity: readIntensity(),
-                    caloriesBurned: caloriesBurned,
                     memo: memo
                 };
+
+                // 응답이 오기 전에 한 번 더 누르면 기록이 두 번 쌓인다
+                submitBtn.disabled = true;
 
                 fetch("${pageContext.request.contextPath}/user/recordWorkout", {
                     method: "POST",
@@ -494,11 +497,17 @@
                     .then(function (response) { return response.json(); })
                     .then(function (data) {
                         alert(data.msg || "운동 기록이 저장되었습니다.");
-                        closeWorkoutModal();
-                        location.reload();
+                        // 저장이 안 됐으면 모달을 그대로 두어 고쳐서 다시 누를 수 있게 한다
+                        if ((data.msg || "").includes("저장되었습니다")) {
+                            closeWorkoutModal();
+                            location.reload();
+                        } else {
+                            submitBtn.disabled = false;
+                        }
                     })
                     .catch(function (error) {
                         console.error("Error:", error);
+                        submitBtn.disabled = false;
                         alert("운동 기록 저장 중 오류가 발생했습니다.");
                     });
             };

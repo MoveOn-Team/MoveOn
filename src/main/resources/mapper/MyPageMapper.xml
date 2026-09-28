@@ -48,7 +48,7 @@
             created_at
         ) VALUES (
                      #{userId},
-                     (SELECT sport_id FROM sports WHERE name = #{sportName} LIMIT 1),
+                     #{sportId},
             STR_TO_DATE(#{workoutDate}, '%Y-%m-%d'),
             #{durationMin},
             #{intensity},

@@ -8,6 +8,7 @@ import com.moveon.dto.WorkoutReportDTO;
 import com.moveon.mapper.IMyPageMapper;
 import com.moveon.service.IAiService;
 import com.moveon.service.IMyPageService;
+import com.moveon.service.IWorkoutService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,9 @@ public class MyPageService implements IMyPageService {
 
     private final IMyPageMapper myPageMapper;
     private final IAiService aiService;
+
+    /** 기록 열량을 셀 체중. 못 찾으면 기본 체중을 준다 */
+    private final IWorkoutService workoutService;
 
     /** 코치 글을 뒤에서 만드는 데 쓴다. ExternalApiConfig 가 만들어 준다 */
     private final ExecutorService searchExecutor;
@@ -62,8 +66,18 @@ public class MyPageService implements IMyPageService {
         return result > 0;
     }
 
-    /** 강도는 이 셋뿐이다. 화면에서 다른 값이 와도 표에는 못 들어가게 막는다 */
-    private static final Set<String> INTENSITIES = Set.of("LIGHT", "MODERATE", "HARD");
+    /**
+     * 강도별 열량 가중치. 강도는 이 셋뿐이라 화면에서 다른 값이 와도 표에는 못 들어간다.
+     * myPage.jsp 의 INTENSITY_FACTOR 와 같은 값이다. 화면은 미리보기만 하고 저장은 이 값으로 센다
+     */
+    private static final Map<String, Double> INTENSITY_FACTOR =
+            Map.of("LIGHT", 0.8, "MODERATE", 1.0, "HARD", 1.25);
+
+    /** 직접입력 칸의 max 와 같다. 60 을 600 으로 잘못 친 것보다 큰 값은 받지 않는다 */
+    private static final int MAX_DURATION_MIN = 600;
+
+    /** 표에 MET 이 없는 종목. 중강도로 본다 */
+    private static final double DEFAULT_MET = 5.0;
 
     @Override
     public int insertWorkoutLog(WorkoutLogDTO workoutLogDTO) throws Exception {
@@ -73,10 +87,31 @@ public class MyPageService implements IMyPageService {
         // 브라우저·서버·DB 가 각자 오늘을 알면 시계 하나만 틀어져도 기록이 샌다.
         workoutLogDTO.setWorkoutDate(LocalDate.now().toString());
 
-        if (!INTENSITIES.contains(workoutLogDTO.getIntensity())) {
+        // 종목은 번호로 받고, 손으로 적을 수 있는 종목인지 본다. 홈트·없는 번호는 여기서 걸린다
+        Integer sportId = workoutLogDTO.getSportId();
+        SportDTO sport = myPageMapper.selectRecordableSports().stream()
+                .filter(s -> sportId != null && s.getSportId() == sportId)
+                .findFirst()
+                .orElse(null);
+        if (sport == null) {
+            throw new IllegalArgumentException("운동 종목을 다시 골라 주세요.");
+        }
+
+        Integer minutes = workoutLogDTO.getDurationMin();
+        if (minutes == null || minutes < 1 || minutes > MAX_DURATION_MIN) {
+            throw new IllegalArgumentException("운동 시간은 1분에서 " + MAX_DURATION_MIN + "분 사이로 적어 주세요.");
+        }
+
+        if (!INTENSITY_FACTOR.containsKey(workoutLogDTO.getIntensity())) {
             log.warn("모르는 강도라 중간으로 둔다 : {}", workoutLogDTO.getIntensity());
             workoutLogDTO.setIntensity("MODERATE");
         }
+
+        // 열량은 화면이 보낸 값을 쓰지 않고 여기서 센다. 식은 화면 미리보기와 같다
+        double met = sport.getMetValue() > 0 ? sport.getMetValue() : DEFAULT_MET;
+        double weight = workoutService.getUserWeight(workoutLogDTO.getUserId());
+        double factor = INTENSITY_FACTOR.get(workoutLogDTO.getIntensity());
+        workoutLogDTO.setCaloriesBurned((int) Math.round(met * 3.5 * weight / 200 * minutes * factor));
 
         int res = myPageMapper.insertWorkoutLog(workoutLogDTO);
 
