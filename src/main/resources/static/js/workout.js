@@ -278,17 +278,16 @@
                 totalCompletedSetCount += completedSets;
                 totalSkippedSetCount += skippedSets;
 
-                // 열량 = MET x 0.0175 x 체중 x 시간(분) x 완료 세트 수
+                // 계획의 예상 열량(WorkoutService.estimateKcal)과 같은 식이다.
+                // estimatedMin 은 서버가 쉬는 시간까지 넣어 센 이 동작의 시간이라,
+                // 다 하면 예상과 같고 건너뛴 세트만큼 줄어든다.
+                // 기본 체중은 서버(WorkoutService.DEFAULT_WEIGHT_KG)가 정해 내려준다
                 var met = ex.metValue || 4.5;
-                var durationSec = ex.durationSec || 30;
-                // 기본 체중은 서버(WorkoutService.DEFAULT_WEIGHT_KG)가 정한다.
-                // 여기서 또 정하면 값이 두 곳에 생긴다. 못 받았으면 아래 바닥값이 받는다
                 var userWeight = parseFloat(document.body.dataset.userWeight) || 0;
+                var doneRatio = ex.sets > 0 ? completedSets / ex.sets : 0;
 
-                var durationMin = durationSec / 60.0;
-                var setCalorie = met * 0.0175 * userWeight * durationMin;
-
-                totalBurnedCalories += (setCalorie * completedSets);
+                totalBurnedCalories += met * 3.5 * userWeight / 200
+                                       * (ex.estimatedMin || 0) * doneRatio;
 
                 return {
                     exerciseId: ex.exerciseId || ex.id,
@@ -300,11 +299,7 @@
                 };
             });
 
-            // 위 식에는 휴식시간이 빠져 있어 너무 낮게 나온다. 세트당 4.5kcal 을 바닥으로 둔다
-            var finalCalories = Math.max(
-                Math.round(totalBurnedCalories),
-                Math.round(totalCompletedSetCount * 4.5)
-            );
+            var finalCalories = Math.round(totalBurnedCalories);
 
             fetch(contextPath + "/workout/api/home-result", {
                 method: "POST",
