@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>즉시 운동하기</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.5">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.6">
 </head>
 <body class="auth-page" data-context-path="${pageContext.request.contextPath}"
       data-lat="${lat}" data-lng="${lng}">
@@ -189,7 +189,7 @@
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
 <script src="${pageContext.request.contextPath}/js/geo.js"></script>
-<script src="${pageContext.request.contextPath}/js/workout.js?v=1.5"></script>
+<script src="${pageContext.request.contextPath}/js/workout.js?v=1.6"></script>
 <script>
     // 종목 단추 줄. 넘치는 쪽을 클래스로 알려 css 가 그쪽 끝을 흐린다
     (function () {

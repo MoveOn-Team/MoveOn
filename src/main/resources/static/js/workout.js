@@ -221,27 +221,18 @@
                 ? exercises[exerciseIndex + 1].name + " · " + volume(exercises[exerciseIndex + 1])
                 : "마지막 동작";
 
-            var imgId = exercise.exerciseId || exercise.id;
-            var imgUrl = contextPath + '/resources/images/workout/' + imgId + '.png';
-            var videoUrl = contextPath + '/resources/videos/workout/' + imgId + '.mp4';
+            var mediaId = exercise.exerciseId || exercise.id;
 
             var video = document.createElement("video");
             video.className = "exercise-media-vid";
-            video.src = videoUrl;
+            video.src = contextPath + '/resources/videos/workout/' + mediaId + '.mp4';
             video.autoplay = true;
             video.muted = true;
             video.loop = true;
             video.playsInline = true;
+            // 영상이 없으면 칸을 비운다. 깨진 영상 틀을 두는 것보다 낫다. 동작 이름과 설명은 아래에 있다
             video.onerror = function () {
-                var img = document.createElement("img");
-                img.className = "exercise-media-img";
-                img.alt = exercise.name;
-                img.src = imgUrl;
-                img.onerror = function () {
-                    if (img.src.endsWith(".png")) img.src = img.src.replace(".png", ".jpg");
-                };
                 mediaPlaceholder.innerHTML = "";
-                mediaPlaceholder.appendChild(img);
             };
             mediaPlaceholder.innerHTML = "";
             mediaPlaceholder.appendChild(video);

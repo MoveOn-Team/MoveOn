@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>운동 진행 중</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.5">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.6">
 </head>
 <body class="auth-page"
       data-context-path="${pageContext.request.contextPath}"
@@ -60,6 +60,6 @@
 
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
-<script src="${pageContext.request.contextPath}/js/workout.js?v=1.5"></script>
+<script src="${pageContext.request.contextPath}/js/workout.js?v=1.6"></script>
 </body>
 </html>
