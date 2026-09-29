@@ -68,6 +68,15 @@
                 </ul>
             </div>
 
+            <div class="copyright-card">
+                <h3 class="card-item-title">서울시 공공 체육시설별 운영프로그램 정보</h3>
+                <ul class="card-info-list">
+                    <li><span class="info-label">제공:</span> 서울특별시 (관광체육국 체육정책과)</li>
+                    <li><span class="info-label">용도:</span> 시설별 강좌 목록 · 수강 대상 · 수강 신청 페이지 연결</li>
+                    <li><span class="info-label">이용조건:</span> 공공누리 제1유형 (출처 표시)</li>
+                </ul>
+            </div>
+
             <%-- 네 건 모두 제4유형이다. 상업적 이용과 변경이 금지돼 있으니
                  이 서비스를 영리로 돌릴 때는 서울시에 따로 물어야 한다. --%>
             <div class="copyright-card">
