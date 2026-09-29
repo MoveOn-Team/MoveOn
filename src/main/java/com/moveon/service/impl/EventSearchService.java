@@ -105,8 +105,10 @@ public class EventSearchService implements IEventSearchService {
     // =====================================================================
     // 1. 어떤 대회가 있는지 찾음
     // =====================================================================
+    // 한 번에 Gemini 를 네댓 번 부른다. 둘이 겹치면 분당 한도를 넘기므로 하나씩 돌린다.
+    // 뒤에 온 요청은 기다렸다가 보관해 둔 결과를 받는다
     @Override
-    public List<EventSearchDTO> discover(String keyword, boolean refresh) throws Exception {
+    public synchronized List<EventSearchDTO> discover(String keyword, boolean refresh) throws Exception {
 
         log.info("{}.discover Start! keyword : {} / refresh : {}",
                 this.getClass().getName(), keyword, refresh);

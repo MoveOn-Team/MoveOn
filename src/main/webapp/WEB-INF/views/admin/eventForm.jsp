@@ -200,6 +200,6 @@
     </form>
 </main>
 
-<script src="${pageContext.request.contextPath}/js/admin.js"></script>
+<script src="${pageContext.request.contextPath}/js/admin.js?v=1.1"></script>
 </body>
 </html>

@@ -25,9 +25,20 @@
                 fetch(ctx + "/admin/searchEvents?keyword=" + encodeURIComponent(keyword)
                           + (fresh ? "&refresh=1" : ""),
                       {credentials: "same-origin"})
-                    .then(function (r) { return r.json(); })
+                    .then(function (r) {
+                        if (r.status === 429) {
+                            return null;
+                        }
+                        return r.json();
+                    })
                     .then(function (list) {
                         btnSearch.disabled = false;
+
+                        if (list === null) {
+                            box.innerHTML = '<p class="empty">Gemini 호출 한도에 걸렸습니다. ' +
+                                            '1분쯤 뒤에 다시 눌러 보세요.</p>';
+                            return;
+                        }
 
                         if (!list || list.length === 0) {
                             box.innerHTML = '<p class="empty">찾은 대회가 없습니다. 검색어를 바꿔 보세요.</p>';

@@ -17,6 +17,9 @@ public interface IAiService {
     /** 쓸 수 있는 상태인지. 키가 없으면 false */
     boolean isReady();
 
+    /** 호출 한도에 걸려 잠시 부르지 않는 중인지 */
+    boolean isRateLimited();
+
     /**
      * 대회 홈페이지 글에서 행사 정보를 뽑음.
      *
