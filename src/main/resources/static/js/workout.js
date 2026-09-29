@@ -107,18 +107,8 @@
             renderGroup("본운동", plan.mainMin, plan.mains) +
             renderGroup("마무리", plan.cooldownMin, plan.cooldowns) +
             '<div class="home-action-group">' +
-            '<button type="button" class="btn-outline" id="btnResetHomePlan">다시 만들기</button>' +
             '<a href="' + contextPath + '/workout/workoutPlay" class="btn-main-action">운동 시작하기</a>' +
             '</div>';
-
-        document.getElementById("btnResetHomePlan").addEventListener("click", function () {
-            document.querySelectorAll("#homeWorkoutPicker .option-grid").forEach(function (group) {
-                group.querySelectorAll(".option-btn").forEach(function (btn, idx) {
-                    btn.classList.toggle("is-active", idx === 1);
-                });
-            });
-            hidePlan(result);
-        });
     }
 
     function renderGroup(title, minutes, items) {
