@@ -56,7 +56,7 @@
              즉시운동 탭 '야외에서' 와 같은 서울두드림길 자료를 쓴다.
              예약이라는 절차가 없는 길이라 아래 버튼도 필요 없다. --%>
         <c:when test="${not empty courses}">
-            <h2 class="section-title">가까운 코스 ${courses.size()}곳 <small>가까운 순</small></h2>
+            <h2 class="section-title">가까운 코스 ${courses.size()}곳</h2>
             <ul class="facility-list">
                 <c:forEach var="c" items="${courses}">
                     <li>
@@ -178,7 +178,7 @@
                  수영장을 통째로 빌리는 사람은 없고, 자유수영은 위 시설 쪽이 맡는다. --%>
             <c:if test="${not empty rentals}">
                 <h2 class="section-title">
-                    지금 빌릴 수 있는 ${rentals.size()}곳 <small>가까운 순</small>
+                    지금 빌릴 수 있는 ${rentals.size()}곳
                 </h2>
                 <ul class="facility-list">
                     <c:forEach var="r" items="${rentals}">
@@ -248,24 +248,6 @@
                         이 시설의 신청 창구를 아직 못 찾았어요.<br>
                         아래 지도로 위치만 확인해 주세요.
                     </div>
-                </c:when>
-                <%-- 방문 접수만 받는 곳. 버튼 너머에서 신청이 안 되니 미리 말해 준다.
-                     노인복지관·사회복지관이 여기 해당한다. --%>
-                <c:when test="${visitOnly}">
-                    <p class="data-notice">
-                        여기는 직접 찾아가 접수하는 곳이에요.<br>
-                        <c:choose>
-                            <c:when test="${not empty linkUrl}">아래에서 어떤 프로그램이 있는지 먼저 보세요.</c:when>
-                            <%-- 온라인 창구가 없으면 남는 답은 전화뿐이다.
-                                 목동테니스장은 접수 방법이 아예 '전화문의' 로 적혀 있다.
-                                 눌러서 걸 수 있게 tel: 로 건다. --%>
-                            <c:when test="${not empty pick.phone}">
-                                접수 기간은 <a href="tel:${pick.phone}">${pick.phone}</a> 로 확인해 주세요.
-                            </c:when>
-                            <c:otherwise>가시기 전에 접수 기간을 확인해 주세요.</c:otherwise>
-                        </c:choose>
-
-                    </p>
                 </c:when>
             </c:choose>
 

@@ -229,17 +229,14 @@ public class RecommendController {
         // pick 은 우리 facilities 에서만 고르는데 화면 목록에는 서울시 예약
         // 장소가 섞여 있다. 그쪽이 더 가까우면 첫 줄은 그 장소인데 테두리는
         // 두 번째 줄에 가서, 왜 켜졌는지 알 수 없었다.
-        if (pickPlace.isBlank() && !rentals.isEmpty()) {
+        // 우리 시설을 눌러 facilityId 가 왔으면 고른 것이다. 맨 위로 되돌리지 않는다
+        if (facilityId == null && pickPlace.isBlank() && !rentals.isEmpty()) {
             RentalDTO top = rentals.get(0);
             if (top.getFacilityId() == 0
                     && (pick == null || top.getDistanceKm() < pick.getDistanceKm())) {
                 pickPlace = top.getPlaceName();
             }
         }
-
-        // 서울시 예약 장소를 골랐는지. 그 장소는 우리 표에 없어서
-        // pick 이 들고 있는 값(방문접수 여부 등)을 그대로 쓰면 안 된다
-        boolean pickedSeoul = false;
 
         if (!pickPlace.isBlank()) {
             for (RentalDTO r : rentals) {
@@ -249,7 +246,6 @@ public class RecommendController {
                     pickLng = r.getLng();
                     linkUrl = r.getSvcUrl();
                     linkLabel = Go.RENT.label;
-                    pickedSeoul = true;
                     break;
                 }
             }
@@ -258,10 +254,6 @@ public class RecommendController {
         model.addAttribute("pickLat", pickLat);
         model.addAttribute("pickLng", pickLng);
         model.addAttribute("pickPlace", pickPlace);
-
-        // 서울시 예약 장소는 온라인으로 신청하는 곳이다.
-        // '직접 찾아가 접수하세요' 는 우리 시설을 골랐을 때만 할 말이다
-        model.addAttribute("visitOnly", !pickedSeoul && pick != null && pick.isVisitOnly());
 
         // 예약 절차 자체가 없는 개방형 코트인지. 근린공원 농구장·풋살장이 그렇다.
         //
