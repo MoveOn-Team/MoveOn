@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import tools.jackson.databind.ObjectMapper;
 
@@ -423,9 +424,23 @@ public class AiService implements IAiService {
         }
     }
 
+    /** 무료 등급 한도(분당 15번)에 걸리면 이때까지 부르지 않는다 */
+    private volatile long blockedUntil;
+
+    private static final long BLOCK_MILLIS = 60_000L;
+
+    @Override
+    public boolean isRateLimited() {
+        return System.currentTimeMillis() < blockedUntil;
+    }
+
     /** Gemini 에 물어 본문 글자만 돌려준다. 무료 등급이라 503 이 잦아 두 번까지 다시 부른다 */
     private String ask(String prompt) {
         for (int i = 0; i < 3; i++) {
+            // 한도에 걸렸을 때 다시 부르면 한도만 더 깎인다
+            if (isRateLimited()) {
+                return null;
+            }
             String res = askOnce(prompt);
             if (res != null) {
                 return res;
@@ -477,6 +492,10 @@ public class AiService implements IAiService {
             return String.valueOf(parts.get(0).get("text")).trim()
                     .replaceAll("^```(?:json)?", "").replaceAll("```$", "").trim();
 
+        } catch (HttpClientErrorException.TooManyRequests e) {
+            blockedUntil = System.currentTimeMillis() + BLOCK_MILLIS;
+            log.warn("Gemini 호출 한도 초과. {}초 동안 부르지 않는다", BLOCK_MILLIS / 1000);
+            return null;
         } catch (Exception e) {
             log.warn("Gemini 호출 실패 : {}", e.getMessage());
             return null;

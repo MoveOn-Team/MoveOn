@@ -4,10 +4,13 @@ import com.moveon.dto.AdminDTO;
 import com.moveon.dto.EventDTO;
 import com.moveon.dto.EventSearchDTO;
 import com.moveon.service.IAdminService;
+import com.moveon.service.IAiService;
 import com.moveon.service.IEventSearchService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +36,7 @@ public class AdminController {
 
     private final IAdminService adminService;
     private final IEventSearchService eventSearchService;
+    private final IAiService aiService;
 
     // =====================================================================
     // 로그인
@@ -279,14 +283,20 @@ public class AdminController {
     /** 어떤 대회가 있는지 찾는다 */
     @GetMapping(value = "/searchEvents")
     @ResponseBody
-    public List<EventSearchDTO> searchEvents(@RequestParam(value = "keyword", required = false) String keyword,
-                                             @RequestParam(value = "refresh", required = false) String refresh,
-                                             HttpSession session) throws Exception {
+    public ResponseEntity<List<EventSearchDTO>> searchEvents(@RequestParam(value = "keyword", required = false) String keyword,
+                                                             @RequestParam(value = "refresh", required = false) String refresh,
+                                                             HttpSession session) throws Exception {
 
         if (getAdminId(session) == null) {
-            return List.of();
+            return ResponseEntity.ok(List.of());
         }
-        return eventSearchService.discover(keyword, "1".equals(refresh));
+        List<EventSearchDTO> rList = eventSearchService.discover(keyword, "1".equals(refresh));
+
+        // 한도에 걸려 비었으면 '찾은 대회가 없다' 가 아니라고 화면에 알린다
+        if (rList.isEmpty() && aiService.isRateLimited()) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(List.of());
+        }
+        return ResponseEntity.ok(rList);
     }
 
     /** 장소 이름으로 좌표를 얻는다. 등록 화면의 '좌표 찾기' 버튼이 부른다 */
