@@ -189,7 +189,7 @@
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
 
 <script src="${pageContext.request.contextPath}/js/geo.js"></script>
-<script src="${pageContext.request.contextPath}/js/workout.js?v=1.6"></script>
+<script src="${pageContext.request.contextPath}/js/workout.js?v=1.7"></script>
 <script>
     // 종목 단추 줄. 넘치는 쪽을 클래스로 알려 css 가 그쪽 끝을 흐린다
     (function () {
