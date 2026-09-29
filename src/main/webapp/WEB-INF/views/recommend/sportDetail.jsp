@@ -267,22 +267,6 @@
 
                     </p>
                 </c:when>
-
-                <%-- 안내 문구도 버튼과 같은 이야기를 해야 한다.
-                     빌리러 가는 곳에 '여는 강좌' 를 말하면 앞뒤가 어긋난다. --%>
-                <c:when test="${not empty linkUrl and toRental}">
-                    <p class="data-notice">
-                        여기는 시간을 잡아 빌리는 곳이에요.
-                        요금과 빈 시간은 아래에서 확인해 주세요.
-                    </p>
-                </c:when>
-
-                <c:when test="${not empty linkUrl}">
-                    <p class="data-notice">
-                        여는 강좌와 요금은 자주 바뀌어요.<br>
-                        아래에서 지금 열리는 것을 확인해 주세요.
-                    </p>
-                </c:when>
             </c:choose>
 
             <%-- ---------- 고른 시설의 단추 ----------

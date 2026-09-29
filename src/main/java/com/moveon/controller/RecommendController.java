@@ -213,7 +213,6 @@ public class RecommendController {
 
         Destination dest = chooseDestination(pick, programs);
         String linkUrl = dest.url();
-        boolean toRental = dest.go() == Go.RENT;
 
         String linkLabel = (linkUrl == null) ? null : dest.go().label;
 
@@ -250,7 +249,6 @@ public class RecommendController {
                     pickLng = r.getLng();
                     linkUrl = r.getSvcUrl();
                     linkLabel = Go.RENT.label;
-                    toRental = true;
                     pickedSeoul = true;
                     break;
                 }
@@ -274,9 +272,6 @@ public class RecommendController {
         boolean openAccess = programs.isEmpty() && linkUrl == null
                 && pick != null && pick.getCourseCount() == 0;
         model.addAttribute("openAccess", openAccess);
-
-        // 화면은 이걸 보고 '강좌가 없어요' 안내를 접는다
-        model.addAttribute("toRental", toRental);
 
         // 목록 제목을 '지금 빌릴 수 있는 3곳' 으로 바꿀지. 같은 테니스라도
         // 강남에는 강습이 있고 오금동에는 대관뿐이라 동네마다 갈린다.
