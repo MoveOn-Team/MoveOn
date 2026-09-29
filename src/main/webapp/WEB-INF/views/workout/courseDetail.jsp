@@ -172,12 +172,6 @@
             </button>
         </c:if>
     </div>
-    <c:if test="${not empty routeUrl}">
-        <p class="map-sub-info">
-            네이버지도 앱이 있으면 음성 안내로, 없으면 카카오맵으로 열려요.<br>
-            코스의 주요 지점만 이어 지도앱이 다시 계산한 경로라 실제 산책로와 다를 수 있어요.
-        </p>
-    </c:if>
 </main>
 
 <jsp:include page="/WEB-INF/views/common/tabbar.jsp"/>
