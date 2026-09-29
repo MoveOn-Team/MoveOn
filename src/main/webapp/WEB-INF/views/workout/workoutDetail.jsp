@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>MOVE:ON ${facility.name}</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.6">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.7">
 </head>
 <body class="auth-page" data-context-path="${pageContext.request.contextPath}">
 
