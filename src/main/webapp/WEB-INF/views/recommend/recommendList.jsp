@@ -86,7 +86,7 @@
                     <li>
                         <%-- 현위치를 상세 화면까지 이어줘야 거리 표시가 달라지지 않는다 --%>
                         <a class="sport-card ${loop.first ? 'is-top' : ''}"
-                           href="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}?lat=${lat}&lng=${lng}">
+                           href="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}">
                             <span class="rank-badge">${loop.count}위</span>
                             <span class="sport-name">${sport.name}</span>
                             <span class="sport-score">

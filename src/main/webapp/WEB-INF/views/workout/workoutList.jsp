@@ -11,8 +11,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/workout.css?v=1.7">
 </head>
-<body class="auth-page" data-context-path="${pageContext.request.contextPath}"
-      data-lat="${lat}" data-lng="${lng}">
+<body class="auth-page" data-context-path="${pageContext.request.contextPath}">
 
 <c:set var="DIFF_EASY" value="쉬움"/>
 <c:set var="DIFF_NORMAL" value="보통"/>
@@ -30,14 +29,13 @@
         </p>
     </header>
 
-    <c:set var="pos" value="&lat=${lat}&lng=${lng}"/>
 
     <nav class="main-tab-group">
-        <a href="?tab=facility${pos}"
+        <a href="?tab=facility"
            class="main-tab-btn ${currentTab == 'facility' || empty currentTab ? 'is-active' : ''}">시설에서</a>
-        <a href="?tab=outdoor${pos}"
+        <a href="?tab=outdoor"
            class="main-tab-btn ${currentTab == 'outdoor' ? 'is-active' : ''}">야외에서</a>
-        <a href="?tab=home${pos}"
+        <a href="?tab=home"
            class="main-tab-btn ${currentTab == 'home' ? 'is-active' : ''}">집에서</a>
     </nav>
 
@@ -66,9 +64,9 @@
 
         <c:when test="${currentTab == 'outdoor'}">
             <div class="sub-tag-group">
-                <a href="?tab=outdoor&type=WALK${pos}"
+                <a href="?tab=outdoor&type=WALK"
                    class="sub-tag-btn ${courseType == 'WALK' ? 'is-active' : ''}">평지</a>
-                <a href="?tab=outdoor&type=HIKE${pos}"
+                <a href="?tab=outdoor&type=HIKE"
                    class="sub-tag-btn ${courseType == 'HIKE' ? 'is-active' : ''}">산길</a>
             </div>
 
@@ -82,7 +80,7 @@
                 <c:otherwise>
                     <div class="facility-list">
                         <c:forEach var="c" items="${courses}" varStatus="st">
-                            <a href="${pageContext.request.contextPath}/workout/courseDetail/${c.courseId}?lat=${lat}&lng=${lng}"
+                            <a href="${pageContext.request.contextPath}/workout/courseDetail/${c.courseId}"
                                class="facility-card ${st.first ? 'is-highlight' : ''} ${st.index >= 5 ? 'is-folded' : ''}">
                                 <div class="card-body">
                                     <h3 class="facility-name">${c.name}</h3>
@@ -143,7 +141,7 @@
             <div class="sub-tag-scroll" id="sportTagScroll">
                 <div class="sub-tag-group">
                     <c:forEach var="s" items="${sports}">
-                        <a href="?tab=facility&sportId=${s.sportId}${pos}"
+                        <a href="?tab=facility&sportId=${s.sportId}"
                            class="sub-tag-btn ${sportId eq s.sportId ? 'is-active' : ''}">${s.name}</a>
                     </c:forEach>
                 </div>
@@ -159,14 +157,14 @@
                 <c:otherwise>
                     <div class="facility-list">
                         <c:forEach var="f" items="${facilities}" varStatus="st">
-                            <a href="${pageContext.request.contextPath}/workout/workoutDetail/${f.facilityId}?sportId=${sportId}&lat=${lat}&lng=${lng}"
+                            <a href="${pageContext.request.contextPath}/workout/workoutDetail/${f.facilityId}?sportId=${sportId}"
                                class="facility-card ${st.first ? 'is-highlight' : ''}">
                                 <div class="card-body">
                                     <h3 class="facility-name">${f.name}</h3>
                                     <p class="facility-address">${not empty f.roadAddr ? f.roadAddr : f.lotAddr}</p>
                                 </div>
 
-                                <span class="distance-badge">
+                                <span class="distance-badge">   
                                     <c:choose>
                                         <c:when test="${f.distanceKm lt 1}">
                                             <fmt:formatNumber value="${f.distanceKm * 1000}" maxFractionDigits="0"/>m

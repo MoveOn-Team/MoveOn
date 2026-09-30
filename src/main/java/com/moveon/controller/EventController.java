@@ -105,7 +105,7 @@ public class EventController {
         // 없는 번호이거나 검수 전 행사를 주소로 직접 들어온 경우. 목록으로 돌려보낸다
         if (event == null) {
             log.info("{}.eventDetail End! 없는 행사 : {}", this.getClass().getName(), eventId);
-            return "redirect:/event/eventList?lat=" + myLat + "&lng=" + myLng;
+            return "redirect:/event/eventList";
         }
 
         model.addAttribute("event", event);
