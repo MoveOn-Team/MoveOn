@@ -22,7 +22,7 @@
 
     <div class="detail-header">
         <a class="back-button"
-           href="${pageContext.request.contextPath}/workout/workoutList?tab=facility&sportId=${sportId}&lat=${lat}&lng=${lng}"
+           href="${pageContext.request.contextPath}/workout/workoutList?tab=facility&sportId=${sportId}"
            aria-label="뒤로 가기">&#8249;</a>
     </div>
 

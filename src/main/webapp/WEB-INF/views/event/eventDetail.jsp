@@ -11,9 +11,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/event.css">
 </head>
-<%-- event.js 가 body.dataset 에서 좌표를 읽어 다음 주소에 이어 붙인다 --%>
-<body class="auth-page" data-context-path="${pageContext.request.contextPath}"
-      data-lat="${lat}" data-lng="${lng}">
+<body class="auth-page" data-context-path="${pageContext.request.contextPath}">
 
 <c:set var="DOW" value="월,화,수,목,금,토,일"/>
 <c:set var="fromLabel" value="${usingGps ? '현위치' : '서울시청'}"/>
@@ -22,7 +20,7 @@
 
     <%-- history.back() 을 안 쓴다. 주소로 바로 들어온 경우에 갈 곳이 없다 --%>
     <a class="back-button"
-       href="${pageContext.request.contextPath}/event/eventList?lat=${lat}&amp;lng=${lng}"
+       href="${pageContext.request.contextPath}/event/eventList"
        aria-label="뒤로 가기">&#8249;</a>
 
     <div class="detail-header-card">

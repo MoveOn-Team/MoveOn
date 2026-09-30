@@ -64,7 +64,7 @@
                              다만 from 을 달아 준다. 이게 없으면 뒤로가기가 즉시운동 목록으로 가서,
                              추천을 보다가 누른 사람이 엉뚱한 탭에 떨어진다. --%>
                         <a class="facility-item"
-                           href="${pageContext.request.contextPath}/workout/courseDetail/${c.courseId}?lat=${lat}&lng=${lng}&from=recommend&sportId=${sport.sportId}">
+                           href="${pageContext.request.contextPath}/workout/courseDetail/${c.courseId}?from=recommend&sportId=${sport.sportId}">
                             <span class="facility-body">
                                 <span class="facility-name">${c.name}</span>
                                 <span class="facility-addr">
@@ -109,7 +109,7 @@
             </div>
             <p class="data-notice">
                 예약 없이 그냥 쓰는 동네 코트는
-                <a href="${pageContext.request.contextPath}/workout/workoutList?tab=facility&sportId=${sport.sportId}&lat=${lat}&lng=${lng}">즉시운동 탭</a>
+                <a href="${pageContext.request.contextPath}/workout/workoutList?tab=facility&sportId=${sport.sportId}">즉시운동 탭</a>
                 에서 볼 수 있어요.
             </p>
         </c:when>
@@ -136,7 +136,7 @@
                 <c:forEach var="f" items="${learnFacilities}">
                     <li>
                         <a class="facility-item ${f.facilityId == pick.facilityId and empty pickPlace ? 'is-pick' : ''}"
-                           href="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}?facilityId=${f.facilityId}&lat=${lat}&lng=${lng}">
+                           href="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}?facilityId=${f.facilityId}">
                             <span class="facility-body">
                                 <span class="facility-name">${f.name}</span>
                                 <span class="facility-addr">
@@ -190,7 +190,7 @@
                             <c:choose>
                                 <c:when test="${r.facilityId > 0}">
                                     <c:set var="href"
-                                           value="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}?facilityId=${r.facilityId}&lat=${lat}&lng=${lng}"/>
+                                           value="${pageContext.request.contextPath}/recommend/sportDetail/${sport.sportId}?facilityId=${r.facilityId}"/>
                                     <c:set var="on" value="${r.facilityId == pick.facilityId and empty pickPlace}"/>
                                 </c:when>
                                 <c:otherwise>
@@ -198,8 +198,6 @@
                                          이어 붙이면 거기서 값이 끊겨 고른 줄이 안 켜진다. c:param 이 인코딩한다 --%>
                                     <c:url var="href" value="/recommend/sportDetail/${sport.sportId}">
                                         <c:param name="place" value="${r.placeName}"/>
-                                        <c:param name="lat" value="${lat}"/>
-                                        <c:param name="lng" value="${lng}"/>
                                     </c:url>
                                     <c:set var="on" value="${r.placeName eq pickPlace}"/>
                                 </c:otherwise>

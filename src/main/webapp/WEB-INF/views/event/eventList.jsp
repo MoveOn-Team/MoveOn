@@ -11,8 +11,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/event.css">
 </head>
-<body class="auth-page" data-context-path="${pageContext.request.contextPath}"
-      data-lat="${lat}" data-lng="${lng}">
+<body class="auth-page" data-context-path="${pageContext.request.contextPath}">
 
 <%-- getDayOfWeek().getValue() 가 월요일 1 ~ 일요일 7 이라 -1 해서 꺼낸다 --%>
 <c:set var="DOW" value="월,화,수,목,금,토,일"/>

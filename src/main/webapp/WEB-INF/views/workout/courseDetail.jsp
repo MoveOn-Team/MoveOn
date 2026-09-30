@@ -22,12 +22,12 @@
         <c:choose>
             <c:when test="${fromRecommend}">
                 <a class="back-button"
-                   href="${pageContext.request.contextPath}/recommend/sportDetail/${sportId}?lat=${lat}&lng=${lng}"
+                   href="${pageContext.request.contextPath}/recommend/sportDetail/${sportId}"
                    aria-label="뒤로 가기">&#8249;</a>
             </c:when>
             <c:otherwise>
                 <a class="back-button"
-                   href="${pageContext.request.contextPath}/workout/workoutList?tab=outdoor&type=${course.courseType}&lat=${lat}&lng=${lng}"
+                   href="${pageContext.request.contextPath}/workout/workoutList?tab=outdoor&type=${course.courseType}"
                    aria-label="뒤로 가기">&#8249;</a>
             </c:otherwise>
         </c:choose>

@@ -5,26 +5,11 @@
         var body = document.body;
         var contextPath = body.dataset.contextPath || "";
 
-        appendPositionToLinks(body);
         bindMoreButton();
         bindMaps();
         bindHomePlan(contextPath);
         bindHomePlay(contextPath);
     });
-
-    function appendPositionToLinks(body) {
-        var lat = body.dataset.lat;
-        var lng = body.dataset.lng;
-        if (!lat || !lng) {
-            return;
-        }
-        document.querySelectorAll(".main-tab-btn, .sub-tag-btn").forEach(function (a) {
-            if (!a.href || a.href.indexOf("lat=") >= 0) {
-                return;
-            }
-            a.href += (a.href.indexOf("?") < 0 ? "?" : "&") + "lat=" + lat + "&lng=" + lng;
-        });
-    }
 
     function bindMoreButton() {
         var btnMore = document.querySelector("[data-more]");
