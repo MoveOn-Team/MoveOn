@@ -1254,6 +1254,7 @@ button {
     left: 0;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     background: rgba(0, 0, 0, 0.4);
     display: none;
     justify-content: center;
@@ -1270,6 +1271,7 @@ button {
     width: 100%;
     max-width: var(--app-w);
     max-height: 85vh;
+    max-height: 85dvh;
     border-radius: 24px 24px 0 0;
     padding: 20px;
     overflow-y: auto;
