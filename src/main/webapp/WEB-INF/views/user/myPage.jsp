@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>내 정보 - MOVE:ON</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.1">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/auth.css?v=1.2">
     <style>
         /* 로그아웃 버튼 포인트 컬러 (붉은색 계열) */
         .menu-list-card .logout-item span {
